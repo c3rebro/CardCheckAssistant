@@ -1,0 +1,187 @@
+﻿<Page x:Class="CardCheckAssistant.Views.HomePage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      xmlns:ctWinUI="using:CommunityToolkit.WinUI.UI.Controls"
+      xmlns:viewmodels="using:CardCheckAssistant.ViewModels"
+      mc:Ignorable="d"
+      Background="Transparent">
+
+    <Page.DataContext>
+        <viewmodels:HomePageViewModel />
+    </Page.DataContext>
+
+    <Grid Margin="0 0 0 80">
+        <!-- Beef -->
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="460"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="10"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="34.2" />
+                <RowDefinition Height="62"/>
+                <RowDefinition Height="16"/>
+                <RowDefinition Height="26"/>
+                <RowDefinition Height="218"/>
+                <RowDefinition Height="143.8"/>
+                <!-- <RowDefinition Height="Auto" /> -->
+                <!-- <RowDefinition Height="Auto" /> -->
+            </Grid.RowDefinitions>
+
+            <Border
+            Grid.Row="0"
+            CornerRadius="8,0,0,0" Grid.ColumnSpan="3" Grid.RowSpan="6">
+                <Border.Background>
+                    <ImageBrush
+                    ImageSource="/Assets/fluent-ui-microsoft.png"
+                    Opacity="0.5"
+                    Stretch="UniformToFill" />
+                </Border.Background>
+                <Border CornerRadius="8,0,0,0" >
+                    <Border.Background>
+                        <RadialGradientBrush>
+                            <GradientStop Offset="0" Color="#1F000000" />
+                            <GradientStop Offset="1" Color="#4F000000" />
+                        </RadialGradientBrush>
+                    </Border.Background>
+                    <Grid>
+                        <Image
+                    Source="/Assets/monitorbg.png"
+
+                    Stretch="None" Margin="40,0,0,0" HorizontalAlignment="Left" />
+                        <StackPanel
+                        Margin="64"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Center"
+                        Background="Transparent">
+                            <TextBlock
+                            FontSize="18"
+                            Foreground="#B7FFFFFF"
+                            Text="Karten-Prüf-Assistent                   Version 1.0" />
+                            <TextBlock
+                            FontSize="28"
+                            FontWeight="Bold"
+                            Foreground="#FFFFFF"
+                            Text="Neue Prüfungen stehen an" />
+                            <TextBlock
+                            FontSize="18"
+                            Foreground="#B7FFFFFF"
+                            Text="Zahl der unbearbeiteten Prüfungen: 2" />
+                            <Button
+                            Height="36"
+                            Margin="0,6,0,0"
+                            Padding="30,6"
+                            HorizontalAlignment="Left"
+                            IsEnabled="{Binding StartCheckCanExecute, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                            Opacity="1"
+                            Command="{Binding NavigateCommand}"
+                            Content="Prüfvorgang starten">
+                                <Button.Resources>
+                                    <ResourceDictionary>
+                                        <SolidColorBrush
+                                        x:Key="ButtonBorderBrushDisabled"
+                                        Opacity="0.6"
+                                        Color="#BFBFBF" />
+                                        <SolidColorBrush x:Key="ButtonBackground" Color="LimeGreen" />
+                                        <SolidColorBrush x:Key="ButtonBackgroundDisabled" Color="#73726e" />
+                                        <SolidColorBrush x:Key="ButtonBackgroundPressed" Color="#f5fa75" />
+                                        <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="#c4c736" />
+
+                                        <SolidColorBrush x:Key="ButtonForegroundDisabled" Color="DarkGray" />
+
+                                        <SolidColorBrush x:Key="ButtonForeground" Color="Black" />
+                                        <SolidColorBrush x:Key="ButtonForegroundPointerOver" Color="White" />
+
+                                        <!--<SolidColorBrush x:Key="ButtonBorderBrush" Color="White" />-->
+                                        <!--<SolidColorBrush x:Key="ButtonBorderBrushPointerOver" Color="White" />-->
+                                        <!--<SolidColorBrush x:Key="ButtonBorderBrushFocused" Color="#ECF542" />-->
+                                        <!--<SolidColorBrush x:Key="ButtonBorderBrushPressed" Color="#ECF542" />-->
+
+                                        <SolidColorBrush x:Key="ButtonBackgroundFocused" Color="LightGreen" />
+
+                                    </ResourceDictionary>
+                                </Button.Resources>
+                            </Button>
+                        </StackPanel>
+                        <TextBlock
+                        Margin="12"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Bottom"
+                        FontSize="10"
+                        Foreground="#57FFFFFF"
+                        Text="Created by C3rebro" />
+                    </Grid>
+                </Border>
+            </Border>
+
+            <TextBlock Text="Auftragsübersicht" Grid.Column="1" Grid.Row="2" Foreground="Black" Grid.RowSpan="3" Grid.ColumnSpan="2"/>
+
+            <ctWinUI:DataGrid 
+            Margin="0,8,0,0"
+            Grid.Row="3"
+            Grid.RowSpan="2"
+            Grid.Column="1"
+            HorizontalAlignment="Stretch"
+            VerticalAlignment="Stretch"
+            HorizontalContentAlignment="Center"
+            VerticalContentAlignment="Center"
+            AutoGenerateColumns="False"
+            Background="Transparent"
+            IsReadOnly="True"
+            Opacity="1"
+            CanUserReorderColumns="True"
+            CanUserSortColumns="True"
+            ItemsSource="{Binding DataGridItemCollection}"
+            SelectedItem="{Binding SelectedCustomer, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}">
+                <ctWinUI:DataGrid.Resources>
+                    <SolidColorBrush x:Key="DataGridColumnHeaderBackgroundBrush" Opacity=".5" />
+                    <SolidColorBrush x:Key="DataGridCellFocusVisualPrimaryBrush">Transparent</SolidColorBrush>
+                    <SolidColorBrush x:Key="DataGridCellFocusVisualSecondaryBrush">Transparent</SolidColorBrush>
+                </ctWinUI:DataGrid.Resources>
+                <ctWinUI:DataGrid.Columns>
+                    <ctWinUI:DataGridTextColumn Binding="{Binding JobNr}" Header="JobNr." />
+                    <ctWinUI:DataGridTextColumn Binding="{Binding VCNr}" Header="VC Nr." />
+                    <!--  The Email property contains a URI.  For example "mailto:lucy0@adventure-works.com"  -->
+                    <!-- <DataGridHyperlinkColumn
+                        Binding="{Binding MailTo}"
+                        ContentBinding="{Binding Email}"
+                        Header="Omni-Link" /> -->
+                    <!-- <DataGridCheckBoxColumn Binding="{Binding IsMember}" Header="Referenz / Beschreibung" /> -->
+                    <!-- <DataGridCheckBoxColumn Binding="{Binding IsMember}" Header="Referenz / Beschreibung" /> -->
+                    <!-- <DataGridTextColumn Binding="{Binding Date}" Header="Referenz / Beschreibung" /> -->
+                    <ctWinUI:DataGridTextColumn Binding="{Binding CName}" Header="Referenz / Beschreibung" />
+                    <ctWinUI:DataGridTextColumn Binding="{Binding Date}" Header="Auftragsdatum" />
+                    <!-- <DataGridComboBoxColumn Header="Erstelldatum" SelectedItemBinding="{Binding Status}" /> -->
+                </ctWinUI:DataGrid.Columns>
+            </ctWinUI:DataGrid>
+
+            <Grid Grid.Row="5" Margin="12,0,2,12" Grid.ColumnSpan="2">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <!--
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+                -->
+                </Grid.ColumnDefinitions>
+
+            </Grid>
+
+            <Grid Grid.Row="5" Margin="12,0,2,12" Grid.ColumnSpan="2">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+            </Grid>
+
+        </Grid>
+    </Grid>
+</Page>

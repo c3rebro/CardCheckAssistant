@@ -1,0 +1,113 @@
+﻿<Page x:Class="CardCheckAssistant.Views.Step2Page"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      xmlns:viewmodels="using:CardCheckAssistant.ViewModels"
+      mc:Ignorable="d"
+      Background="Transparent">
+
+    <Page.DataContext>
+        <viewmodels:Step2PageViewModel />
+    </Page.DataContext>
+
+    <Grid Margin="0 0 0 80">
+        <!-- Beef -->
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="auto"/>
+            <ColumnDefinition Width="auto"/>
+            <ColumnDefinition Width="0.8*"/>
+            <ColumnDefinition Width="0.1*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="20"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="20"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="auto"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Margin="8,8,8,8" TextWrapping="Wrap" Grid.ColumnSpan="3" Grid.Column="0" Grid.Row="0">
+            <Run>In diesem Schritt wird die automatische Kartenprüfung gestartet.
+                Bitte stelle Sicher, dass das &quot;Elatec TWN4 Legic&quot; Programmiergerät angeschlossen ist. 
+                Lege dann den zu prüfenden Chip auf den Leser und Klicke auf &quot;OK&quot; wenn Du soweit bist.</Run>
+        </TextBlock>
+        <TextBlock Margin="8,8,8,8" Grid.Column="0" Grid.Row="2" Text="Ausgewählter Job:"/>
+        <TextBlock Margin="8,8,8,8" Grid.Column="1" Grid.Row="2" Text="{Binding JobNumber}"/>
+        <Button 
+            Grid.Row="7"
+            Grid.Column="0"
+            Height="36"
+            Margin="0,6,0,0"
+            Padding="30,6"
+            HorizontalAlignment="Left"
+            IsEnabled="{Binding GoBackCanExecute, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+            Opacity="1"
+            Command="{Binding NavigateBackCommand}"
+            Content="Zurück">
+            <Button.Resources>
+                <ResourceDictionary>
+                    <SolidColorBrush x:Key="ButtonBorderBrushDisabled" Opacity="0.6" Color="#BFBFBF" />
+                    <SolidColorBrush x:Key="ButtonBackground" Color="IndianRed" />
+                    <SolidColorBrush x:Key="ButtonBackgroundDisabled" Color="#73726e" />
+                    <SolidColorBrush x:Key="ButtonBackgroundPressed" Color="#f5fa75" />
+                    <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="#c4c736" />
+
+                    <SolidColorBrush x:Key="ButtonForegroundDisabled" Color="DarkGray" />
+
+                    <SolidColorBrush x:Key="ButtonForeground" Color="Black" />
+                    <SolidColorBrush x:Key="ButtonForegroundPointerOver" Color="White" />
+
+                    <!--<SolidColorBrush x:Key="ButtonBorderBrush" Color="White" />-->
+                    <!--<SolidColorBrush x:Key="ButtonBorderBrushPointerOver" Color="White" />-->
+                    <!--<SolidColorBrush x:Key="ButtonBorderBrushFocused" Color="#ECF542" />-->
+                    <!--<SolidColorBrush x:Key="ButtonBorderBrushPressed" Color="#ECF542" />-->
+
+                    <SolidColorBrush x:Key="ButtonBackgroundFocused" Color="LightGreen" />
+
+                </ResourceDictionary>
+            </Button.Resources>
+        </Button>
+        <Button
+            Grid.Row="7"
+            Grid.Column="2"
+            Grid.ColumnSpan="3"
+            Height="36"
+            Margin="0,6,50,0"
+            Padding="30,6"
+            HorizontalAlignment="Left"
+            IsEnabled="{Binding NextStepCanExecute, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+            Opacity="1"
+            Command="{Binding NavigateNextStepCommand}"
+            Content="OK">
+            <Button.Resources>
+                <ResourceDictionary>
+                    <SolidColorBrush
+                        x:Key="ButtonBorderBrushDisabled"
+                        Opacity="0.6"
+                        Color="#BFBFBF" />
+                    <SolidColorBrush x:Key="ButtonBackground" Color="LimeGreen" />
+                    <SolidColorBrush x:Key="ButtonBackgroundDisabled" Color="#73726e" />
+                    <SolidColorBrush x:Key="ButtonBackgroundPressed" Color="#f5fa75" />
+                    <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="#c4c736" />
+
+                    <SolidColorBrush x:Key="ButtonForegroundDisabled" Color="DarkGray" />
+
+                    <SolidColorBrush x:Key="ButtonForeground" Color="Black" />
+                    <SolidColorBrush x:Key="ButtonForegroundPointerOver" Color="White" />
+
+                    <!--<SolidColorBrush x:Key="ButtonBorderBrush" Color="White" />-->
+                    <!--<SolidColorBrush x:Key="ButtonBorderBrushPointerOver" Color="White" />-->
+                    <!--<SolidColorBrush x:Key="ButtonBorderBrushFocused" Color="#ECF542" />-->
+                    <!--<SolidColorBrush x:Key="ButtonBorderBrushPressed" Color="#ECF542" />-->
+
+                    <SolidColorBrush x:Key="ButtonBackgroundFocused" Color="LightGreen" />
+
+                </ResourceDictionary>
+            </Button.Resources>
+        </Button>
+    </Grid>
+</Page>

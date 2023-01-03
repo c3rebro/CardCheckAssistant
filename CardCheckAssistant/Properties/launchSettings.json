@@ -1,0 +1,11 @@
+{
+  "profiles": {
+    "CardCheckAssistant (Package)": {
+      "commandName": "MsixPackage",
+      "allowLocalNetworkLoopbackProperty": false
+    },
+    "CardCheckAssistant (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}
