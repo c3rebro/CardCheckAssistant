@@ -22,21 +22,16 @@
                 <ColumnDefinition x:Name="RightDragColumn" Width="*"/>
                 <ColumnDefinition x:Name="RightPaddingColumn" Width="0"/>
             </Grid.ColumnDefinitions>
-            <Image x:Name="TitleBarIcon" Source="/Assets/logo.png"
+            <Image x:Name="TitleBarIcon" Source="/Assets/Logo.png"
            Grid.Column="1"
            Width="16" Height="16"
            Margin="8,0,0,0"/>
             <TextBlock x:Name="TitleTextBlock" 
-               Text="SettingsUI Demo" 
+               Text="CardCheckAssistant" 
                Style="{StaticResource CaptionTextBlockStyle}"
                Grid.Column="2"
                VerticalAlignment="Center"
                Margin="4,0,0,0"/>
-            <AutoSuggestBox Grid.Column="4" QueryIcon="Find"
-                    PlaceholderText="Search"
-                    BorderThickness="0"
-                    VerticalAlignment="Center"
-                    Width="260" Margin="4,0"/>
         </Grid>
         <MenuBar Grid.Row="1">
             <MenuBarItem Title="File">
@@ -94,7 +89,7 @@
             </MenuBarItem>
         </MenuBar>
 
-        <local:Shell Grid.Row="2"/>
+        <local:Shell x:Name="RootShell" Grid.Row="2"/>
 
     </Grid>
 </Window>

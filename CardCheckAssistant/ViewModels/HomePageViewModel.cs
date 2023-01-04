@@ -44,8 +44,8 @@ public class HomePageViewModel : ObservableObject
         };
         StartCheckCanExecute = false;
 
-        
-        var navigation = (Application.Current as App).Navigation;
+        var window = (Application.Current as App)?.Window as MainWindow;
+        var navigation = window.Navigation;
         foreach (NavigationViewItem nVI in navigation.GetNavigationViewItems().Where(x => x.Content.ToString() != "Start").Where(x => x.Content.ToString().Contains("Schritt")))
         {
             nVI.IsEnabled = false;
@@ -153,7 +153,8 @@ public class HomePageViewModel : ObservableObject
     
     public void BeginCardCheck_Executed()
     {
-        var navigation = (Application.Current as App).Navigation;
+        var window = (Application.Current as App)?.Window as MainWindow;
+        var navigation = window.Navigation;
         var step1Page = navigation.GetNavigationViewItems(typeof(Step1Page)).First();
         navigation.SetCurrentNavigationViewItem(step1Page);
         step1Page.IsEnabled = true;

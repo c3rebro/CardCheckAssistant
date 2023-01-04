@@ -136,7 +136,8 @@ public class Step1PageViewModel : ObservableObject
     
     private void NavigateNextStepCommand_Executed()
     {
-        var navigation = (Application.Current as App).Navigation;
+        var window = (Application.Current as App)?.Window as MainWindow;
+        var navigation = window.Navigation;
         var step2Page = navigation.GetNavigationViewItems(typeof(Step2Page)).First();
         navigation.SetCurrentNavigationViewItem(step2Page);
         step2Page.IsEnabled = true;
@@ -144,7 +145,8 @@ public class Step1PageViewModel : ObservableObject
 
     private void NavigateBackCommand_Executed()
     {
-        var navigation = (Application.Current as App).Navigation;
+        var window = (Application.Current as App)?.Window as MainWindow;
+        var navigation = window.Navigation;
         var step1Page = navigation.GetNavigationViewItems(typeof(Step1Page)).First();
         navigation.SetCurrentNavigationViewItem(step1Page);
         step1Page.IsEnabled = true;

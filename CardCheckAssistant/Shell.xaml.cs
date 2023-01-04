@@ -5,11 +5,11 @@ using Microsoft.UI.Xaml.Controls;
 
 namespace CardCheckAssistant;
 
-public sealed partial class Shell : Window
+public sealed partial class Shell : Page
 {
     public Shell()
     {
-        Title = "SimonsVoss CardCheckAssistant";
+        //Title = "SimonsVoss CardCheckAssistant";
 
         InitializeComponent();
 
@@ -22,14 +22,14 @@ public sealed partial class Shell : Window
         var settings = (Application.Current as App).Settings;
         settings.IsLightTheme = !settings.IsLightTheme;
         (Application.Current as App).SaveSettings();
-        Root.ActualThemeChanged += Root_ActualThemeChanged;
+        ShellRoot.ActualThemeChanged += Root_ActualThemeChanged;
         ApplyTheme();
     }
 
     private void ApplyTheme()
     {
         var settings = (Application.Current as App).Settings;
-        Root.RequestedTheme = settings.IsLightTheme ? ElementTheme.Light : ElementTheme.Dark;
+        ShellRoot.RequestedTheme = settings.IsLightTheme ? ElementTheme.Light : ElementTheme.Dark;
     }
     private void Root_ActualThemeChanged(FrameworkElement sender, object args)
     {

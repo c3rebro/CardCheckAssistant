@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net6.0-windows10.0.19041.0</TargetFramework>
@@ -15,15 +15,6 @@
     <StartupObject>CardCheckAssistant.Program</StartupObject>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Remove="AppNotification\**" />
-    <EmbeddedResource Remove="AppNotification\**" />
-    <None Remove="AppNotification\**" />
-    <Page Remove="AppNotification\**" />
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Remove="MainWindow.xaml.cs" />
-    <Compile Remove="Services\PageService.cs" />
-    <Compile Remove="Views\AppNotificationPage.xaml.cs" />
     <Compile Remove="Views\Step1Page - Kopieren.xaml.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -40,26 +31,14 @@
     <None Remove="MainWindow.xaml" />
     <None Remove="Shell.xaml" />
     <None Remove="Views\AboutPage.xaml" />
-    <None Remove="Views\AppNotificationPage.xaml" />
     <None Remove="Views\HomePage.xaml" />
     <None Remove="Views\Step1Page - Kopieren.xaml" />
     <None Remove="Views\Step1Page.xaml" />
     <None Remove="Views\Step2Page.xaml" />
   </ItemGroup>
   <ItemGroup>
-    <Page Remove="MainWindow.xaml" />
     <Page Remove="Views\AppNotificationPage.xaml" />
     <Page Remove="Views\Step1Page - Kopieren.xaml" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Content Include="Assets\SplashScreen.scale-200.png" />
-    <Content Include="Assets\LockScreenLogo.scale-200.png" />
-    <Content Include="Assets\Square150x150Logo.scale-200.png" />
-    <Content Include="Assets\Square44x44Logo.scale-200.png" />
-    <Content Include="Assets\Square44x44Logo.targetsize-24_altform-unplated.png" />
-    <Content Include="Assets\StoreLogo.png" />
-    <Content Include="Assets\Wide310x150Logo.scale-200.png" />
   </ItemGroup>
 
   <ItemGroup>
@@ -100,4 +79,57 @@
   <ItemGroup>
     <PRIResource Remove="AppNotification\**" />
   </ItemGroup>
+  <ItemGroup>
+    <Compile Update="Properties\Resources.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Update="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <None Update="Views\AppNotificationPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="MainWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  
+  <!-- 
+    Defining the "Msix" ProjectCapability here allows the Single-project MSIX Packaging
+    Tools extension to be activated for this project even if the Windows App SDK Nuget
+    package has not yet been restored.
+  -->
+  <ItemGroup Condition="'$(DisableMsixProjectCapabilityAddedByProject)'!='true' and '$(EnableMsixTooling)'=='true'">
+    <ProjectCapability Include="Msix" />
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="ShellPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+
+  <!-- 
+    Defining the "HasPackageAndPublishMenuAddedByProject" property here allows the Solution 
+    Explorer "Package and Publish" context menu entry to be enabled for this project even if 
+    the Windows App SDK Nuget package has not yet been restored.
+  -->
+  <PropertyGroup Condition="'$(DisableHasPackageAndPublishMenuAddedByProject)'!='true' and '$(EnableMsixTooling)'=='true'">
+    <HasPackageAndPublishMenu>true</HasPackageAndPublishMenu>
+  </PropertyGroup>
+  <!-- Copy the String folder to output directory -->
+  <Target Name="CopyStringResources" AfterTargets="Build">
+    <ItemGroup>
+      <StringResources Include="$(ProjectDir)Strings\**\*.*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(StringResources)" DestinationFiles="$(OutDir)Strings\%(RecursiveDir)%(Filename)%(Extension)" />
+  </Target>
 </Project>
