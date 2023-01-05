@@ -1,9 +1,11 @@
-﻿<Page x:Class="CardCheckAssistant.Shell"
-        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d">
+﻿<Page 
+    x:Class="CardCheckAssistant.Shell"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d" 
+    Loaded="UserControl_Loaded">
 
     <Grid x:Name="ShellRoot"
           Background="Transparent"
@@ -19,12 +21,13 @@
 
         <!-- Main Beef -->
         <NavigationView x:Name="NavigationView"
-                        Loaded="NavigationView_Loaded"
                         SelectionChanged="NavigationView_SelectionChanged"
-                        Header="WinUI 3 Master Detail Sample"
                         IsBackButtonVisible="Collapsed"
+                        PaneDisplayMode="LeftCompact"
                         Background="Transparent"
                         IsSettingsVisible="True"
+                        ItemInvoked="NavigationView_ItemInvoked"
+                        SelectedItem="{x:Bind ViewModel.Selected, Mode=OneWay}"
                         Margin="0">
             <!--<NavigationView.PaneCustomContent>
                 <HyperlinkButton NavigateUri="https://xamlbrewer.wordpress.com/2022/03/09/a-dialog-service-for-winui-3/"
@@ -32,7 +35,6 @@
             </NavigationView.PaneCustomContent>-->
             <NavigationView.MenuItems>
                 <NavigationViewItem Content="Start"
-                                    Width="auto"
                                     Tag="CardCheckAssistant.Views.HomePage"
                                     ToolTipService.ToolTip="Start">
                     <NavigationViewItem.Icon>
@@ -71,6 +73,7 @@
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
             </NavigationView.FooterMenuItems>
+            
             <Frame x:Name="ContentFrame"
                    Padding="20">
                 <Frame.ContentTransitions>
@@ -85,7 +88,7 @@
             </Frame>
         </NavigationView>
 
-        <!-- Theme Switcher -->
+        <!-- Theme Switcher 
         <Button Click="ToggleButton_Click"
                 Background="Transparent"
                 Margin="16"
@@ -95,7 +98,8 @@
             <FontIcon Glyph="&#xE793;"
                       FontSize="16" />
         </Button>
-
+        -->
+        
         <!-- XAML Brewer Logo -->
         <Viewbox StretchDirection="DownOnly"
                  HorizontalAlignment="Right"

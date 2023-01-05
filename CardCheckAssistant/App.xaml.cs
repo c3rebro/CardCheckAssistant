@@ -66,7 +66,6 @@ public partial class App : Application
         }
 
         MainRoot = m_window.Content as FrameworkElement;
-        Navigation = new Shell();
 
         m_window.Activate();
     }

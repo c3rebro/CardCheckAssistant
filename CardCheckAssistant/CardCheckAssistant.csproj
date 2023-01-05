@@ -15,10 +15,12 @@
     <StartupObject>CardCheckAssistant.Program</StartupObject>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Remove="App.xaml.Settings.cs" />
     <Compile Remove="Views\Step1Page - Kopieren.xaml.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Remove="Assets\Flag.png" />
+    <Content Remove="Assets\FluentIconsSettings.png" />
     <Content Remove="Assets\S1.xcf" />
     <Content Remove="Assets\S2.xcf" />
   </ItemGroup>
@@ -32,6 +34,7 @@
     <None Remove="Shell.xaml" />
     <None Remove="Views\AboutPage.xaml" />
     <None Remove="Views\HomePage.xaml" />
+    <None Remove="Views\SettingsPage.xaml" />
     <None Remove="Views\Step1Page - Kopieren.xaml" />
     <None Remove="Views\Step1Page.xaml" />
     <None Remove="Views\Step2Page.xaml" />
@@ -46,6 +49,7 @@
     <PackageReference Include="CommunityToolkit.WinUI.UI.Controls.DataGrid" Version="7.1.2" />
     <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.2.221209.1" />
     <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.22621.755" />
+    <PackageReference Include="System.Windows.Extensions" Version="7.0.0" />
     <PackageReference Include="WinUICommunity.Common" Version="3.0.0" />
     <PackageReference Include="WinUICommunity.SettingsUI" Version="3.0.0" />
     <PackageReference Include="WinUICommunity.ShellContextMenu" Version="3.0.0" />
@@ -96,6 +100,9 @@
     <None Update="Views\AppNotificationPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </None>
+    <Page Update="Views\SettingsPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Page Update="MainWindow.xaml">

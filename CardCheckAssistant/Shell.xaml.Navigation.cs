@@ -57,9 +57,14 @@ public sealed partial class Shell : INavigation
             return;
         }
 
-        ContentFrame.Navigate(Type.GetType(item.Tag.ToString()), item.Content);
+        if (Type.GetType(item.Tag.ToString()) != null)
+        {
+            ContentFrame.Navigate(Type.GetType(item.Tag.ToString()), item.Content);
+            
+            NavigationView.SelectedItem = item;
+        }
+
         NavigationView.Header = item.Content;
-        NavigationView.SelectedItem = item;
     }
 
     public NavigationViewItem GetCurrentNavigationViewItem()

@@ -1,38 +1,43 @@
-﻿using CardCheckAssistant.Services;
+﻿using System.Linq;
+using CardCheckAssistant.Services;
 using CardCheckAssistant.Views;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+
+using WinUICommunity.Common.ViewModel;
 
 namespace CardCheckAssistant;
 
 public sealed partial class Shell : Page
 {
+    public ShellViewModel ViewModel { get; } = new ShellViewModel();
+
     public Shell()
     {
-        //Title = "SimonsVoss CardCheckAssistant";
-
         InitializeComponent();
 
-        (Application.Current as App).EnsureSettings();
-        ApplyTheme();
+        ViewModel.InitializeNavigation(ContentFrame, NavigationView)
+            .WithKeyboardAccelerator(KeyboardAccelerators)
+            .WithSettingsPage(typeof(SettingsPage));
+
     }
 
-    private void ToggleButton_Click(object sender, RoutedEventArgs e)
+    private void UserControl_Loaded(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
     {
-        var settings = (Application.Current as App).Settings;
-        settings.IsLightTheme = !settings.IsLightTheme;
-        (Application.Current as App).SaveSettings();
-        ShellRoot.ActualThemeChanged += Root_ActualThemeChanged;
-        ApplyTheme();
+        ViewModel.OnLoaded();
+
+        var window = (Application.Current as App)?.Window as MainWindow;
+        var navigation = window.Navigation;
+        var homePage = navigation.GetNavigationViewItems(typeof(HomePage)).First();
+        navigation.SetCurrentNavigationViewItem(homePage);
+
+        using SettingsReaderWriter settings = new SettingsReaderWriter();
+
+        window.SelectedTheme = settings.DefaultSpecification.DefaultTheme;
     }
 
-    private void ApplyTheme()
+    private void NavigationView_ItemInvoked(NavigationView sender, NavigationViewItemInvokedEventArgs args)
     {
-        var settings = (Application.Current as App).Settings;
-        ShellRoot.RequestedTheme = settings.IsLightTheme ? ElementTheme.Light : ElementTheme.Dark;
-    }
-    private void Root_ActualThemeChanged(FrameworkElement sender, object args)
-    {
-        // Theme change refinements (e.g. content dialogs and title bar).
+        ViewModel.OnItemInvoked(args);
     }
 }

@@ -6,101 +6,79 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using CardCheckAssistant.Models;
 using CardCheckAssistant.Services;
-using System;
 using System.Collections.ObjectModel;
+using System;
 using System.Linq;
 using CardCheckAssistant.Views;
+using Microsoft.UI.Xaml.Controls;
+using Newtonsoft.Json.Linq;
 using Windows.Storage.Pickers;
 
 namespace CardCheckAssistant.ViewModels;
 
-public class Step1PageViewModel : ObservableObject
+public class SettingsPageViewModel : ObservableObject
 {
-    public Step1PageViewModel()
+    public SettingsPageViewModel()
     {
-        ChipCount = new ObservableCollection<string>();
+        ThemeSource = new ObservableCollection<string>();
+        ThemeSource.Add("Light");
+        ThemeSource.Add("Dark");
+        ThemeSource.Add("Default");
 
-        for (var i = 0; i <= 10; i++)
+        //SelectedTheme.Content = "Light";
+        using (SettingsReaderWriter settings = new SettingsReaderWriter())
         {
-            ChipCount.Add(i.ToString("D2"));
-        }
+            var m_window = (Application.Current as App)?.Window as MainWindow;
 
-        NumberOfDeliveredChips = ChipCount.First();
-        NextStepCanExecute = false;
-        GoBackCanExecute = true;
+            SelectedTheme = settings.DefaultSpecification.DefaultTheme;
+        }
     }
 
     #region ObservableObjects
 
-    public ObservableCollection<string> ChipCount
+    public ObservableCollection<string> ThemeSource
     {
-        get; set;
-    }
-
-    public async void InputText_Click(object sender, RoutedEventArgs e)
-    {
-        /*
-        Debug.WriteLine("Opening Text Input Dialog.");
-        var inputText = await App.MainRoot.InputTextDialogAsync(
-                "What would Faramir say?",
-                "“War must be, while we defend our lives against a destroyer who would devour all; but I do not love the bright sword for its sharpness, nor the arrow for its swiftness, nor the warrior for his glory. I love only that which they defend.”\n\nJ.R.R. Tolkien"
-            );
-
-        Debug.WriteLine($"Text Input Dialog was closed with {inputText}.");
-        */
-    }
-
-    public bool NextStepCanExecute
-    {
-        get => _nextStepCanExecute;
-        set => SetProperty(ref _nextStepCanExecute, value);
-    }
-    private bool _nextStepCanExecute;
-
-    public bool GoBackCanExecute
-    {
-        get => _goBackCanExecute;
-        set => SetProperty(ref _goBackCanExecute, value);
-    }
-    private bool _goBackCanExecute;
-
-    public string JobNumber => string.Format("JobNr.: {0}; {1}",CheckProcessService.CurrentCustomer.JobNr, CheckProcessService.CurrentCustomer.CName);
-
-    public string NumberOfDeliveredChips
-    {
-        get => _numberOfDeliveredChips;
+        get => _themeSource;
         set
         {
-            if (int.Parse(value) > 0)
-            {
-                NextStepCanExecute = true;
-            }
-            else
-            {
-                NextStepCanExecute = false;
-            }
-            SetProperty(ref _numberOfDeliveredChips, value);
+            SetProperty(ref _themeSource, value);
         }
     }
-    private string _numberOfDeliveredChips;
+    private ObservableCollection<string> _themeSource;
+
+
+    public string SelectedTheme
+    {
+        get => _selectedTheme;
+        set
+        {
+            SetProperty(ref _selectedTheme, value);
+            var m_window = (Application.Current as App)?.Window as MainWindow;
+
+            m_window.SelectedTheme = value;
+
+            using SettingsReaderWriter settings = new SettingsReaderWriter();
+
+            settings.DefaultSpecification.DefaultTheme = value;
+            settings.SaveSettings();
+        }
+    }
+    private string _selectedTheme;
 
     #endregion 
 
     #region Commands
 
-    public ICommand NavigateNextStepCommand => new AsyncRelayCommand(NavigateNextStepCommand_Executed);
+    public ICommand NavigateNextStepCommand => new RelayCommand(NavigateNextStepCommand_Executed);
 
     public ICommand NavigateBackCommand => new RelayCommand(NavigateBackCommand_Executed);
 
-    
-    public ICommand ConfirmationCommandYesNo => new AsyncRelayCommand(ConfirmationYesNo_Executed);
-
-    public ICommand ConfirmationCommandYesNoCancel => new AsyncRelayCommand(ConfirmationYesNoCancel_Executed);
-
     public ICommand InputStringCommand => new AsyncRelayCommand(InputString_Executed);
-    
+
+    public ICommand SelectRFIDGearExe => new AsyncRelayCommand(SelectRFIDGearExe_Executed);
+
     #endregion
-    
+
     private async Task ConfirmationYesNo_Executed()
     {
         Debug.WriteLine("2-State Confirmation Dialog will be opened.");
@@ -135,8 +113,8 @@ public class Step1PageViewModel : ObservableObject
             );
         Debug.WriteLine($"String Input Dialog was closed with '{inputString}'.");
     }
-    
-    private async Task NavigateNextStepCommand_Executed()
+
+    private async Task SelectRFIDGearExe_Executed()
     {
         var window = (Application.Current as App)?.Window as MainWindow;
         var navigation = window.Navigation;
@@ -161,6 +139,15 @@ public class Step1PageViewModel : ObservableObject
 
         filePicker.FileTypeFilter.Add("*");
         var file = await filePicker.PickSingleFileAsync();
+    }
+
+    private void NavigateNextStepCommand_Executed()
+    {
+        var window = (Application.Current as App)?.Window as MainWindow;
+        var navigation = window.Navigation;
+        var step2Page = navigation.GetNavigationViewItems(typeof(Step2Page)).First();
+        navigation.SetCurrentNavigationViewItem(step2Page);
+        step2Page.IsEnabled = true;
     }
 
     private void NavigateBackCommand_Executed()
