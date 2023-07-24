@@ -117,13 +117,13 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="english.Content" xml:space="preserve">
-    <value>English</value>
+  <data name="buttonContentStartCheck" xml:space="preserve">
+    <value>Vorgang auswählen</value>
   </data>
-  <data name="langDetail.Text" xml:space="preserve">
-    <value>Changed to English</value>
+  <data name="dataGridHeaderChipNr.Header" xml:space="preserve">
+    <value>Chipnummer</value>
   </data>
-  <data name="persian.Content" xml:space="preserve">
-    <value>Persian</value>
+  <data name="dataGridHeaderJobNr.Header" xml:space="preserve">
+    <value>Jobnummer</value>
   </data>
 </root>

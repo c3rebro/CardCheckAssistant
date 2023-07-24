@@ -35,13 +35,15 @@ public partial class App : Application
                 c_notificationHandlers.Add(ToastWithPayload.Instance.ScenarioId, ToastWithPayload.Instance.NotificationReceived);
                 notificationManager = new NotificationManager(c_notificationHandlers);
             }
-            ILocalizer localizer = new LocalizerBuilder()
+            /*
+             * ILocalizer localizer = new LocalizerBuilder()
                 // For a packaged app:
                 //.AddResourcesStringsFolder(new LocalizerResourcesStringsFolder(@"C:/Projects/Strings"))
                 // For a non-packaged app:
                 .AddDefaultResourcesStringsFolder()
                 .Build();
-            Localizer.Set(localizer);
+            */
+            //Localizer.Set(localizer);
         }
 
         catch (Exception ex)
@@ -59,21 +61,21 @@ public partial class App : Application
     protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
     {
         m_window = new MainWindow();
-        ThemeHelper.Initialize(m_window, BackdropType.MicaAlt);
+        ThemeHelper.Initialize(m_window, BackdropType.Mica);
         if (!ApplicationHelper.IsPackaged)
         {
             notificationManager.Init(notificationManager, OnNotificationInvoked);
         }
 
-        MainRoot = m_window.Content as FrameworkElement;
-
         m_window.Activate();
+
+        MainRoot = m_window.Content as FrameworkElement;
     }
 
     
     private void OnNotificationInvoked(string message)
     {
-        AppNotificationPage.Instance.NotificationInvoked(message);
+        //AppNotificationPage.Instance.NotificationInvoked(message);
     }
 
     void OnProcessExit(object sender, EventArgs e)

@@ -27,11 +27,16 @@ public class ToastWithAvatar : IScenario
     public void NotificationReceived(AppNotificationActivatedEventArgs notificationActivatedEventArgs)
     {
         var notification = NotificationHelper.GetNotificationForWithAvatar(ScenarioName, notificationActivatedEventArgs);
-        AppNotificationPage.Instance.NotificationReceived(notification);
+        //AppNotificationPage.Instance.NotificationReceived(notification);
     }
 
     public bool SendToast()
     {
         return ScenarioHelper.SendToastWithAvatar(ScenarioId, ScenarioName, "Hi, This is a Toast", "Open App", "OpenApp", "logo.png");
+    }
+
+    public bool SendToast(string message, string btnContent, string actionName, string logoNameWithExtension)
+    {
+        return ScenarioHelper.SendToastWithAvatar(ScenarioId, ScenarioName, message, btnContent, actionName, logoNameWithExtension);
     }
 }

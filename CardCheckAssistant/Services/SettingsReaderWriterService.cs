@@ -20,7 +20,7 @@ namespace CardCheckAssistant.Services;
 public class SettingsReaderWriter : IDisposable
 {
     #region fields
-    private static readonly string FacilityName = "RFiDGear";
+    private static readonly string FacilityName = Assembly.GetExecutingAssembly().GetName().Name;
 
     private readonly string _settingsFileFileName = "settings.xml";
     private readonly string _updateConfigFileFileName = "update.xml";
@@ -38,25 +38,20 @@ public class SettingsReaderWriter : IDisposable
 
     private bool _disposed;
 
-    public DefaultSettings DefaultSpecification
+    public DefaultSettings DefaultSettings
     {
-        get
-        {
-            ReadSettings();
-            return defaultSpecification ?? new DefaultSettings();
-        }
+        get =>  defaultSettings ?? new DefaultSettings(true);
 
         set
         {
-            defaultSpecification = value;
-            if (defaultSpecification != null)
+            defaultSettings = value;
+            if (defaultSettings != null)
             {
                 SaveSettings();
             }
         }
     }
-
-    private DefaultSettings defaultSpecification;
+    private DefaultSettings defaultSettings;
 
     #endregion fields
 
@@ -113,28 +108,39 @@ public class SettingsReaderWriter : IDisposable
                 doc.Save(Path.Combine(appDataPath, _updateConfigFileFileName));
             }
         }
-        catch (Exception e)
+        catch (Exception ex)
         {
-            LogWriter.CreateLogEntry(string.Format("{0}: {1}; {2}", DateTime.Now, e.Message, e.InnerException != null ? e.InnerException.Message : ""), FacilityName);
+            LogWriter.CreateLogEntry(ex, FacilityName);
         }
 
         if (!File.Exists(Path.Combine(appDataPath, _settingsFileFileName)))
         {
             try
             {
-                defaultSpecification = new DefaultSettings(true);
+                defaultSettings = new DefaultSettings(true);
 
-                var serializer = new XmlSerializer(defaultSpecification.GetType());
+                var serializer = new XmlSerializer(defaultSettings.GetType());
 
                 var txtWriter = new StreamWriter(Path.Combine(appDataPath, _settingsFileFileName));
 
-                serializer.Serialize(txtWriter, defaultSpecification);
+                serializer.Serialize(txtWriter, defaultSettings);
 
                 txtWriter.Close();
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                LogWriter.CreateLogEntry(string.Format("{0}; {1}; {2}", DateTime.Now, e.Message, e.InnerException != null ? e.InnerException.Message : ""), FacilityName);
+                LogWriter.CreateLogEntry(ex, FacilityName);
+            }
+        }
+        else
+        {
+            try
+            {
+                ReadSettings();
+            }
+            catch (Exception ex)
+            {
+                LogWriter.CreateLogEntry(ex, FacilityName);
             }
         }
     }
@@ -198,7 +204,7 @@ public class SettingsReaderWriter : IDisposable
                     );
                 }
 
-                defaultSpecification = (serializer.Deserialize(reader) as DefaultSettings);
+                defaultSettings = (serializer.Deserialize(reader) as DefaultSettings);
 
                 reader.Close();
             }
@@ -227,15 +233,15 @@ public class SettingsReaderWriter : IDisposable
 
             textWriter = new StreamWriter(!string.IsNullOrEmpty(_path) ? @_path : @Path.Combine(appDataPath, _settingsFileFileName), false);
 
-            serializer.Serialize(textWriter, defaultSpecification);
+            serializer.Serialize(textWriter, defaultSettings);
 
             textWriter.Close();
 
             return true;
         }
-        catch (XmlException e)
+        catch (XmlException ex)
         {
-            LogWriter.CreateLogEntry(string.Format("{0}: {1}; {2}", DateTime.Now, e.Message, e.InnerException != null ? e.InnerException.Message : ""), FacilityName);
+            LogWriter.CreateLogEntry(ex, FacilityName);
             return false;
         }
     }
@@ -253,14 +259,14 @@ public class SettingsReaderWriter : IDisposable
                         xmlWriter.Close();
                     }
 
-                    defaultSpecification = null;
+                    defaultSettings = null;
                     // Dispose any managed objects
                     // ...
                 }
 
-                catch (Exception e)
+                catch (Exception ex)
                 {
-                    LogWriter.CreateLogEntry(string.Format("{0}: {1}; {2}", DateTime.Now, e.Message, e.InnerException != null ? e.InnerException.Message : ""), FacilityName);
+                    LogWriter.CreateLogEntry(ex, FacilityName);
                 }
             }
 

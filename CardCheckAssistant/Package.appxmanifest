@@ -8,12 +8,12 @@
 
   <Identity
     Name="a7309bff-a402-4e9a-a499-6f394b1a770a"
-    Publisher="CN=Diederik"
-    Version="1.0.0.0" />
+    Publisher="CN=Steven Hansen"
+    Version="1.0.14.0" />
 
   <Properties>
     <DisplayName>CardCheckAssistant</DisplayName>
-    <PublisherDisplayName>Diederik</PublisherDisplayName>
+    <PublisherDisplayName>Steven Hansen</PublisherDisplayName>
     <Logo>Assets\StoreLogo.png</Logo>
   </Properties>
 
@@ -28,16 +28,19 @@
 
   <Applications>
     <Application Id="App"
-      Executable="$targetnametoken$.exe"
-      EntryPoint="$targetentrypoint$">
+      Executable="$targetnametoken$.exe" EntryPoint="$targetentrypoint$">
       <uap:VisualElements
         DisplayName="CardCheckAssistant"
-        Description="CardCheckAssistant"
+        Description="Assistent für SimonsVoss Kartenprüfungen. Benötigt Zugriff auf OMNI-SQL Datenbank und eine installierte Version von &quot;RFIDGear&quot;"
         BackgroundColor="transparent"
-        Square150x150Logo="Assets\Square150x150Logo.png"
-        Square44x44Logo="Assets\Square44x44Logo.png">
-        <uap:DefaultTile Wide310x150Logo="Assets\Wide310x150Logo.png" />
-        <uap:SplashScreen Image="Assets\SplashScreen.png" />
+        Square150x150Logo="Assets\Square150x150Logo.png" Square44x44Logo="Assets\SquareLogo.png">
+        <uap:DefaultTile Wide310x150Logo="Assets\Wide310x150Logo.png"  Square310x310Logo="Assets\LargeTile.png" Square71x71Logo="Assets\SmallTile.png">
+          <uap:ShowNameOnTiles>
+            <uap:ShowOn Tile="square150x150Logo"/>
+            <uap:ShowOn Tile="wide310x150Logo"/>
+          </uap:ShowNameOnTiles>
+        </uap:DefaultTile >
+        <uap:SplashScreen Image="Assets\SplashScreen.png"/>
       </uap:VisualElements>
     </Application>
   </Applications>

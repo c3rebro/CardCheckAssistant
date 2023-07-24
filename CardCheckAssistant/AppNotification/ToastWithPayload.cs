@@ -18,7 +18,10 @@ public class ToastWithPayload : IScenario
             }
             return _Instance;
         }
-        set { _Instance = value; }
+        set 
+        { 
+            _Instance = value; 
+        }
     }
 
     public int ScenarioId { get; set; } = 3;
@@ -35,7 +38,7 @@ public class ToastWithPayload : IScenario
         notification.Action = action == null ? "" : action;
         notification.HasInput = true;
         notification.Input = text;
-        //MainPage.Current.NotificationReceived(notification);
+
         WindowHelper.SwitchToThisWindow(MainWindow.Instance);
         AppNotificationPage.Instance.NotificationReceived(notification);
     }

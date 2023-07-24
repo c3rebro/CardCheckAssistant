@@ -33,7 +33,7 @@ public sealed partial class Shell : Page
 
         using SettingsReaderWriter settings = new SettingsReaderWriter();
 
-        window.SelectedTheme = settings.DefaultSpecification.DefaultTheme;
+        window.SelectedTheme = settings.DefaultSettings.DefaultTheme;
     }
 
     private void NavigationView_ItemInvoked(NavigationView sender, NavigationViewItemInvokedEventArgs args)

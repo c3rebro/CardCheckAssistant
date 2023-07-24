@@ -15,13 +15,9 @@ namespace CardCheckAssistant.Views
 
         public HomePageViewModel ViewModel => DataContext as HomePageViewModel;
 
-        private async void MessageBox_Click(object sender, RoutedEventArgs e)
+        private void Page_Loaded(object sender, RoutedEventArgs e)
         {
-            Debug.WriteLine("Message Dialog will be opened.");
-
-            await this.MessageDialogAsync("All we are saying:", "Give peace a chance.", "Got it");
-
-            Debug.WriteLine("Message Dialog was closed.");
+            ViewModel.PostPageLoadedCommand.Execute(null);
         }
     }
 }

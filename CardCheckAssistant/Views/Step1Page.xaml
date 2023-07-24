@@ -3,9 +3,15 @@
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      xmlns:ctWinUIConv="using:CommunityToolkit.WinUI.UI.Converters"
       xmlns:viewmodels="using:CardCheckAssistant.ViewModels"
       mc:Ignorable="d"
       Background="Transparent">
+    
+    <Page.Resources>
+        <ctWinUIConv:BoolToVisibilityConverter x:Key="boolean" />
+    </Page.Resources>
+    
 
     <Page.DataContext>
         <viewmodels:Step1PageViewModel />
@@ -15,26 +21,124 @@
         <!-- Beef -->
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="auto"/>
-            <ColumnDefinition Width="auto"/>
+            <ColumnDefinition Width="20"/>
             <ColumnDefinition Width="auto"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="auto"/>
-            <RowDefinition Height="20"/>
             <RowDefinition Height="auto"/>
-            <RowDefinition Height="20"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
             <RowDefinition Height="auto"/>
             <RowDefinition Height="auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="auto"/>
         </Grid.RowDefinitions>
 
-        <TextBlock Margin="8,8,8,8" Grid.ColumnSpan="3" Grid.Column="0" Grid.Row="0" Text="Bitte beantworte folgende Fragen und Klicke dann auf Weiter"/>
-        <TextBlock Margin="8,8,8,8" Grid.ColumnSpan="3" Grid.Column="0" Grid.Row="2" Text="Wie viele Chips wurden zur Prüfung eingesendet?"/>
-        <ComboBox Margin="8,8,8,8" Grid.ColumnSpan="3" Grid.Column="2" Grid.Row="2" ItemsSource="{Binding ChipCount}" SelectedItem="{Binding NumberOfDeliveredChips, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
-        <TextBlock Margin="8,8,8,8" Grid.Column="0" Grid.Row="4" Text="Ausgewählter Job:"/>
-        <TextBlock Margin="8,8,8,8" Grid.Column="1" Grid.Row="4" Text="{Binding JobNumber}"/>
+        <Border
+            Grid.Row="0"
+            CornerRadius="8,8,8,8" Grid.ColumnSpan="4" Grid.RowSpan="7">
+            <Border>
+                <Border.Background>
+                    <RadialGradientBrush>
+                        <GradientStop Offset="0" Color="#1F000000" />
+                        <GradientStop Offset="1" Color="#4F000000" />
+                    </RadialGradientBrush>
+                </Border.Background>
+
+                <Grid>
+                    <StackPanel
+                        Orientation="Horizontal"
+                        VerticalAlignment="Bottom"
+                        HorizontalAlignment="Right">
+                        <TextBlock
+                        Margin="12"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Bottom"
+                        FontSize="12"
+                        Text="Aktueller Auftrag:" />
+                        <TextBlock
+                        Margin="12"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Bottom"
+                        FontSize="12"
+                        Text="{Binding JobNumber}" />
+                    </StackPanel>
+
+                </Grid>
+                
+            </Border>
+        </Border>
+
+        <TextBlock 
+            Margin="8,8,8,8" 
+            Grid.ColumnSpan="4" 
+            Grid.Column="0" 
+            Grid.Row="0" 
+            VerticalAlignment="Center" >
+            <Run Text="Bitte nimm eine Karte und lege Sie auf den Kartenleser. Vergewissere Dich, dass der Kartenleser vom Typ: &#x0a;&quot;ELATECH TWN4 Legic&quot;&#x0a;korrekt angeschlossen ist."/>
+        </TextBlock>
+        <InfoBar
+            Grid.Column="0"
+            Grid.Row="1"
+            Grid.ColumnSpan="4"
+            Margin="15"
+            IsOpen="True"
+            IsIconVisible="True"
+            IsClosable="False"
+            Title="Leserstatus:"
+            Severity="Error"
+            Visibility="{Binding HasTwoReadersInfoBarIsVisible, Converter={StaticResource boolean}, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+            Message="Es ist mehr als ein Leser gleichzeitig angeschlossen. Bitte entferne den für die Prüfung nicht benötigten Leser."/>
+        <InfoBar
+            Grid.Column="0"
+            Grid.Row="1"
+            Grid.ColumnSpan="4"
+            Margin="15"
+            IsOpen="True"
+            IsIconVisible="True"
+            IsClosable="False"
+            Title="Leserstatus:"
+            Severity="Informational"
+            Visibility="{Binding NoChipDetectedInfoBarIsVisible, Converter={StaticResource boolean}, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+            Message="Es wurde kein Chip gefunden oder der Chip wird nicht unterstützt. Bitte platziere einen zu prüfenden Chip auf dem Leser. &#x0a;Gegebenenfalls muss der Chip etwas verschoben werden bis er erkannt wird."/>
+        <InfoBar
+            Grid.Column="0"
+            Grid.Row="1"
+            Grid.ColumnSpan="2"
+            Margin="15"
+            IsOpen="True"
+            IsIconVisible="True"
+            IsClosable="False"
+            Title="Leserstatus:"
+            Severity="Success"
+            Visibility="{Binding ChipDetectedInfoBarIsVisible, Converter={StaticResource boolean}, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+            Message="{Binding ChipInfoMessage, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}"/>
+        <TextBlock 
+            Margin="8,8,8,8" 
+            Grid.ColumnSpan="4" 
+            Grid.Column="0" 
+            Grid.Row="2" 
+            VerticalAlignment="Center" >
+            <Run Text="Beantworte dann noch die Frage und klicke anschließend auf Weiter. Der Prüfvorgang startet im nächsten Schritt automatisch."/>
+            <LineBreak/>
+        </TextBlock>
+        <TextBlock 
+            Margin="8,0"
+            Grid.ColumnSpan="3" 
+            Grid.Column="0" 
+            Grid.Row="3" 
+            VerticalAlignment="Center" >
+            <Run Text="Frage: In welcher Sprache soll der Bericht erstellt werden?"/>
+        </TextBlock>
+        <ComboBox 
+            Grid.ColumnSpan="1" 
+            Grid.Column="3" 
+            Grid.Row="3" 
+            VerticalAlignment="Center" 
+            ItemsSource="{Binding Languages}" 
+            SelectedItem="{Binding SelectedReportLaguage, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
         <Button 
             Grid.Row="7"
             Grid.Column="0"
@@ -71,12 +175,11 @@
         </Button>
         <Button
             Grid.Row="7"
-            Grid.Column="2"
-            Grid.ColumnSpan="3"
+            Grid.Column="4"
             Height="36"
-            Margin="0,6,50,0"
+            Margin="0,6,5,0"
             Padding="30,6"
-            HorizontalAlignment="Left"
+            HorizontalAlignment="Right"
             IsEnabled="{Binding NextStepCanExecute, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
             Opacity="1"
             Command="{Binding NavigateNextStepCommand}"

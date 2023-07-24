@@ -8,11 +8,11 @@ namespace CardCheckAssistant.Models;
 public class Customer
 {
     public string JobNr { get; set; }
-    public string VCNr { get; set; }
+    public string ChipNumber { get; set; }
     public string OmniLink { get; set; }
     public string Date { get; set; }
     public string CName { get; set; }
-    public string MailTo { get; set; }
+    public string EditorName { get; set; }
     public bool IsMember { get; set; }
     public OrderStatus Status { get; set; }
 }

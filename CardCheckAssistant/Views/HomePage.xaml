@@ -3,16 +3,26 @@
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      xmlns:svc="using:CardCheckAssistant.Services"
       xmlns:ctWinUI="using:CommunityToolkit.WinUI.UI.Controls"
+      xmlns:ctWinUIConv="using:CommunityToolkit.WinUI.UI.Converters"
       xmlns:viewmodels="using:CardCheckAssistant.ViewModels"
       mc:Ignorable="d"
-      Background="Transparent">
+      Loaded="Page_Loaded"
+      Background="Transparent" 
+      Margin="0 0 0 0">
 
     <Page.DataContext>
         <viewmodels:HomePageViewModel />
     </Page.DataContext>
 
     <Grid Margin="0 0 0 20">
+        <Grid.Background>
+            <ImageBrush
+                    ImageSource="/Assets/fluent-ui-microsoft.png"
+                    Opacity="0.5"
+                    Stretch="UniformToFill" />
+        </Grid.Background>
         <!-- Beef -->
         <Grid>
             <Grid.ColumnDefinitions>
@@ -21,38 +31,53 @@
                 <ColumnDefinition Width="10"/>
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
-                <RowDefinition Height="34.2" />
-                <RowDefinition Height="62"/>
-                <RowDefinition Height="16"/>
+                <RowDefinition Height="300"/>
                 <RowDefinition Height="26"/>
-                <RowDefinition Height="218"/>
-                <RowDefinition Height="143.8"/>
+                <RowDefinition Height="*"/>
+
                 <!-- <RowDefinition Height="Auto" /> -->
                 <!-- <RowDefinition Height="Auto" /> -->
             </Grid.RowDefinitions>
 
             <Border
             Grid.Row="0"
-            CornerRadius="8,0,0,0" Grid.ColumnSpan="3" Grid.RowSpan="6">
-                <Border.Background>
-                    <ImageBrush
-                    ImageSource="/Assets/fluent-ui-microsoft.png"
-                    Opacity="0.5"
-                    Stretch="UniformToFill" />
-                </Border.Background>
-                <Border CornerRadius="8,0,0,0" >
+                Grid.Column="0"
+            CornerRadius="0,0,0,0" Grid.ColumnSpan="3">
+
+                <Border>
                     <Border.Background>
                         <RadialGradientBrush>
                             <GradientStop Offset="0" Color="#1F000000" />
-                            <GradientStop Offset="1" Color="#4F000000" />
+                            <GradientStop Offset="10" Color="#4F000000" />
                         </RadialGradientBrush>
                     </Border.Background>
                     <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="30" />
+                            <RowDefinition Height="28" />
+                            <RowDefinition Height="28" />
+                            <RowDefinition Height="28" />
+                            <RowDefinition Height="28" />
+                            <RowDefinition Height="28" />
+                            <RowDefinition Height="28" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="500" />
+                            <ColumnDefinition Width="100" />
+                            <ColumnDefinition Width="100" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
                         <Image
-                    Source="/Assets/monitorbg.png"
-
-                    Stretch="None" Margin="40,0,0,0" HorizontalAlignment="Left" />
+                            Grid.Row="0"
+                            Grid.RowSpan="8"
+                            Grid.Column="0"
+                            Source="/Assets/monitorbg.png"
+                            Stretch="None" Margin="40,10,0,0" HorizontalAlignment="Left" />
                         <StackPanel
+                            Grid.Row="0"
+                            Grid.RowSpan="8"
+                            Grid.Column="0"
                         Margin="64"
                         HorizontalAlignment="Left"
                         VerticalAlignment="Center"
@@ -60,16 +85,16 @@
                             <TextBlock
                             FontSize="18"
                             Foreground="#B7FFFFFF"
-                            Text="Karten-Prüf-Assistent                   Version 1.0" />
+                            Text="CardCheckAssistant                   Version 1.0.15" />
                             <TextBlock
                             FontSize="28"
                             FontWeight="Bold"
                             Foreground="#FFFFFF"
-                            Text="Neue Prüfungen stehen an" />
+                            Text="{Binding WelcomeScreenText, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}" />
                             <TextBlock
                             FontSize="18"
                             Foreground="#B7FFFFFF"
-                            Text="Zahl der unbearbeiteten Prüfungen: 2" />
+                            Text="{Binding NumberOfChecksText, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}" />
                             <Button
                             Height="36"
                             Margin="0,6,0,0"
@@ -78,7 +103,7 @@
                             IsEnabled="{Binding StartCheckCanExecute, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
                             Opacity="1"
                             Command="{Binding NavigateCommand}"
-                            Content="Prüfvorgang starten">
+                            Content="{Binding ButtonStartCheckContent}">
                                 <Button.Resources>
                                     <ResourceDictionary>
                                         <SolidColorBrush
@@ -106,7 +131,40 @@
                                 </Button.Resources>
                             </Button>
                         </StackPanel>
+                        <TextBlock 
+                            Grid.Row="1"
+                            Grid.Column="1"
+                            Grid.ColumnSpan="2"
+                            Text="Anzeigeoptionen"/>
+                        <TextBlock 
+                            Grid.Row="3"
+                            Grid.Column="1"
+                            Text="Sortiere nach:"/>
+                        <ComboBox 
+                            Grid.Row="3"
+                            Grid.Column="2"
+                            Grid.ColumnSpan="2"
+                            Width="auto"
+                            Height="auto"/>
+                        <Border
+                            Grid.Row="2"
+                            Grid.Column="1"
+                            Grid.ColumnSpan="3"
+                            BorderBrush="Black"
+                            Margin="0,0,10,0"
+                            BorderThickness="0,1,0,0">
+                        </Border>
+                        <CheckBox 
+                            Grid.Row="5"
+                            Grid.Column="1"
+                            Grid.ColumnSpan="2"
+                            Content="Zeige alle Jobs"
+                            IsChecked="{Binding ShowAllJobs, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                            Width="auto"
+                            Height="auto"/>
                         <TextBlock
+                            Grid.Row="8"
+                            Grid.Column="3"
                         Margin="12"
                         HorizontalAlignment="Right"
                         VerticalAlignment="Bottom"
@@ -117,13 +175,14 @@
                 </Border>
             </Border>
 
-            <TextBlock Text="Auftragsübersicht" Grid.Column="1" Grid.Row="2" Foreground="Black" Grid.RowSpan="3" Grid.ColumnSpan="2"/>
+            <TextBlock Text="Auftragsübersicht" Padding="5" VerticalAlignment="Top" Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="2"/>
 
             <ctWinUI:DataGrid 
+                x:Name="ctDG"
             Margin="0,8,0,0"
-            Grid.Row="3"
-            Grid.RowSpan="2"
-            Grid.Column="1"
+            Grid.Row="2"
+            Grid.Column="0"
+            Grid.ColumnSpan="2"
             HorizontalAlignment="Stretch"
             VerticalAlignment="Stretch"
             HorizontalContentAlignment="Center"
@@ -134,16 +193,25 @@
             Opacity="1"
             CanUserReorderColumns="True"
             CanUserSortColumns="True"
-            ItemsSource="{Binding DataGridItemCollection}"
+            SelectionMode="Single"
+            ItemsSource="{Binding DataGridItemCollection, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
             SelectedItem="{Binding SelectedCustomer, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}">
                 <ctWinUI:DataGrid.Resources>
+                    <ctWinUIConv:BoolToObjectConverter x:Key="boolean" />
                     <SolidColorBrush x:Key="DataGridColumnHeaderBackgroundBrush" Opacity=".5" />
                     <SolidColorBrush x:Key="DataGridCellFocusVisualPrimaryBrush">Transparent</SolidColorBrush>
                     <SolidColorBrush x:Key="DataGridCellFocusVisualSecondaryBrush">Transparent</SolidColorBrush>
+                    <svc:BindingProxy x:Key="proxy" Data="{Binding}" />
+                    <svc:ResourceLoaderService x:Key="Localization" />
                 </ctWinUI:DataGrid.Resources>
+                <ctWinUI:DataGrid.RowStyle>
+                    <Style TargetType="ctWinUI:DataGridRow">
+                        <Setter Property="Visibility" Value="{Binding IsVisible}"/>
+                    </Style>
+                </ctWinUI:DataGrid.RowStyle>
                 <ctWinUI:DataGrid.Columns>
-                    <ctWinUI:DataGridTextColumn Binding="{Binding JobNr}" Header="JobNr." />
-                    <ctWinUI:DataGridTextColumn Binding="{Binding VCNr}" Header="VC Nr." />
+                    <ctWinUI:DataGridTextColumn Binding="{Binding JobNr}" x:Uid="dataGridHeaderJobNr" />
+                    <ctWinUI:DataGridTextColumn Binding="{Binding ChipNumber}" x:Uid="dataGridHeaderChipNr" />
                     <!--  The Email property contains a URI.  For example "mailto:lucy0@adventure-works.com"  -->
                     <!-- <DataGridHyperlinkColumn
                         Binding="{Binding MailTo}"
@@ -152,8 +220,10 @@
                     <!-- <DataGridCheckBoxColumn Binding="{Binding IsMember}" Header="Referenz / Beschreibung" /> -->
                     <!-- <DataGridCheckBoxColumn Binding="{Binding IsMember}" Header="Referenz / Beschreibung" /> -->
                     <!-- <DataGridTextColumn Binding="{Binding Date}" Header="Referenz / Beschreibung" /> -->
-                    <ctWinUI:DataGridTextColumn Binding="{Binding CName}" Header="Referenz / Beschreibung" />
+                    <ctWinUI:DataGridTextColumn Binding="{Binding CName}" Header="Kunde" />
                     <ctWinUI:DataGridTextColumn Binding="{Binding Date}" Header="Auftragsdatum" />
+                    <ctWinUI:DataGridTextColumn Binding="{Binding EditorName}" Header="Prüfer" />
+                    <ctWinUI:DataGridTextColumn Binding="{Binding Status}" Header="Auftragsstatus"  />
                     <!-- <DataGridComboBoxColumn Header="Erstelldatum" SelectedItemBinding="{Binding Status}" /> -->
                 </ctWinUI:DataGrid.Columns>
             </ctWinUI:DataGrid>

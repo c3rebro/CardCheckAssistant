@@ -12,23 +12,28 @@
           VerticalAlignment="Stretch"
           HorizontalAlignment="Stretch">
 
-        <Image Source="ms-appx:///Assets/Logo.png"
+<!--        <Image Source="ms-appx:///Assets/Logo.png"
                VerticalAlignment="Top"
                HorizontalAlignment="Right"
                Height="200"
                Opacity="0.2"
                Margin="20 60" />
-
+-->
         <!-- Main Beef -->
         <NavigationView x:Name="NavigationView"
                         SelectionChanged="NavigationView_SelectionChanged"
                         IsBackButtonVisible="Collapsed"
                         PaneDisplayMode="LeftCompact"
+                        
                         Background="Transparent"
                         IsSettingsVisible="True"
                         ItemInvoked="NavigationView_ItemInvoked"
-                        SelectedItem="{x:Bind ViewModel.Selected, Mode=OneWay}"
-                        Margin="0">
+                        SelectedItem="{x:Bind ViewModel.Selected, Mode=OneWay}">
+            <NavigationView.HeaderTemplate>
+                <DataTemplate>
+                    <TextBlock Text="{Binding}" Margin="-35 -30 0 0"/>
+                </DataTemplate>
+            </NavigationView.HeaderTemplate>
             <!--<NavigationView.PaneCustomContent>
                 <HyperlinkButton NavigateUri="https://xamlbrewer.wordpress.com/2022/03/09/a-dialog-service-for-winui-3/"
                                  Margin="8 0">Blog post</HyperlinkButton>
@@ -41,6 +46,7 @@
                         <BitmapIcon UriSource="/Assets/Home.png"
                                     ShowAsMonochrome="False" />
                     </NavigationViewItem.Icon>
+                    
                 </NavigationViewItem>
 
                 <NavigationViewItem Content="Schritt 1"
@@ -61,6 +67,15 @@
                                     ShowAsMonochrome="False" />
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
+
+                <NavigationViewItem Content="Schritt 3"
+                                    Tag="CardCheckAssistant.Views.Step3Page"
+                                    ToolTipService.ToolTip="Schritt 3">
+                    <NavigationViewItem.Icon>
+                        <BitmapIcon UriSource="/Assets/S3.png"
+                                    ShowAsMonochrome="False" />
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
                 
             </NavigationView.MenuItems>
             <NavigationView.FooterMenuItems>
@@ -75,7 +90,7 @@
             </NavigationView.FooterMenuItems>
             
             <Frame x:Name="ContentFrame"
-                   Padding="20">
+                   Padding="5" Margin="0 -20 0 0" >
                 <Frame.ContentTransitions>
                     <TransitionCollection>
                         <NavigationThemeTransition>
@@ -100,12 +115,12 @@
         </Button>
         -->
         
-        <!-- XAML Brewer Logo -->
+        <!-- 
         <Viewbox StretchDirection="DownOnly"
                  HorizontalAlignment="Right"
                  VerticalAlignment="Bottom"
                  Width="142"
-                 Margin="0,0,8,8">
+                 Margin="8,8,8,8">
             <Canvas Height="80"
                     Width="300"
                     Background="Transparent">
@@ -123,6 +138,6 @@
                     </TextBlock>
                 </Grid>
             </Canvas>
-        </Viewbox>
+        </Viewbox> Logo -->
     </Grid>
 </Page>

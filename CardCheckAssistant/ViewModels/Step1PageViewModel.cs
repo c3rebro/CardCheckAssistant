@@ -11,31 +11,70 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using CardCheckAssistant.Views;
 using Windows.Storage.Pickers;
+using CommunityToolkit.Common;
 
 namespace CardCheckAssistant.ViewModels;
 
-public class Step1PageViewModel : ObservableObject
+public class Step1PageViewModel : ObservableObject, IDisposable
 {
+
+    private readonly DispatcherTimer scanChipTimer;
+
     public Step1PageViewModel()
     {
-        ChipCount = new ObservableCollection<string>();
+        scanChipTimer = new DispatcherTimer();
+        scanChipTimer.Tick += ScanChipEvent;
+        scanChipTimer.Interval = new TimeSpan(0,0,0,0,3000);
 
-        for (var i = 0; i <= 10; i++)
+        Languages = new ObservableCollection<string>
         {
-            ChipCount.Add(i.ToString("D2"));
-        }
+            "Deutsch" 
+        };
 
-        NumberOfDeliveredChips = ChipCount.First();
+        SelectedReportLaguage = Languages.FirstOrDefault();
+
         NextStepCanExecute = false;
         GoBackCanExecute = true;
+        HasTwoReadersInfoBarIsVisible = false;
+
+        ScanChipEvent(this, null);
+        scanChipTimer.Start();
     }
 
     #region ObservableObjects
 
-    public ObservableCollection<string> ChipCount
+    public ObservableCollection<string> Languages
     {
         get; set;
     }
+
+    public bool HasTwoReadersInfoBarIsVisible
+    {
+        get => hasTwoReadersInfoBarIsVisible;
+        set => SetProperty(ref hasTwoReadersInfoBarIsVisible, value);
+    }
+    private bool hasTwoReadersInfoBarIsVisible;
+
+    public bool NoChipDetectedInfoBarIsVisible
+    {
+        get => noChipDetectedInfoBarIsVisible;
+        set => SetProperty(ref noChipDetectedInfoBarIsVisible, value);
+    }
+    private bool noChipDetectedInfoBarIsVisible;
+
+    public bool ChipDetectedInfoBarIsVisible
+    {
+        get => chipDetectedInfoBarIsVisible;
+        set => SetProperty(ref chipDetectedInfoBarIsVisible, value);
+    }
+    private bool chipDetectedInfoBarIsVisible;
+
+    public string ChipInfoMessage
+    {
+        get => chipInfoMessage;
+        set => SetProperty(ref chipInfoMessage, value);
+    }
+    private string chipInfoMessage;
 
     public async void InputText_Click(object sender, RoutedEventArgs e)
     {
@@ -64,25 +103,18 @@ public class Step1PageViewModel : ObservableObject
     }
     private bool _goBackCanExecute;
 
-    public string JobNumber => string.Format("JobNr.: {0}; {1}",CheckProcessService.CurrentCustomer.JobNr, CheckProcessService.CurrentCustomer.CName);
+    public string JobNumber => string.Format("JobNr.: {0}; {1}",CheckProcessService.CurrentCardCheckProcess.JobNr, CheckProcessService.CurrentCardCheckProcess.CName);
 
-    public string NumberOfDeliveredChips
+    public string SelectedReportLaguage
     {
-        get => _numberOfDeliveredChips;
+        get => _selectedReportLaguage;
         set
         {
-            if (int.Parse(value) > 0)
-            {
-                NextStepCanExecute = true;
-            }
-            else
-            {
-                NextStepCanExecute = false;
-            }
-            SetProperty(ref _numberOfDeliveredChips, value);
+            CheckProcessService.CurrentCardCheckProcess.ReportLanguage = value;
+            SetProperty(ref _selectedReportLaguage, value);
         }
     }
-    private string _numberOfDeliveredChips;
+    private string _selectedReportLaguage;
 
     #endregion 
 
@@ -92,36 +124,62 @@ public class Step1PageViewModel : ObservableObject
 
     public ICommand NavigateBackCommand => new RelayCommand(NavigateBackCommand_Executed);
 
-    
-    public ICommand ConfirmationCommandYesNo => new AsyncRelayCommand(ConfirmationYesNo_Executed);
-
-    public ICommand ConfirmationCommandYesNoCancel => new AsyncRelayCommand(ConfirmationYesNoCancel_Executed);
-
     public ICommand InputStringCommand => new AsyncRelayCommand(InputString_Executed);
-    
-    #endregion
-    
-    private async Task ConfirmationYesNo_Executed()
-    {
-        Debug.WriteLine("2-State Confirmation Dialog will be opened.");
-        var confirmed = await App.MainRoot.ConfirmationDialogAsync(
-                "What Pantone color do you prefer?",
-                "Freedom Blue",
-                "Energizing Yellow"
-            );
-        Debug.WriteLine($"2-State Confirmation Dialog was closed with {confirmed}.");
-    }
 
-    private async Task ConfirmationYesNoCancel_Executed()
+    #endregion
+
+
+    private async void ScanChipEvent(object? sender, object e)
     {
-        Debug.WriteLine("3-State Confirmation Dialog will be opened.");
-        var confirmed = await App.MainRoot.ConfirmationDialogAsync(
-                "Is it wise to use artillery against a nuclear power plant?",
-                "да",
-                "That's insane",
-                "I don't understand"
-            );
-        Debug.WriteLine($"3-State Confirmation Dialog was closed with {confirmed}.");
+        try
+        {
+            using (ReaderService readerService = new ReaderService())
+            {
+                await readerService.ReadChipPublic();
+
+                if (readerService.MoreThanOneReaderFound)
+                {
+                    HasTwoReadersInfoBarIsVisible = true;
+                    ChipDetectedInfoBarIsVisible = false;
+                    NoChipDetectedInfoBarIsVisible = false;
+
+                    NextStepCanExecute = false;
+                }
+                else
+                {
+                    HasTwoReadersInfoBarIsVisible = false;
+
+                    if (readerService.GenericChip != null)
+                    {
+                        NoChipDetectedInfoBarIsVisible = false;
+                        ChipDetectedInfoBarIsVisible = true;
+
+                        NextStepCanExecute = true;
+
+                        ChipInfoMessage = string.Format("Es wurde ein Chip erkannt:\nErkannt 1: {0}", readerService.GenericChip.CardType.ToString());
+
+                        if(readerService.GenericChip.Child != null)
+                        {
+                            ChipInfoMessage = ChipInfoMessage + string.Format("\nErkannt 2: {0}", readerService.GenericChip.Child.CardType);
+                        }
+                    }
+
+                    else
+                    {
+                        ChipDetectedInfoBarIsVisible = false;
+                        NoChipDetectedInfoBarIsVisible = true;
+
+                        NextStepCanExecute  = true;
+                    }
+                }
+
+
+            }
+        }
+        catch
+        {
+
+        }
     }
 
     private async Task InputString_Executed()
@@ -138,38 +196,46 @@ public class Step1PageViewModel : ObservableObject
     
     private async Task NavigateNextStepCommand_Executed()
     {
+        scanChipTimer.Stop();
+
         var window = (Application.Current as App)?.Window as MainWindow;
         var navigation = window.Navigation;
         var step2Page = navigation.GetNavigationViewItems(typeof(Step2Page)).First();
         navigation.SetCurrentNavigationViewItem(step2Page);
         step2Page.IsEnabled = true;
-        /*
-        var inputString = await App.MainRoot.InputStringDialogAsync(
-        "How can we help you?",
-        "I need ammunition, not a ride.",
-        "OK",
-        "Forget it");
-        */
-
-        var filePicker = new FileOpenPicker();
-
-        // Get the current window's HWND by passing in the Window object
-        var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(window);
-
-        // Associate the HWND with the file picker
-        WinRT.Interop.InitializeWithWindow.Initialize(filePicker, hwnd);
-
-        filePicker.FileTypeFilter.Add("*");
-        var file = await filePicker.PickSingleFileAsync();
     }
 
     private void NavigateBackCommand_Executed()
     {
+        scanChipTimer.Stop();
+
         var window = (Application.Current as App)?.Window as MainWindow;
         var navigation = window.Navigation;
-        var step1Page = navigation.GetNavigationViewItems(typeof(Step1Page)).First();
-        navigation.SetCurrentNavigationViewItem(step1Page);
-        step1Page.IsEnabled = true;
+        var homePage = navigation.GetNavigationViewItems(typeof(HomePage)).First();
+        navigation.SetCurrentNavigationViewItem(homePage);
+
+        this.Dispose();
+        //Step1Page.IsEnabled = true;
     }
+
+    protected void Dispose(bool disposing)
+    {
+        if (!_disposed)
+        {
+            if (disposing)
+            {
+            }
+
+            _disposed = true;
+        }
+    }
+
+    public void Dispose()
+    {
+        _disposed = false;
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+    private bool _disposed;
 
 }

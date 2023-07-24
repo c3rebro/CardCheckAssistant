@@ -12,13 +12,12 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition />
         </Grid.RowDefinitions>
-        <Grid x:Name="AppTitleBar" Height="48">
+        <Grid x:Name="AppTitleBar" Height="32" IsHitTestVisible="False" >
             <Grid.ColumnDefinitions>
                 <ColumnDefinition x:Name="LeftPaddingColumn" Width="0"/>
                 <ColumnDefinition x:Name="IconColumn" Width="Auto"/>
-                <ColumnDefinition x:Name="TitleColumn" Width="Auto"/>
+                <ColumnDefinition x:Name="TitleColumn" Width="auto"/>
                 <ColumnDefinition x:Name="LeftDragColumn" Width="*"/>
-                <ColumnDefinition x:Name="SearchColumn" Width="Auto"/>
                 <ColumnDefinition x:Name="RightDragColumn" Width="*"/>
                 <ColumnDefinition x:Name="RightPaddingColumn" Width="0"/>
             </Grid.ColumnDefinitions>
@@ -33,6 +32,7 @@
                VerticalAlignment="Center"
                Margin="4,0,0,0"/>
         </Grid>
+        <!--
         <MenuBar Grid.Row="1">
             <MenuBarItem Title="Datei">
                 <MenuFlyoutItem Text="Neu">
@@ -88,8 +88,8 @@
                 </MenuFlyoutItem>
             </MenuBarItem>
         </MenuBar>
-
-        <local:Shell x:Name="RootShell" Grid.Row="2"/>
+-->
+        <local:Shell x:Name="RootShell" Margin="0 15 0 0" Grid.Row="2"/>
 
     </Grid>
 </Window>

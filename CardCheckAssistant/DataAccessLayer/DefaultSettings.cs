@@ -15,9 +15,9 @@ using System.Xml.Serialization;
 namespace CardCheckAssistant.DataAccessLayer;
 
 /// <summary>
-/// Description of MifareClassicDefaultSpecification.
+///
 /// </summary>
-[XmlRoot("DefaultSpecification", IsNullable = false)]
+[XmlRoot("DefaultSettings", IsNullable = false)]
 public class DefaultSettings : IDisposable
 {
     private Version Version = Assembly.GetExecutingAssembly().GetName().Version;
@@ -30,15 +30,28 @@ public class DefaultSettings : IDisposable
     {
         ManifestVersion = string.Format("{0}.{1}.{2}", Version.Major, Version.Minor, Version.Build);
 
-        _defaultLanguage = "english";
-        defaultAutoPerformTasksEnabled = false;
-        autoCheckForUpdates = true;
-        _autoLoadProjectOnStart = false;
-        _lastUsedProjectPath = "";
-        _defaultTheme = "Light";
+        if(init)
+        {
+            _defaultLanguage = "english";
+            _autoCheckForUpdates = true;
+            _autoLoadProjectOnStart = false;
+            _cardCheckUseSQLLite = true;
+            _lastUsedProjectPath = "";
+            _lastUsedCustomProjectPath = "";
+            _defaultTheme = "Light";
+            _defaultRFIDGearExePath = "";
+            _defaultProjectOutputPath = "";
+
+            _selectedDBName = "db";
+            _selectedDBServerName = "localhost";
+            _selectedDBServerPort = "1433";
+            _selectedDBUsername = "user";
+            _selectedDBUserPwd = "3A-85-DC-5F-49-E4-A0-79-F9-6F-26-FE-DB-6C-56-CB"; //12345678
+        }
+
     }
 
-    #region properties
+    #region Properties
 
     /// <summary>
     ///
@@ -51,12 +64,71 @@ public class DefaultSettings : IDisposable
     /// <summary>
     ///
     /// </summary>
+    public bool CardCheckUseMSSQL
+    {
+        get => _cardCheckUseSQLLite;
+        set => _cardCheckUseSQLLite = value;
+    }
+    private bool _cardCheckUseSQLLite;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public string SelectedDBServerName
+    {
+        get => _selectedDBServerName;
+        set => _selectedDBServerName = value;
+    }
+    private string _selectedDBServerName;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public string SelectedDBServerPort
+    {
+        get => _selectedDBServerPort;
+        set => _selectedDBServerPort = value;
+    }
+    private string _selectedDBServerPort;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public string SelectedDBName
+    {
+        get => _selectedDBName;
+        set => _selectedDBName = value;
+    }
+    private string _selectedDBName;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public string SelectedDBUsername
+    {
+        get => _selectedDBUsername;
+        set => _selectedDBUsername = value;
+    }
+    private string _selectedDBUsername;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public string SelectedDBUserPwd
+    {
+        get => _selectedDBUserPwd;
+        set => _selectedDBUserPwd = value;
+    }
+    private string _selectedDBUserPwd;
+
+    /// <summary>
+    ///
+    /// </summary>
     public string DefaultTheme
     {
         get => _defaultTheme;
         set => _defaultTheme = value;
     }
-
     private string _defaultTheme;
 
     /// <summary>
@@ -64,10 +136,10 @@ public class DefaultSettings : IDisposable
     /// </summary>
     public bool AutoCheckForUpdates
     {
-        get => autoCheckForUpdates;
-        set => autoCheckForUpdates = value;
+        get => _autoCheckForUpdates;
+        set => _autoCheckForUpdates = value;
     }
-    private bool autoCheckForUpdates;
+    private bool _autoCheckForUpdates;
 
     /// <summary>
     ///
@@ -78,17 +150,6 @@ public class DefaultSettings : IDisposable
         set => _defaultLanguage = value;
     }
     private string _defaultLanguage;
-
-    /// <summary>
-    ///
-    /// </summary>
-    public bool DefaultAutoPerformTasksEnabled
-    {
-        get => defaultAutoPerformTasksEnabled;
-        set => defaultAutoPerformTasksEnabled = value;
-    }
-
-    private bool defaultAutoPerformTasksEnabled;
 
     /// <summary>
     ///
@@ -110,6 +171,36 @@ public class DefaultSettings : IDisposable
     }
     private string _lastUsedProjectPath;
 
+
+    /// <summary>
+    ///
+    /// </summary>
+    public string LastUsedCustomProjectPath
+    {
+        get => _lastUsedCustomProjectPath;
+        set => _lastUsedCustomProjectPath = value;
+    }
+    private string _lastUsedCustomProjectPath;
+
+    /// <summary>
+    ///
+    /// </summary>
+    public string DefaultRFIDGearExePath
+    {
+        get => _defaultRFIDGearExePath;
+        set => _defaultRFIDGearExePath = value;
+    }
+    private string _defaultRFIDGearExePath;
+
+    /// <summary>
+    ///
+    /// </summary>
+    public string DefaultProjectOutputPath
+    {
+        get => _defaultProjectOutputPath;
+        set => _defaultProjectOutputPath = value;
+    }
+    private string _defaultProjectOutputPath;
     #endregion properties
 
     #region Extensions
