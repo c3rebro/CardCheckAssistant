@@ -1,22 +1,29 @@
 ﻿<Page x:Class="CardCheckAssistant.Views.HomePage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
       xmlns:svc="using:CardCheckAssistant.Services"
+      xmlns:viewmodels="using:CardCheckAssistant.ViewModels"
       xmlns:ctWinUI="using:CommunityToolkit.WinUI.UI.Controls"
       xmlns:ctWinUIConv="using:CommunityToolkit.WinUI.UI.Converters"
-      xmlns:viewmodels="using:CardCheckAssistant.ViewModels"
       mc:Ignorable="d"
+      x:Name="_homePage"
       Loaded="Page_Loaded"
       Background="Transparent" 
       Margin="0 0 0 0">
 
     <Page.DataContext>
-        <viewmodels:HomePageViewModel />
+        <viewmodels:HomePageViewModel/>
     </Page.DataContext>
 
-    <Grid Margin="0 0 0 20">
+    <Page.Resources>
+        <viewmodels:HomePageViewModel x:Name="HomePageVM"/>
+        <ctWinUIConv:BoolToVisibilityConverter x:Key="boolean" />
+    </Page.Resources>
+   
+    <Grid 
+        Margin="0 0 0 20">
         <Grid.Background>
             <ImageBrush
                     ImageSource="/Assets/fluent-ui-microsoft.png"
@@ -24,6 +31,7 @@
                     Stretch="UniformToFill" />
         </Grid.Background>
         <!-- Beef -->
+        
         <Grid>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="460"/>
@@ -34,10 +42,9 @@
                 <RowDefinition Height="300"/>
                 <RowDefinition Height="26"/>
                 <RowDefinition Height="*"/>
-
-                <!-- <RowDefinition Height="Auto" /> -->
-                <!-- <RowDefinition Height="Auto" /> -->
             </Grid.RowDefinitions>
+
+
 
             <Border
             Grid.Row="0"
@@ -131,21 +138,13 @@
                                 </Button.Resources>
                             </Button>
                         </StackPanel>
+
                         <TextBlock 
                             Grid.Row="1"
                             Grid.Column="1"
                             Grid.ColumnSpan="2"
                             Text="Anzeigeoptionen"/>
-                        <TextBlock 
-                            Grid.Row="3"
-                            Grid.Column="1"
-                            Text="Sortiere nach:"/>
-                        <ComboBox 
-                            Grid.Row="3"
-                            Grid.Column="2"
-                            Grid.ColumnSpan="2"
-                            Width="auto"
-                            Height="auto"/>
+
                         <Border
                             Grid.Row="2"
                             Grid.Column="1"
@@ -154,23 +153,67 @@
                             Margin="0,0,10,0"
                             BorderThickness="0,1,0,0">
                         </Border>
-                        <CheckBox 
-                            Grid.Row="5"
+                        
+                        <StackPanel 
+                            Orientation="Horizontal"
+                            HorizontalAlignment="Stretch"
                             Grid.Column="1"
-                            Grid.ColumnSpan="2"
-                            Content="Zeige alle Jobs"
-                            IsChecked="{Binding ShowAllJobs, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
-                            Width="auto"
-                            Height="auto"/>
+                            Grid.ColumnSpan="3"
+                            Grid.Row="2"
+                            Grid.RowSpan="2"
+                            Margin="0 0 0 16"
+                            CornerRadius="4"
+                            Height="52">
+                            <CommandBar 
+                                DefaultLabelPosition="Right"
+                                Background="Transparent"
+                                VerticalAlignment="Center">
+                                <AppBarButton 
+                                    Icon="Filter"
+                                    Label="Filter"
+                                    Width="80">
+                                    <AppBarButton.Flyout>
+                                        <MenuFlyout>
+                                            <RadioMenuFlyoutItem Text="Zeige: InProgress"
+                                                   Click="FilterStatusInProgress_Click" />
+                                            <RadioMenuFlyoutItem Text="Zeige: Completed"
+                                                   Click="FilterStatusCheckFinished_Click" />
+                                            <RadioMenuFlyoutItem Text="Zeige: WaitForCustomer"
+                                                   Click="FilterStatusWaitForCustomer_Click" />
+                                            <RadioMenuFlyoutItem Text="Zeige: Alle"
+                                                   Click="FilterClear_Click" />
+                                        </MenuFlyout>
+                                    </AppBarButton.Flyout>
+                                </AppBarButton>
+                                <AppBarElementContainer
+                                Visibility="Collapsed"
+                                Margin="-16 0 0 0">
+                                    <FontIcon 
+                                        Glyph="&#xE73E;"
+                                        FontSize="12"
+                                        Foreground="Coral"
+                                        VerticalAlignment="Top" />
+                                </AppBarElementContainer>
+                            </CommandBar>
+
+                            <AutoSuggestBox
+                                QueryIcon="Find"
+                                MinWidth="280"
+                                HorizontalAlignment="Stretch"
+                                VerticalAlignment="Center"
+                                Margin="8 0 0 0" 
+                                QuerySubmitted="SearchQuery_Submitted"/>
+                        </StackPanel>
+
                         <TextBlock
                             Grid.Row="8"
                             Grid.Column="3"
-                        Margin="12"
-                        HorizontalAlignment="Right"
-                        VerticalAlignment="Bottom"
-                        FontSize="10"
-                        Foreground="#57FFFFFF"
-                        Text="Created by C3rebro" />
+                            Margin="12"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Bottom"
+                            FontSize="10"
+                            Foreground="#57FFFFFF"
+                            Text="Created by C3rebro" />
                     </Grid>
                 </Border>
             </Border>
@@ -178,7 +221,7 @@
             <TextBlock Text="Auftragsübersicht" Padding="5" VerticalAlignment="Top" Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="2"/>
 
             <ctWinUI:DataGrid 
-                x:Name="ctDG"
+                x:Name="DataGrid"
             Margin="0,8,0,0"
             Grid.Row="2"
             Grid.Column="0"
@@ -195,7 +238,7 @@
             CanUserSortColumns="True"
             SelectionMode="Single"
             ItemsSource="{Binding DataGridItemCollection, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
-            SelectedItem="{Binding SelectedCustomer, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}">
+            SelectedItem="{Binding SelectedCardCheckProcess, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}">
                 <ctWinUI:DataGrid.Resources>
                     <ctWinUIConv:BoolToObjectConverter x:Key="boolean" />
                     <SolidColorBrush x:Key="DataGridColumnHeaderBackgroundBrush" Opacity=".5" />
@@ -210,7 +253,7 @@
                     </Style>
                 </ctWinUI:DataGrid.RowStyle>
                 <ctWinUI:DataGrid.Columns>
-                    <ctWinUI:DataGridTextColumn Binding="{Binding JobNr}" x:Uid="dataGridHeaderJobNr" />
+                    <ctWinUI:DataGridTextColumn Binding="{Binding JobNr}" x:Uid="dataGridHeaderJobNr"/>
                     <ctWinUI:DataGridTextColumn Binding="{Binding ChipNumber}" x:Uid="dataGridHeaderChipNr" />
                     <!--  The Email property contains a URI.  For example "mailto:lucy0@adventure-works.com"  -->
                     <!-- <DataGridHyperlinkColumn
@@ -224,6 +267,24 @@
                     <ctWinUI:DataGridTextColumn Binding="{Binding Date}" Header="Auftragsdatum" />
                     <ctWinUI:DataGridTextColumn Binding="{Binding EditorName}" Header="Prüfer" />
                     <ctWinUI:DataGridTextColumn Binding="{Binding Status}" Header="Auftragsstatus"  />
+                    <ctWinUI:DataGridTemplateColumn Header="PDF Bericht">
+                        <ctWinUI:DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Grid
+                                    PointerEntered="OpenPDFButton_PointerEntered"
+                                    PointerExited="OpenPDFButton_PointerExited"
+                                    Background="Transparent">
+                                    <Button
+                                        Content="PDF öffnen..."
+                                        Visibility="{Binding IsOpenReportButtonVisible, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                                        Command="{Binding OpenSelectedReportCommand, Source={StaticResource HomePageVM}}" 
+                                        CommandParameter="{Binding}">
+                                    </Button>
+                                </Grid>
+
+                            </DataTemplate>
+                        </ctWinUI:DataGridTemplateColumn.CellTemplate>
+                    </ctWinUI:DataGridTemplateColumn>
                     <!-- <DataGridComboBoxColumn Header="Erstelldatum" SelectedItemBinding="{Binding Status}" /> -->
                 </ctWinUI:DataGrid.Columns>
             </ctWinUI:DataGrid>
@@ -235,11 +296,6 @@
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
-                    <!--
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="*" />
-                -->
                 </Grid.ColumnDefinitions>
 
             </Grid>
@@ -253,5 +309,16 @@
             </Grid>
 
         </Grid>
+
+        <ProgressRing 
+                Width="auto"
+                Height="auto"
+                MaxWidth="250"
+                MaxHeight="250"
+                Margin="10"
+                VerticalContentAlignment="Stretch"
+                HorizontalContentAlignment="Stretch"
+                Visibility="{x:Bind HomePageVM.OpenSelectedReportCommand.IsRunning, Converter={StaticResource boolean}, Mode=OneWay}">
+        </ProgressRing>
     </Grid>
 </Page>

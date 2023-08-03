@@ -13,6 +13,19 @@ public class CardCheckProcess : Customer
         get; set; 
     }
 
+    public bool IsSelected
+    {
+        get; set;
+    }
+
+    public string IsOpenReportButtonVisible
+    {
+        get
+        {
+            return (Status == OrderStatus.CheckFinished) ? "Visible" : "Collapsed";
+        }
+    }
+
     public string ReportLanguage 
     { 
         get; set; 

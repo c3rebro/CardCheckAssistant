@@ -25,7 +25,10 @@ namespace CardCheckAssistant.ViewModels;
 public class HomePageViewModel : ObservableObject, IDisposable
 {
     private readonly DispatcherTimer scanDBTimer;
-    private object state;
+    private SQLDBService dbService;
+
+    private FilterOptions currentFilter;
+
     private ObservableCollection<CardCheckProcess> cardCheckProcesses;
 #if DEBUG
     private const string DBNAME = "OT_CardCheck_Test";
@@ -35,6 +38,9 @@ public class HomePageViewModel : ObservableObject, IDisposable
 
     public HomePageViewModel()
     {
+
+        OpenSelectedReportCommand = new AsyncRelayCommand(OpenSelectedReportCommand_Executed);
+
         if (this != null)
         {
 
@@ -43,6 +49,8 @@ public class HomePageViewModel : ObservableObject, IDisposable
         scanDBTimer.Tick += OnTimedEvent;
         scanDBTimer.Interval = new TimeSpan(0,0,10);
         scanDBTimer.Stop();
+
+        currentFilter = FilterOptions.All;
 
         ButtonStartCheckContent = ResourceLoaderService.GetResource("buttonContentStartCheck");
 
@@ -57,7 +65,7 @@ public class HomePageViewModel : ObservableObject, IDisposable
         {
             if (DataGridItemCollection.Any(x => x.Status == OrderStatus.InProgress))
             {
-                SelectedCustomer = DataGridItemCollection.First(x => x.Status == OrderStatus.InProgress);
+                SelectedCardCheckProcess = DataGridItemCollection.First(x => x.Status == OrderStatus.InProgress);
             }
 
         }
@@ -99,6 +107,13 @@ public class HomePageViewModel : ObservableObject, IDisposable
     }
     private string _umberOfChecksText;
 
+    public bool HomePageIsBusy
+    {
+        get => _homePageIsBusy;
+        set => SetProperty(ref _homePageIsBusy, value);
+    }
+    private bool _homePageIsBusy;
+
     public bool StartCheckCanExecute
     {
         get => _startCheckCanExecute;
@@ -116,9 +131,9 @@ public class HomePageViewModel : ObservableObject, IDisposable
     }
     private bool _showAllJobs;
 
-    public CardCheckProcess SelectedCustomer
+    public CardCheckProcess SelectedCardCheckProcess
     {
-        get => _selectedCustomer;
+        get => _selectedCardCheckProcess;
         set {
             if (value == null)
             {
@@ -127,24 +142,30 @@ public class HomePageViewModel : ObservableObject, IDisposable
             }
             else
             {
-                StartCheckCanExecute = true;
+                if(CheckProcessService.CurrentCardCheckProcess != null)
+                {
+                    CheckProcessService.CurrentCardCheckProcess.IsSelected = false;
+                }
+                 
                 CheckProcessService.CurrentCardCheckProcess = value;
+                CheckProcessService.CurrentCardCheckProcess.IsSelected = true;
+
                 switch (CheckProcessService.CurrentCardCheckProcess?.Status)
                 {
-                    case OrderStatus.Created:
+                    case OrderStatus.InProgress:
+                        StartCheckCanExecute = true;
                         ButtonStartCheckContent = "Prüfvorgang starten";
                         break;
-                    case OrderStatus.InProgress:
-                        ButtonStartCheckContent = "Prüfvorgang fortsetzen";
-                        break;
                     default:
+                        StartCheckCanExecute = false;
                         ButtonStartCheckContent = "Vorgang auswählen";
                         break;
                 }
             }
-            SetProperty(ref _selectedCustomer, value); }
+            SetProperty(ref _selectedCardCheckProcess, value);
+        }
     }
-    private CardCheckProcess _selectedCustomer;
+    private CardCheckProcess _selectedCardCheckProcess;
     #endregion
 
     #region ObservableObjects
@@ -156,9 +177,183 @@ public class HomePageViewModel : ObservableObject, IDisposable
     }
     private ObservableCollection<CardCheckProcess> _dataGridItemCollection;
 
+
+    #region Filter
+
+    public enum FilterOptions
+    {
+        All = -1,
+        InProgress = 0,
+        WaitForCustomer = 1,
+        CheckFinisched = 2
+    }
+
+    public ObservableCollection<CardCheckProcess> SortData(string sortBy, bool ascending)
+    {
+        switch (sortBy)
+        {
+            case "Status":
+                if (ascending)
+                {
+                    return new ObservableCollection<CardCheckProcess>(from item in _dataGridItemCollection
+                                                                      orderby item.Status ascending
+                                                                      select item);
+                }
+                else
+                {
+                    return new ObservableCollection<CardCheckProcess>(from item in _dataGridItemCollection
+                                                                      orderby item.Status descending
+                                                                      select item);
+                }
+
+            case "Editor":
+                if (ascending)
+                {
+                    return new ObservableCollection<CardCheckProcess>(from item in _dataGridItemCollection
+                                                                      orderby item.EditorName ascending
+                                                                      select item);
+                }
+                else
+                {
+                    return new ObservableCollection<CardCheckProcess>(from item in _dataGridItemCollection
+                                                                      orderby item.EditorName descending
+                                                                      select item);
+                }
+
+            case "Date":
+                if (ascending)
+                {
+                    return new ObservableCollection<CardCheckProcess>(from item in _dataGridItemCollection
+                                                                      orderby item.Date ascending
+                                                                      select item);
+                }
+                else
+                {
+                    return new ObservableCollection<CardCheckProcess>(from item in _dataGridItemCollection
+                                                                      orderby item.Date descending
+                                                                      select item);
+                }
+
+            case "JobNr":
+                if (ascending)
+                {
+                    return new ObservableCollection<CardCheckProcess>(from item in _dataGridItemCollection
+                                                                      orderby item.JobNr ascending
+                                                                      select item);
+                }
+                else
+                {
+                    return new ObservableCollection<CardCheckProcess>(from item in _dataGridItemCollection
+                                                                      orderby item.JobNr descending
+                                                                      select item);
+                }
+        }
+
+        return _dataGridItemCollection;
+    }
+
+    // Grouping implementation using LINQ
+
+    /*
+    public CollectionViewSource GroupData(string groupBy = "Range")
+    {
+        ObservableCollection<GroupInfoCollection<DataGridDataItem>> groups = new ObservableCollection<GroupInfoCollection<DataGridDataItem>>();
+        var query = from item in _items
+                    orderby item
+                    group item by item.Range into g
+                    select new { GroupName = g.Key, Items = g };
+        if (groupBy == "Parent_Mountain")
+        {
+            query = from item in _items
+                    orderby item
+                    group item by item.Parent_mountain into g
+                    select new { GroupName = g.Key, Items = g };
+        }
+        foreach (var g in query)
+        {
+            GroupInfoCollection<DataGridDataItem> info = new GroupInfoCollection<DataGridDataItem>();
+            info.Key = g.GroupName;
+            foreach (var item in g.Items)
+            {
+                info.Add(item);
+            }
+
+            groups.Add(info);
+        }
+
+        groupedItems = new CollectionViewSource();
+        groupedItems.IsSourceGrouped = true;
+        groupedItems.Source = groups;
+
+        return groupedItems;
+    }
+    */
+
+    public class GroupInfoCollection<T> : ObservableCollection<T>
+    {
+        public object Key { get; set; }
+
+        public new IEnumerator<T> GetEnumerator()
+        {
+            return (IEnumerator<T>)base.GetEnumerator();
+        }
+    }
+
+    public ObservableCollection<CardCheckProcess> FilterData(FilterOptions filterBy)
+    {
+        currentFilter = filterBy;
+
+        _dataGridItemCollection = cardCheckProcesses;
+
+        switch (currentFilter)
+        {
+            case FilterOptions.All:
+                return new ObservableCollection<CardCheckProcess>(_dataGridItemCollection);
+
+            case FilterOptions.WaitForCustomer:
+                return new ObservableCollection<CardCheckProcess>(from item in _dataGridItemCollection
+                                                                  where item.Status == OrderStatus.WaitForCustomer
+                                                                  select item);
+
+            case FilterOptions.CheckFinisched:
+                return new ObservableCollection<CardCheckProcess>(from item in _dataGridItemCollection
+                                                                  where item.Status == OrderStatus.CheckFinished
+                                                                  select item);
+
+            case FilterOptions.InProgress:
+                return new ObservableCollection<CardCheckProcess>(from item in _dataGridItemCollection
+                                                                  where item.Status == OrderStatus.InProgress
+                                                                  select item);
+        }
+
+        return _dataGridItemCollection;
+    }
+
+    public ObservableCollection<CardCheckProcess> SearchData(string queryText)
+    {
+        if(!string.IsNullOrEmpty(queryText))
+        {
+            return new ObservableCollection<CardCheckProcess>(from item in FilterData(currentFilter)
+                                                              where (
+                                                              item.JobNr.Contains(queryText, StringComparison.InvariantCultureIgnoreCase) ||
+                                                              item.CName.Contains(queryText, StringComparison.InvariantCultureIgnoreCase) ||
+                                                              item.EditorName.Contains(queryText, StringComparison.InvariantCultureIgnoreCase) ||
+                                                              item.Date.Contains(queryText, StringComparison.InvariantCultureIgnoreCase))
+                                                              select item);
+        }
+
+        else 
+        { 
+            return cardCheckProcesses; 
+        }
+    }
+    #endregion
+
     #endregion
 
     #region Commands
+
+    public IAsyncRelayCommand OpenSelectedReportCommand { get; }
 
     public ICommand PostPageLoadedCommand => new AsyncRelayCommand(PostPageLoadedCommand_Executed);
     public ICommand InputStringCommand => new AsyncRelayCommand(InputString_Executed);
@@ -166,84 +361,129 @@ public class HomePageViewModel : ObservableObject, IDisposable
     public ICommand NavigateCommand => 
         new RelayCommand(() => 
         {
-            if (SelectedCustomer.Status == OrderStatus.Created)
+            if (SelectedCardCheckProcess.Status == OrderStatus.Created)
             {
                 BeginCardCheck_Executed();
             }
-            else if (SelectedCustomer.Status == OrderStatus.InProgress)
+            else if (SelectedCardCheckProcess.Status == OrderStatus.InProgress)
             {
                 ContinueCardCheck_Executed();
             }
         });
 
-    public async Task PostPageLoadedCommand_Executed()
+    private async Task OpenSelectedReportCommand_Executed()
+    {
+        try
+        {
+            if (CheckProcessService.CurrentCardCheckProcess.Status == OrderStatus.CheckFinished && CheckProcessService.CurrentCardCheckProcess.IsSelected == true)
+            {
+                using SettingsReaderWriter settings = new SettingsReaderWriter();
+
+                settings.ReadSettings();
+
+                var p = new Process();
+
+                await SQLDBService.Instance.GetCardCheckReportFromMSSQLAsync(CheckProcessService.CurrentCardCheckProcess.ID);
+
+                var info = new ProcessStartInfo()
+                {
+                    FileName = settings.DefaultSettings.DefaultProjectOutputPath + "\\" + "downloadedReport.pdf",
+                    Verb = "",
+                    UseShellExecute = true
+                };
+
+                p.StartInfo = info;
+                p.Start();
+
+                await p.WaitForExitAsync();
+            }
+        }
+
+        catch(Exception ex)
+        {
+            LogWriter.CreateLogEntry(ex, Assembly.GetExecutingAssembly().GetName().Name);
+        }
+    }
+
+    private async Task PostPageLoadedCommand_Executed()
     {
         try
         {
             using SettingsReaderWriter settings = new SettingsReaderWriter();
-            using (SQLDBService dBConn = new SQLDBService(DBNAME))
+            dbService = new SQLDBService(
+                settings.DefaultSettings.SelectedDBServerName,
+                settings.DefaultSettings.SelectedDBName,
+                settings.DefaultSettings.SelectedDBUsername,
+                settings.DefaultSettings.SelectedDBUserPwd);
+
+            App.MainRoot.MessageDialogAsync(
+                                "Datenbankverbindung",
+                                "Aufträge werden geladen...", "Abbrechen", "connectWaitMsgDlg");
+
+            HomePageIsBusy= true;
+            // ensure attention of user
+            await Task.Delay(2000);
+
+
+            try
             {
-                App.MainRoot.MessageDialogAsync(
-                    "Datenbankverbindung",
-                    "Aufträge werden geladen...", "Abbrechen", "connectWaitMsgDlg");
+                // Connect to DB Async
+                cardCheckProcesses = await ReadCardChecks();
 
-                // ensure attention of user
-                await Task.Delay(2000);
-
-                
-                try
+                if (cardCheckProcesses != null)
                 {
-                    // Connect to DB Async
-                    cardCheckProcesses = await ReadCardChecks();
-
-                    if (cardCheckProcesses != null)
+                    /*
+                    foreach (var cardCheck in cardCheckProcesses)
                     {
-                        foreach (var cardCheck in cardCheckProcesses)
+                        if (cardCheck.Status != OrderStatus.InProgress)
                         {
-                            if (cardCheck.Status != OrderStatus.InProgress)
-                            {
-                                cardCheck.IsVisible = "Collapsed";
-                            }
-                            else
-                            {
-                                cardCheck.IsVisible = "Collapsed";
-                            }
+                            cardCheck.IsVisible = "Collapsed";
                         }
-
-                        DataGridItemCollection = new ObservableCollection<CardCheckProcess>(cardCheckProcesses.OrderBy(x => x.Status));
+                        else
+                        {
+                            cardCheck.IsVisible = "Collapsed";
+                        }
                     }
+                    */
 
-                    ModalView.Dialogs.Where(x => x.Name == "connectWaitMsgDlg").Single().Hide();
-                    ModalView.Dialogs.Remove(ModalView.Dialogs.Where(x => x.Name == "connectWaitMsgDlg").Single());
+                    if(DataGridItemCollection == null)
+                    {
+                        DataGridItemCollection = new ObservableCollection<CardCheckProcess>(cardCheckProcesses.OrderBy(x => x.Status));
+                    } 
                 }
 
-                //I expect the Delay to be not so sufficient on some machines
-                catch (Exception e)
-                {
-                    LogWriter.CreateLogEntry(e, Assembly.GetExecutingAssembly().GetName().Name);
-                }
-                
+                ModalView.Dialogs.Where(x => x.Name == "connectWaitMsgDlg").Single().Hide();
+                ModalView.Dialogs.Remove(ModalView.Dialogs.Where(x => x.Name == "connectWaitMsgDlg").Single());
+            }
 
-                if (DataGridItemCollection == null)
-                {
-                    await DBConnectFailed_Executed();
-                    WelcomeScreenText = "Verbindungsfehler";
-                    NumberOfChecksText = "Einstellungen überprüfen";
-                }
-                else if (DataGridItemCollection.Count == 0)
-                {
-                    await NoJobFoundInDB_Executed();
-                    WelcomeScreenText = "keine Aufträge";
-                    NumberOfChecksText = "";
-                }
-                else
-                {
-                    WelcomeScreenText = "Aufträge gefunden";
-                    NumberOfChecksText = string.Format("Zahl der neuen Aufträge: {0}",DataGridItemCollection.Where(x => x.Status == OrderStatus.InProgress).Count());
-                }
+            //I expect the Delay to be not so sufficient on some machines
+            catch (Exception e)
+            {
+                LogWriter.CreateLogEntry(e, Assembly.GetExecutingAssembly().GetName().Name);
+            }
+
+
+            if (DataGridItemCollection == null)
+            {
+                await DBConnectFailed_Executed();
+                WelcomeScreenText = "Verbindungsfehler";
+                NumberOfChecksText = "Einstellungen überprüfen";
+            }
+            else if (DataGridItemCollection.Count == 0)
+            {
+                await NoJobFoundInDB_Executed();
+                WelcomeScreenText = "keine Aufträge";
+                NumberOfChecksText = "";
+            }
+            else
+            {
+                WelcomeScreenText = "Aufträge gefunden";
+                NumberOfChecksText = string.Format("Zahl der neuen Aufträge: {0}", DataGridItemCollection.Where(x => x.Status == OrderStatus.InProgress).Count());
             }
 
             scanDBTimer.Start();
+
+            HomePageIsBusy = false;
         }
         catch (Exception e)
         {
@@ -251,7 +491,7 @@ public class HomePageViewModel : ObservableObject, IDisposable
         }
     }
 
-    public async Task NoJobFoundInDB_Executed()
+    private async Task NoJobFoundInDB_Executed()
     {
         await App.MainRoot.MessageDialogAsync(
         "Keine Aufträge",
@@ -262,7 +502,7 @@ public class HomePageViewModel : ObservableObject, IDisposable
         "Happy CardChecking ;-)");
     }
 
-    public async Task DBConnectFailed_Executed()
+    private async Task DBConnectFailed_Executed()
     {
         await App.MainRoot.MessageDialogAsync(
         "Fehler in der Verbindung",
@@ -296,7 +536,7 @@ public class HomePageViewModel : ObservableObject, IDisposable
     
     public void BeginCardCheck_Executed()
     {
-        SelectedCustomer.Status = OrderStatus.InProgress;
+        SelectedCardCheckProcess.Status = OrderStatus.InProgress;
 
         var window = (Application.Current as App)?.Window as MainWindow;
         var navigation = window.Navigation;
@@ -312,7 +552,7 @@ public class HomePageViewModel : ObservableObject, IDisposable
         var window = (Application.Current as App)?.Window as MainWindow;
         var navigation = window.Navigation;
         NavigationViewItem page = navigation.GetNavigationViewItems(typeof(Step1Page)).First();
-        switch (SelectedCustomer.CurrentProcessNumber)
+        switch (SelectedCardCheckProcess.CurrentProcessNumber)
         {
             case 1:
                 page = navigation.GetNavigationViewItems(typeof(Step1Page)).First();
@@ -327,8 +567,6 @@ public class HomePageViewModel : ObservableObject, IDisposable
         
         page.IsEnabled = true;
         navigation.SetCurrentNavigationViewItem(page);
-
-        this.Dispose();
     }
 
     private async Task<ObservableCollection<CardCheckProcess>> ReadCardChecks()
@@ -336,23 +574,14 @@ public class HomePageViewModel : ObservableObject, IDisposable
         using (SettingsReaderWriter settings = new SettingsReaderWriter())
         {
             // Connect to DB Async
+
             if (settings.DefaultSettings.CardCheckUseMSSQL)
             {
-                using (SQLDBService dbService = new SQLDBService(
-                    settings.DefaultSettings.SelectedDBServerName,
-                    settings.DefaultSettings.SelectedDBName,
-                    settings.DefaultSettings.SelectedDBUsername,
-                    settings.DefaultSettings.SelectedDBUserPwd))
-                {
-                    return await dbService.GetCardChecksFromMSSQLAsync();
-                }
+                return await SQLDBService.Instance.GetCardChecksFromMSSQLAsync();
             }
             else
             {
-                using (SQLDBService dbService = new SQLDBService(DBNAME))
-                {
-                    return await dbService.GetCardChecksFromSQLLiteAsync();
-                }
+                return await SQLDBService.Instance.GetCardChecksFromSQLLiteAsync();
             }
         }
     }
@@ -361,8 +590,12 @@ public class HomePageViewModel : ObservableObject, IDisposable
     {
         try
         {
-            cardCheckProcesses = await ReadCardChecks();
-            var selectedID = SelectedCustomer?.ID;
+            //scanDBTimer.Stop();
+            //var t = await SQLDBService.Instance.GetCardCheckReportFromMSSQLAsync("KP-000038-1");
+            
+            var cardCheckProcessesFromDB = await ReadCardChecks();
+
+            var selectedID = SelectedCardCheckProcess?.ID;
 
             if (DataGridItemCollection == null)
             {
@@ -370,23 +603,23 @@ public class HomePageViewModel : ObservableObject, IDisposable
             }
             else
             {
-                if (ShowAllJobs == false)
+                foreach(var item in cardCheckProcessesFromDB)
                 {
-                    DataGridItemCollection = new ObservableCollection<CardCheckProcess>(cardCheckProcesses.OrderBy(x => x.Status).Where(y => y.Status == OrderStatus.InProgress));
-                }
-                else
-                {
-                    DataGridItemCollection = new ObservableCollection<CardCheckProcess>(cardCheckProcesses.OrderBy(x => x.Status));
+                    if(!cardCheckProcesses.Where(x => x.ID == item.ID).Any())
+                    {
+                        cardCheckProcesses = new ObservableCollection<CardCheckProcess>(cardCheckProcessesFromDB.OrderBy(x => x.Status));
+                        DataGridItemCollection = FilterData(currentFilter);
+                    }
                 }
             }
 
             try
             {
-                SelectedCustomer = DataGridItemCollection.Where(y => y.ID == (selectedID ?? "")).Single();
+                SelectedCardCheckProcess = DataGridItemCollection.Where(y => y.ID == (selectedID ?? "")).Single();
             }
             catch 
             {
-                SelectedCustomer = null;
+                SelectedCardCheckProcess = null;
             }
 
             if (cardCheckProcesses != null)
@@ -394,7 +627,7 @@ public class HomePageViewModel : ObservableObject, IDisposable
                 //Notify on new DB entry / on new ID
                 foreach (var cc in cardCheckProcesses.Where(x => x.Status == OrderStatus.InProgress))
                 {
-                    if (!DataGridItemCollection.Where(y => y.Status == OrderStatus.InProgress).Select(x => x.ID).Contains(cc.ID))
+                    if (!cardCheckProcessesFromDB.Where(y => y.Status == OrderStatus.InProgress).Select(x => x.ID).Contains(cc.ID))
                     {
                         ToastWithAvatar.Instance.ScenarioName = "Neue Aufträge gefunden...";
                         ToastWithAvatar.Instance.SendToast(string.Format("Es wurde ein neuer Auftrag gefunden:\n" +
@@ -404,13 +637,13 @@ public class HomePageViewModel : ObservableObject, IDisposable
                     }
                 }
 
-                if (DataGridItemCollection == null)
+                if (cardCheckProcessesFromDB == null)
                 {
                     await DBConnectFailed_Executed();
                     WelcomeScreenText = "Verbindungsfehler";
                     NumberOfChecksText = "Einstellungen überprüfen";
                 }
-                else if (DataGridItemCollection.Count == 0)
+                else if (cardCheckProcessesFromDB.Count == 0)
                 {
                     await NoJobFoundInDB_Executed();
                     WelcomeScreenText = "keine Aufträge";
@@ -419,7 +652,7 @@ public class HomePageViewModel : ObservableObject, IDisposable
                 else
                 {
                     WelcomeScreenText = "Aufträge gefunden";
-                    NumberOfChecksText = string.Format("Zahl der neuen Aufträge: {0}", DataGridItemCollection.Where(x => x.Status == OrderStatus.InProgress).Count());
+                    NumberOfChecksText = string.Format("Zahl der neuen Aufträge: {0}", cardCheckProcessesFromDB.Where(x => x.Status == OrderStatus.InProgress).Count());
                 }
 
             }

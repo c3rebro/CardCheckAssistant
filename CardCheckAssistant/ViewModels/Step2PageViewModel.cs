@@ -16,12 +16,23 @@ using System.Linq;
 using System.Threading;
 
 using Windows.Foundation;
+using Microsoft.UI.Xaml.Controls;
+using CardCheckAssistant.Models;
+using Log4CSharp;
+using System.Reflection;
 
 namespace CardCheckAssistant.ViewModels;
 
 public class Step2PageViewModel : ObservableObject
 {
     private readonly DispatcherTimer scanChipTimer;
+    private ObservableCollection<CardCheckProcess> cardCheckProcesses;
+
+#if DEBUG
+    private const string DBNAME = "OT_CardCheck_Test";
+#else
+    private const string DBNAME = "OT_CardCheck";
+#endif
 
     public Step2PageViewModel()
     {
@@ -114,7 +125,7 @@ public class Step2PageViewModel : ObservableObject
     }
     private bool _goBackCanExecute;
 
-    public string JobNumber => string.Format("JobNr.: {0}; {1}",CheckProcessService.CurrentCardCheckProcess.JobNr, CheckProcessService.CurrentCardCheckProcess.CName);
+    public string JobNumber => string.Format("JobNr.: {0}; ChipNummer: {1}; Kunde: {2}", CheckProcessService.CurrentCardCheckProcess.JobNr, CheckProcessService.CurrentCardCheckProcess.ChipNumber, CheckProcessService.CurrentCardCheckProcess.CName);
     public string ReportLanguage => string.Format("{0}", CheckProcessService.CurrentCardCheckProcess.ReportLanguage);
 
     #region Commands
@@ -128,6 +139,8 @@ public class Step2PageViewModel : ObservableObject
 
     private async Task ExecuteRFIDGearCommand()
     {
+        await Task.Delay(2000);
+
         using SettingsReaderWriter settings = new SettingsReaderWriter();
         settings.ReadSettings();
 
@@ -211,7 +224,7 @@ public class Step2PageViewModel : ObservableObject
                     "Ergebnis: Die Karte sollte programmierbar sein...",
                     string.Format("Bitte nimm den Chip vom Leser und verwende die Berichte um die Korrekten Einstellungen für die LSM zu finden.\n\nHinweis: Dieses Fenster schließt sich erst, wenn Du den Chip vom Leser nimmst. "));
                 */
-                await Task.Delay(2000);
+                await ChipIsRemoved();
 
                 scanChipTimer.Start();
             }
@@ -225,6 +238,25 @@ public class Step2PageViewModel : ObservableObject
             //LogWriter.CreateLogEntry(string.Format("{0}: {1}; {2}", DateTime.Now, e.Message, e.InnerException != null ? e.InnerException.Message : ""), FacilityName);
 
             return;
+        }
+    }
+
+    private async Task ChipIsRemoved()
+    {
+        try
+        {
+            using (ReaderService readerService = new ReaderService())
+            {
+                while (readerService.GenericChip != null)
+                {
+                    await readerService.ReadChipPublic();
+                }
+            }
+        } 
+        
+        catch (Exception e)
+        {
+
         }
     }
 
@@ -275,6 +307,8 @@ public class Step2PageViewModel : ObservableObject
 
     public async Task PostPageLoadedCommand_Executed()
     {
+        scanChipTimer.Stop();
+
         await ExecuteRFIDGearCommand();
 
         NextStepCanExecute = true;
@@ -324,11 +358,32 @@ public class Step2PageViewModel : ObservableObject
 
     private async Task NavigateNextStepCommand_Executed()
     {
+        using SettingsReaderWriter settings = new SettingsReaderWriter();
+        settings.ReadSettings();
+
         scanChipTimer.Stop();
         var window = (Application.Current as App)?.Window as MainWindow;
         var navigation = window.Navigation;
-        var step3Page = navigation.GetNavigationViewItems(typeof(Step3Page)).First();
-        navigation.SetCurrentNavigationViewItem(step3Page);
+        NavigationViewItem nextpage;
+        if (TextBlockCheckFinishedAndResultIsSuppOnlyIsVisible || TextBlockCheckFinishedAndResultIsNotSuppIsVisible )
+        {
+            nextpage = navigation.GetNavigationViewItems(typeof(HomePage)).First();
+
+            List<CardCheckProcess> cardChecks = SQLDBService.Instance.CardChecks;
+
+
+            var fileName = settings.DefaultSettings.DefaultProjectOutputPath + "\\" + CheckProcessService.CurrentCardCheckProcess.JobNr + "-" + CheckProcessService.CurrentCardCheckProcess.ChipNumber + ".pdf" ;
+            var fileStream = File.Open(fileName, FileMode.Open);
+
+            await SQLDBService.Instance.InsertData(CheckProcessService.CurrentCardCheckProcess.ID, fileStream);
+            await SQLDBService.Instance.InsertData(CheckProcessService.CurrentCardCheckProcess.ID, OrderStatus.CheckFinished.ToString());
+        }
+        else
+        {
+            nextpage = navigation.GetNavigationViewItems(typeof(Step3Page)).First();
+        }
+        navigation.SetCurrentNavigationViewItem(nextpage);
+        nextpage.IsEnabled = true;
     }
 
     private void NavigateBackCommand_Executed()
@@ -339,5 +394,4 @@ public class Step2PageViewModel : ObservableObject
         var step1Page = navigation.GetNavigationViewItems(typeof(Step1Page)).First();
         navigation.SetCurrentNavigationViewItem(step1Page);
     }
-
 }

@@ -24,6 +24,8 @@
     <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
     <HoursBetweenUpdateChecks>0</HoursBetweenUpdateChecks>
     <DefaultLanguage>de-DE</DefaultLanguage>
+    <ApplicationIcon>Assets\AppIco.ico</ApplicationIcon>
+    <PackageIcon>StoreLogo.scale-400.png</PackageIcon>
   </PropertyGroup>
   <ItemGroup>
     <Compile Remove="App.xaml.Settings.cs" />
@@ -31,6 +33,11 @@
     <Compile Remove="Views\Step1Page - Kopieren.xaml.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Remove="Assets\BadgeLogo.scale-100.png" />
+    <Content Remove="Assets\BadgeLogo.scale-125.png" />
+    <Content Remove="Assets\BadgeLogo.scale-150.png" />
+    <Content Remove="Assets\BadgeLogo.scale-200.png" />
+    <Content Remove="Assets\BadgeLogo.scale-400.png" />
     <Content Remove="Assets\Flag.png" />
     <Content Remove="Assets\FluentIconsSettings.png" />
     <Content Remove="Assets\LargeTile.scale-100.png" />
@@ -62,7 +69,6 @@
     <Content Remove="Assets\SquareLogo.scale-400.png" />
     <Content Remove="Assets\SquareLogo.targetsize-16.png" />
     <Content Remove="Assets\SquareLogo.targetsize-24.png" />
-    <Content Remove="Assets\SquareLogo.targetsize-256.png" />
     <Content Remove="Assets\SquareLogo.targetsize-32.png" />
     <Content Remove="Assets\SquareLogo.targetsize-48.png" />
     <Content Remove="Assets\Wide310x150Logo.scale-200.png" />
@@ -74,6 +80,7 @@
     <None Remove="Assets\Home.png" />
     <None Remove="Assets\S1.xcf" />
     <None Remove="Assets\S2.xcf" />
+    <None Remove="Assets\SquareLogo.targetsize-256.png" />
     <None Remove="MainWindow.xaml" />
     <None Remove="Shell.xaml" />
     <None Remove="Views\AboutPage.xaml" />
@@ -94,6 +101,7 @@
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.0.0" />
     <PackageReference Include="CommunityToolkit.WinUI" Version="7.1.2" />
     <PackageReference Include="CommunityToolkit.WinUI.UI" Version="7.1.2" />
+    <PackageReference Include="CommunityToolkit.WinUI.UI.Behaviors" Version="7.1.2" />
     <PackageReference Include="CommunityToolkit.WinUI.UI.Controls.DataGrid" Version="7.1.2" />
     <PackageReference Include="GemBox.Pdf" Version="17.0.1300" />
     <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.2.230118.102" />
@@ -219,6 +227,10 @@
   <ItemGroup>
     <None Update="Assets\FluentIconsSettings.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Assets\StoreLogo.scale-400.png">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
     </None>
   </ItemGroup>
   <ItemGroup>

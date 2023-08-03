@@ -124,6 +124,6 @@
     <value>Chipnummer</value>
   </data>
   <data name="dataGridHeaderJobNr.Header" xml:space="preserve">
-    <value>Jobnummer</value>
+    <value>Jobnummers</value>
   </data>
 </root>

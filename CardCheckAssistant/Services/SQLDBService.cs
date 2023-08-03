@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Data;
 using System.Data.SqlClient;
 using System.Data.SQLite;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using CardCheckAssistant.Models;
+using Elatec.NET;
 using Log4CSharp;
 
 namespace CardCheckAssistant.Services;
@@ -14,6 +16,10 @@ namespace CardCheckAssistant.Services;
 public class SQLDBService : IDisposable
 {
     public bool IsConnected { get; private set; }
+    public List<CardCheckProcess> CardChecks;
+
+    private static readonly object syncRoot = new object();
+    private static SQLDBService instance;
 
     private readonly string? serverName;
     private readonly string dbName;
@@ -55,7 +61,27 @@ public class SQLDBService : IDisposable
         "RG_SAK VARCHAR(25)",
         "RG_L4Version VARCHAR(25)"};
 #endif
-   
+
+    public static SQLDBService Instance
+    {
+        get
+        {
+            lock (SQLDBService.syncRoot)
+            {
+                if (instance == null)
+                {
+                    instance = new SQLDBService(OMNIDBNAME);
+                    return instance;
+
+                }
+                else
+                {
+                    return instance;
+                }
+            }
+        }
+    }
+
     public SQLDBService(string _dbName)
     {
         dbName = _dbName;
@@ -67,6 +93,8 @@ public class SQLDBService : IDisposable
         dbName = _dbName;
         usr = _userID;
         pwd = _pwd;
+
+        instance = this;
     }
 
     public async Task CreateSqlLiteDBandTableAsync()
@@ -135,7 +163,7 @@ public class SQLDBService : IDisposable
         try
         {
             CardCheckProcess cardCheckProcess;
-            List<CardCheckProcess> cardChecks = new List<CardCheckProcess>();
+            CardChecks = new List<CardCheckProcess>();
 
             SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder();
             builder.DataSource = serverName;
@@ -144,7 +172,6 @@ public class SQLDBService : IDisposable
             builder.ConnectRetryInterval = 10;
             builder.ConnectRetryCount = 2;
             builder.ConnectTimeout = 30;
-            builder.PacketSize = 512;
             builder.ApplicationName = serverName.Split('\\')[1];
 
             using (SqlConnection sqlConnection = new SqlConnection(builder.ConnectionString))
@@ -159,7 +186,7 @@ public class SQLDBService : IDisposable
 
                     using (SqlCommand sql_cmd = sqlConnection.CreateCommand())
                     {
-                        sql_cmd.CommandText = "SELECT * FROM " + OMNITABLENAME;
+                        sql_cmd.CommandText = "SELECT [CC-ID], [CC-JobNumber], [CC-CardNumber], [CC-CreationDate], [CC-Customername], [CC-EditorName], [CC-Status] FROM " + OMNITABLENAME;
 
                         using (SqlDataReader sql_datareader = await sql_cmd.ExecuteReaderAsync())
                         {
@@ -174,11 +201,11 @@ public class SQLDBService : IDisposable
                                         ChipNumber = await sql_datareader.IsDBNullAsync(2) ? null : sql_datareader.GetString(2),
                                         Date = await sql_datareader.IsDBNullAsync(3) ? null : sql_datareader.GetString(3),
 
-                                        CName = await sql_datareader.IsDBNullAsync(5) ? null : sql_datareader.GetString(5),
-                                        EditorName = await sql_datareader.IsDBNullAsync(6) ? null : sql_datareader.GetString(6),
-                                        Status = (OrderStatus)Enum.Parse(typeof(OrderStatus), await sql_datareader.IsDBNullAsync(8) ? null : sql_datareader.GetString(8))
+                                        CName = await sql_datareader.IsDBNullAsync(5) ? null : sql_datareader.GetString(4),
+                                        EditorName = await sql_datareader.IsDBNullAsync(6) ? null : sql_datareader.GetString(5),
+                                        Status = (OrderStatus)Enum.Parse(typeof(OrderStatus), await sql_datareader.IsDBNullAsync(6) ? null : sql_datareader.GetString(6))
                                     };
-                                    cardChecks.Add(cardCheckProcess);
+                                    CardChecks.Add(cardCheckProcess);
                                 }
                                 catch(Exception ex)
                                 {
@@ -187,7 +214,7 @@ public class SQLDBService : IDisposable
                             }
                         }
                     }
-                    return new ObservableCollection<CardCheckProcess>(cardChecks);
+                    return new ObservableCollection<CardCheckProcess>(CardChecks);
                 }
             }
         }
@@ -254,6 +281,71 @@ public class SQLDBService : IDisposable
         return null;
     }
 
+    public async Task GetCardCheckReportFromMSSQLAsync(string id)
+    {
+        try
+        {
+            using SettingsReaderWriter settings = new SettingsReaderWriter();
+            settings.ReadSettings();
+
+            string tmpFilePath = settings.DefaultSettings.DefaultProjectOutputPath + "\\" + "downloadedReport.pdf";
+
+            SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder();
+            builder.DataSource = serverName;
+            builder.IntegratedSecurity = true;
+            builder.InitialCatalog = dbName;
+            builder.ConnectRetryInterval = 10;
+            builder.ConnectRetryCount = 2;
+            builder.ConnectTimeout = 30;
+            builder.ApplicationName = serverName.Split('\\')[1];
+
+            using (SqlConnection sqlConnection = new SqlConnection(builder.ConnectionString))
+            {
+                if (sqlConnection != null)
+                {
+                    if (sqlConnection.State == System.Data.ConnectionState.Closed)
+                    {
+                        await sqlConnection.OpenAsync();
+                        IsConnected = true;
+                    }
+
+                    using (SqlCommand sql_cmd = sqlConnection.CreateCommand())
+                    {
+                        sql_cmd.CommandText = "SELECT [CC-Report] FROM " + OMNITABLENAME + " Where [CC-ID] = @id";
+
+                        sql_cmd.Parameters.AddWithValue("@id", id);
+
+                        // The reader needs to be executed with the SequentialAccess behavior to enable network streaming
+                        // Otherwise ReadAsync will buffer the entire BLOB into memory which can cause scalability issues or even OutOfMemoryExceptions
+                        using (SqlDataReader reader = await sql_cmd.ExecuteReaderAsync(CommandBehavior.SequentialAccess))
+                        {
+                            if (await reader.ReadAsync())
+                            {
+                                if (!(await reader.IsDBNullAsync(0)))
+                                {
+                                    using (FileStream file = new FileStream(tmpFilePath, FileMode.Create, FileAccess.Write))
+                                    {
+                                        using (Stream data = reader.GetStream(0))
+                                        {
+
+                                            // Asynchronously copy the stream from the server to the file we just created
+                                            await data.CopyToAsync(file);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            LogWriter.CreateLogEntry(ex, Assembly.GetExecutingAssembly().GetName().Name);
+            IsConnected = false;
+        }
+    }
+
     private async Task CreateTableAsync(SQLiteConnection conn, string tableName, string[] columns)
     {
         try
@@ -286,6 +378,106 @@ public class SQLDBService : IDisposable
         catch (Exception e)
         {
             LogWriter.CreateLogEntry(e, Assembly.GetExecutingAssembly().GetName().Name);
+        }
+    }
+
+    public async Task InsertData(string key, FileStream fs)
+    {
+        try
+        {
+            CardCheckProcess cardCheckProcess;
+            CardChecks = new List<CardCheckProcess>();
+
+            SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder();
+            builder.DataSource = serverName;
+            builder.IntegratedSecurity = true;
+            builder.InitialCatalog = dbName;
+            builder.ConnectRetryInterval = 10;
+            builder.ConnectRetryCount = 2;
+            builder.ConnectTimeout = 30;
+            builder.ApplicationName = serverName.Split('\\')[1];
+
+            using (SqlConnection sqlConnection = new SqlConnection(builder.ConnectionString))
+            {
+                if (sqlConnection != null)
+                {
+                    if (sqlConnection.State == System.Data.ConnectionState.Closed)
+                    {
+                        await sqlConnection.OpenAsync();
+                        IsConnected = true;
+                    }
+
+                    using (SqlCommand sql_cmd = sqlConnection.CreateCommand())
+                    {
+                        sql_cmd.CommandText = "UPDATE " + OMNITABLENAME + " SET [CC-Report] = @data Where [CC-ID] = @id";
+
+                        sql_cmd.Parameters.AddWithValue("@id", key);
+
+                        // Add a parameter which uses the FileStream we just opened
+                        // Size is set to -1 to indicate "MAX"
+                        sql_cmd.Parameters.Add("@data", SqlDbType.Binary, -1).Value = fs;
+
+                        // Send the data to the server asynchronously
+                        await sql_cmd.ExecuteScalarAsync();
+
+                        sqlConnection.Close();
+                    }
+
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            LogWriter.CreateLogEntry(ex, Assembly.GetExecutingAssembly().GetName().Name);
+            IsConnected = false;
+        }
+    }
+
+    public async Task InsertData(string key, string value)
+    {
+        try
+        {
+            CardCheckProcess cardCheckProcess;
+            CardChecks = new List<CardCheckProcess>();
+
+            SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder();
+            builder.DataSource = serverName;
+            builder.IntegratedSecurity = true;
+            builder.InitialCatalog = dbName;
+            builder.ConnectRetryInterval = 10;
+            builder.ConnectRetryCount = 2;
+            builder.ConnectTimeout = 30;
+            builder.PacketSize = 512;
+            builder.ApplicationName = serverName.Split('\\')[1];
+
+            using (SqlConnection sqlConnection = new SqlConnection(builder.ConnectionString))
+            {
+                if (sqlConnection != null)
+                {
+                    if (sqlConnection.State == System.Data.ConnectionState.Closed)
+                    {
+                        await sqlConnection.OpenAsync();
+                        IsConnected = true;
+                    }
+
+                    using (SqlCommand sql_cmd = sqlConnection.CreateCommand())
+                    {
+                        sql_cmd.CommandText = string.Format("UPDATE {0} SET [CC-Status] = @status Where [CC-ID] = @id",OMNITABLENAME);
+
+                        sql_cmd.Parameters.AddWithValue("@id", key);
+                        sql_cmd.Parameters.AddWithValue("@status", value);
+
+                        sql_cmd.ExecuteNonQuery();
+                        sqlConnection.Close();
+                    }
+                    
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            LogWriter.CreateLogEntry(ex, Assembly.GetExecutingAssembly().GetName().Name);
+            IsConnected = false;
         }
     }
 

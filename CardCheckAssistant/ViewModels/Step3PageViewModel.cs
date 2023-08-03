@@ -117,11 +117,15 @@ public class Step3PageViewModel : ObservableObject
             FileName = settings.DefaultSettings.DefaultRFIDGearExePath,
             Verb = "",
             Arguments = string.Format(
-                "REPORTTARGETPATH=" + "\"" + "{0}" + "\" " + 
-                "$JOBNUMBER=" + "\"" + "{1}" + "\" " +
-                "$CHIPNUMBER=" + "\"" + "{2}" + "\" " +
-                "{3}",
+                "REPORTTARGETPATH=" + "\"" + "{0}" + "\" " +
+                "REPORTTEMPLATEFILE=" + "\"" + "{1}" + "\" " +
+                "CUSTOMPROJECTFILE=" + "\"" + "{2}" + "\" " +
+                "$JOBNUMBER=" + "\"" + "{3}" + "\" " +
+                "$CHIPNUMBER=" + "\"" + "{4}" + "\" " +
+                "{5}",
+                settings.DefaultSettings.DefaultProjectOutputPath + "\\" + CheckProcessService.CurrentCardCheckProcess.JobNr + "-" + CheckProcessService.CurrentCardCheckProcess.ChipNumber + "_final.pdf",
                 settings.DefaultSettings.DefaultProjectOutputPath + "\\" + CheckProcessService.CurrentCardCheckProcess.JobNr + "-" + CheckProcessService.CurrentCardCheckProcess.ChipNumber + ".pdf",
+                settings.DefaultSettings.LastUsedCustomProjectPath,
                 CheckProcessService.CurrentCardCheckProcess.JobNr,
                 CheckProcessService.CurrentCardCheckProcess.ChipNumber,
                 settings.DefaultSettings.AutoLoadProjectOnStart ? "AUTORUN=1" : "AUTORUN=0"),

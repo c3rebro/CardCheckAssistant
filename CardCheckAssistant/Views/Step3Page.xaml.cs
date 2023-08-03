@@ -13,7 +13,7 @@ public sealed partial class Step3Page : Page
         InitializeComponent();
     }
 
-    public Step2PageViewModel ViewModel => DataContext as Step2PageViewModel;
+    public Step3PageViewModel ViewModel => DataContext as Step3PageViewModel;
 
     private void Page_Loaded(object sender, RoutedEventArgs e)
     {
