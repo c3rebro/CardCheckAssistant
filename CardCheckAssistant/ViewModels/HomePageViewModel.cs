@@ -86,6 +86,14 @@ public class HomePageViewModel : ObservableObject, IDisposable
     }
 
     #region Properties
+    public string HomePageVersionString
+    {
+        get {
+            Assembly assembly = Assembly.GetExecutingAssembly();
+            FileVersionInfo fvi = FileVersionInfo.GetVersionInfo(assembly.Location);
+            return string.Format("CardCheckAssistant                  Version: {0}",fvi.FileVersion); }
+    }
+
     public string ButtonStartCheckContent
     {
         get => _buttonStartCheckContent;
@@ -375,7 +383,7 @@ public class HomePageViewModel : ObservableObject, IDisposable
     {
         try
         {
-            if (CheckProcessService.CurrentCardCheckProcess.Status == OrderStatus.CheckFinished && CheckProcessService.CurrentCardCheckProcess.IsSelected == true)
+            if ((CheckProcessService.CurrentCardCheckProcess.Status == OrderStatus.CheckFinished || CheckProcessService.CurrentCardCheckProcess.Status == OrderStatus.WaitForCustomer) && CheckProcessService.CurrentCardCheckProcess.IsSelected == true)
             {
                 using SettingsReaderWriter settings = new SettingsReaderWriter();
 

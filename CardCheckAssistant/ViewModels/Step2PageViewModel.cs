@@ -46,14 +46,25 @@ public class Step2PageViewModel : ObservableObject
         TextBlockCheckFinishedAndResultIsSuppOnlyIsVisible = false;
         TextBlockCheckFinishedAndResultIsSuppAndProgIsVisible = false;
         TextBlockCheckFinishedAndResultIsNotSuppIsVisible = false;
+        TextBlockCheckFinishedAndResultIsMissingPICCKeyIsVisible = false;
+        TextBlockCheckFinishedAndResultIsNotEnoughMemoryIsVisible = false;
 
         TextBlockCheckNotYetFinishedIsVisible = true;
         TextBlockCheckFinishedIsVisible = false;
         HyperlinkButtonReportIsVisible = false;
         ReaderHasNoChipInfoBarIsVisible = false;
 
+        SelectedCustomerRequestTemplate = CustomerRequestTemplate.NA;
+
         NextStepButtonContent = "Weiter";
     }
+
+    public CustomerRequestTemplate SelectedCustomerRequestTemplate
+    {
+        get => _selectedCustomerRequestTemplate;
+        set => SetProperty(ref _selectedCustomerRequestTemplate, value);
+    }
+    private CustomerRequestTemplate _selectedCustomerRequestTemplate;
 
     public string NextStepButtonContent
     {
@@ -68,6 +79,21 @@ public class Step2PageViewModel : ObservableObject
         set => SetProperty(ref _readerHasNoChipInfoBarIsVisible, value);
     }
     private bool _readerHasNoChipInfoBarIsVisible;
+    
+    public bool TextBlockCheckFinishedAndResultIsNotEnoughMemoryIsVisible
+    {
+        get => _textBlockCheckFinishedAndResultIsNotEnoughMemoryIsVisible;
+        set => SetProperty(ref _textBlockCheckFinishedAndResultIsNotEnoughMemoryIsVisible, value);
+    }
+    private bool _textBlockCheckFinishedAndResultIsNotEnoughMemoryIsVisible;
+
+
+    public bool TextBlockCheckFinishedAndResultIsMissingPICCKeyIsVisible
+    {
+        get => _textBlockCheckFinishedAndResultIsMissingPICCKeyIsVisible;
+        set => SetProperty(ref _textBlockCheckFinishedAndResultIsMissingPICCKeyIsVisible, value);
+    }
+    private bool _textBlockCheckFinishedAndResultIsMissingPICCKeyIsVisible;
 
     public bool TextBlockCheckFinishedAndResultIsNotSuppIsVisible
     {
@@ -183,6 +209,27 @@ public class Step2PageViewModel : ObservableObject
 
             var supported = reportReader.GetReportField("CheckBox_isChipSuppYes") != null && reportReader.GetReportField("CheckBox_isChipSuppYes") == "Yes";
             var programmable = reportReader.GetReportField("CheckBox_ChipCanUseYes") != null && reportReader.GetReportField("CheckBox_ChipCanUseYes") == "Yes";
+            var amountOfFreeMemory = 0;
+            var notEnoughFreeMemory = true;
+
+            if (reportReader.GetReportField("TextBox_Detail_FreeMem_1") != null)
+            {
+                if (int.TryParse(reportReader.GetReportField("TextBox_Detail_FreeMem_1").Split(' ')[0], out amountOfFreeMemory))
+                {
+                    if(amountOfFreeMemory >= 225) 
+                    { 
+                        notEnoughFreeMemory = false;
+                    }
+                    else
+                    {
+                        notEnoughFreeMemory = true;
+                    }
+                }
+                else
+                {
+                    amountOfFreeMemory = -1;
+                }    
+            } 
 
             TextBlockCheckNotYetFinishedIsVisible = false;
 
@@ -199,16 +246,26 @@ public class Step2PageViewModel : ObservableObject
                 TextBlockCheckFinishedIsVisible = true;
             }
 
-            else if (supported && !programmable)
+            else if (supported && !programmable && !notEnoughFreeMemory)
             {
-                Debug.WriteLine("supported only");
+                Debug.WriteLine("supported but missing info e.g. key");
 
                 TextBlockCheckFinishedAndResultIsSuppOnlyIsVisible = true;
+                TextBlockCheckFinishedAndResultIsMissingPICCKeyIsVisible = true;
                 HyperlinkButtonReportIsVisible = true;
 
                 NextStepButtonContent = "Fertigstellen";
+            }
 
-                TextBlockCheckFinishedIsVisible = true;
+            else if (supported && !programmable && notEnoughFreeMemory || (supported && programmable && notEnoughFreeMemory))
+            {
+                Debug.WriteLine("supported but no memory left");
+
+                TextBlockCheckFinishedAndResultIsSuppOnlyIsVisible = true;
+                TextBlockCheckFinishedAndResultIsNotEnoughMemoryIsVisible = true;
+                HyperlinkButtonReportIsVisible = true;
+
+                NextStepButtonContent = "Fertigstellen";
             }
 
             else if (supported && programmable)
@@ -217,7 +274,7 @@ public class Step2PageViewModel : ObservableObject
 
                 TextBlockCheckFinishedAndResultIsSuppAndProgIsVisible = true;
                 HyperlinkButtonReportIsVisible = true;
-
+                NextStepCanExecute = false;
                 /*
                 await App.MainRoot.MessageDialogAsync(
                     "Prüfung erfolgreich abgeschlossen.\n" +
@@ -226,6 +283,7 @@ public class Step2PageViewModel : ObservableObject
                 */
                 await ChipIsRemoved();
 
+                NextStepCanExecute = true;
                 scanChipTimer.Start();
             }
 
@@ -365,14 +423,29 @@ public class Step2PageViewModel : ObservableObject
         var window = (Application.Current as App)?.Window as MainWindow;
         var navigation = window.Navigation;
         NavigationViewItem nextpage;
-        if (TextBlockCheckFinishedAndResultIsSuppOnlyIsVisible || TextBlockCheckFinishedAndResultIsNotSuppIsVisible )
+
+        if (TextBlockCheckFinishedAndResultIsSuppOnlyIsVisible)
+        {
+            nextpage = navigation.GetNavigationViewItems(typeof(HomePage)).First();
+
+            List<CardCheckProcess> cardChecks = SQLDBService.Instance.CardChecks;
+
+            var fileName = settings.DefaultSettings.DefaultProjectOutputPath + "\\" + CheckProcessService.CurrentCardCheckProcess.JobNr + "-" + CheckProcessService.CurrentCardCheckProcess.ChipNumber + ".pdf" ;
+            var fileStream = File.Open(fileName, FileMode.Open);
+
+            await SQLDBService.Instance.InsertData(CheckProcessService.CurrentCardCheckProcess.ID, fileStream);
+
+            await SQLDBService.Instance.InsertData(CheckProcessService.CurrentCardCheckProcess.ID, OrderStatus.RequestCustomerFeedback.ToString());
+        }
+
+        else if (TextBlockCheckFinishedAndResultIsNotSuppIsVisible)
         {
             nextpage = navigation.GetNavigationViewItems(typeof(HomePage)).First();
 
             List<CardCheckProcess> cardChecks = SQLDBService.Instance.CardChecks;
 
 
-            var fileName = settings.DefaultSettings.DefaultProjectOutputPath + "\\" + CheckProcessService.CurrentCardCheckProcess.JobNr + "-" + CheckProcessService.CurrentCardCheckProcess.ChipNumber + ".pdf" ;
+            var fileName = settings.DefaultSettings.DefaultProjectOutputPath + "\\" + CheckProcessService.CurrentCardCheckProcess.JobNr + "-" + CheckProcessService.CurrentCardCheckProcess.ChipNumber + ".pdf";
             var fileStream = File.Open(fileName, FileMode.Open);
 
             await SQLDBService.Instance.InsertData(CheckProcessService.CurrentCardCheckProcess.ID, fileStream);

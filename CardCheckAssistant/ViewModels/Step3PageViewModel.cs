@@ -16,6 +16,8 @@ using System.Linq;
 using System.Threading;
 using System.Windows.Threading;
 using Windows.Foundation;
+using CardCheckAssistant.Models;
+using Microsoft.UI.Xaml.Controls;
 
 namespace CardCheckAssistant.ViewModels;
 
@@ -33,6 +35,9 @@ public class Step3PageViewModel : ObservableObject
         HyperlinkButtonReportIsVisible = false;
 
         NextStepButtonContent = "Weiter";
+
+        NavigateNextStepCommand = new AsyncRelayCommand(NavigateNextStepCommand_Executed);
+        RunRFiDGearCommand = new AsyncRelayCommand(ExecuteRFIDGearCommand);
     }
 
     public string NextStepButtonContent
@@ -95,7 +100,9 @@ public class Step3PageViewModel : ObservableObject
     public string ReportLanguage => string.Format("{0}", CheckProcessService.CurrentCardCheckProcess.ReportLanguage);
 
     #region Commands
-    public ICommand NavigateNextStepCommand => new AsyncRelayCommand(NavigateNextStepCommand_Executed);
+    public IAsyncRelayCommand NavigateNextStepCommand { get; }
+    public IAsyncRelayCommand RunRFiDGearCommand { get; }
+
     public ICommand NavigateBackCommand => new RelayCommand(NavigateBackCommand_Executed);
 
     public ICommand PostPageLoadedCommand => new AsyncRelayCommand(PostPageLoadedCommand_Executed);
@@ -171,23 +178,18 @@ public class Step3PageViewModel : ObservableObject
                 HyperlinkButtonReportIsVisible = true;
 
                 await App.MainRoot.MessageDialogAsync(
-                    "Prüfung erfolgreich abgeschlossen.\n" +
-                    "Ergebnis: Die Karte sollte programmierbar sein...",
-                    string.Format("Der Test hat ergeben, dass die Karte in der LSM programmierbar sein sollte.\n" +
-                    "Bitte nimm die Karte vom Leser und führe einen Test mit der LSM durch.\n" +
-                    "Verwende hierfür die Daten aus dem Bericht, der soeben erstellt wurde." +
+                    "Prüfung erfolgreich abgeschlossen.\n",
+                    string.Format("Die Prüfung ist hiermit abgeschlossen.\n" +
+                    "Bitte nimm die Karte vom Leser und bereite sie für den Rückversand vor.\n" +
                     "\n" +
-                    "WICHTIG: \n" +
-                    "Kehre nach dem Test hierher zurück um den freien Speicher aus zu lesen.\n" +
-                    "Alles klar? Dann schließe bitte dieses Fenster und fahre mit der LSM fort."),
-                    "Schliessen");
+                    "Hinweis: \n" +
+                    "Mit dem Klick auf \"Fertigstellen\" wird das Ergebnis des Berichtes\n" +
+                    "Automatisch an den im Auftrag hinterlegten Ansprechpartner versendet."),
+                    "OK");
 
                 TextBlockCheckFinishedAndResultIsSuppAndProgIsVisible = true;
 
             }
-
-
-            //TextBlockCheckFinishedIsVisible = true;
         }
 
         catch (Exception e)
@@ -200,7 +202,7 @@ public class Step3PageViewModel : ObservableObject
 
     public async Task PostPageLoadedCommand_Executed()
     {
-        await ExecuteRFIDGearCommand();
+        await RunRFiDGearCommand.ExecuteAsync(null);
 
         NextStepCanExecute = true;
     }
@@ -249,10 +251,24 @@ public class Step3PageViewModel : ObservableObject
 
     private async Task NavigateNextStepCommand_Executed()
     {
+        using SettingsReaderWriter settings = new SettingsReaderWriter();
+        settings.ReadSettings();
+
         var window = (Application.Current as App)?.Window as MainWindow;
         var navigation = window.Navigation;
-        var homePage = navigation.GetNavigationViewItems(typeof(HomePage)).First();
-        navigation.SetCurrentNavigationViewItem(homePage);
+        NavigationViewItem nextpage;
+        nextpage = navigation.GetNavigationViewItems(typeof(HomePage)).First();
+
+        List<CardCheckProcess> cardChecks = SQLDBService.Instance.CardChecks;
+
+        var fileName = settings.DefaultSettings.DefaultProjectOutputPath + "\\" + CheckProcessService.CurrentCardCheckProcess.JobNr + "-" + CheckProcessService.CurrentCardCheckProcess.ChipNumber + "_final.pdf";
+        var fileStream = File.Open(fileName, FileMode.Open);
+
+        await SQLDBService.Instance.InsertData(CheckProcessService.CurrentCardCheckProcess.ID, fileStream);
+        await SQLDBService.Instance.InsertData(CheckProcessService.CurrentCardCheckProcess.ID, OrderStatus.CheckFinished.ToString());
+
+        navigation.SetCurrentNavigationViewItem(nextpage);
+        nextpage.IsEnabled = true;
     }
 
     private void NavigateBackCommand_Executed()

@@ -25,7 +25,9 @@
     <HoursBetweenUpdateChecks>0</HoursBetweenUpdateChecks>
     <DefaultLanguage>de-DE</DefaultLanguage>
     <ApplicationIcon>Assets\AppIco.ico</ApplicationIcon>
-    <PackageIcon>StoreLogo.scale-400.png</PackageIcon>
+    <PackageIcon>Assets\StoreLogo.scale-400.png</PackageIcon>
+    <FileVersion>1.0.16</FileVersion>
+    <AssemblyVersion>1.0.16</AssemblyVersion>
   </PropertyGroup>
   <ItemGroup>
     <Compile Remove="App.xaml.Settings.cs" />

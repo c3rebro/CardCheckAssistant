@@ -8,19 +8,19 @@ using System.ComponentModel;
 namespace CardCheckAssistant.Models;
 
 [TypeConverter(typeof(EnumDescriptionTypeConverter))]
-public enum OrderStatus
+public enum CustomerRequestTemplate
 {
-    [Description("NotDefined")]
+    [Description("CustomerTextTemplate")]
     NA,
-    Created,
-    OrderConfirmed,
-    ExportReady,
-    InProgress,
-    RequestCustomerFeedback,
-    WaitForCustomer,
-    CheckFinished,
-    SendMail,
-    ReadyForShipping,
-    Closed,
-    Cancelled
+    Ask_4PICC_MK,
+    Ask_4ClassicKeys,
+    Ask_NoMemory,
+    Ask_Reserved1,
+    Ask_Reserved2,
+    Ask_Reserved3,
+    Ask_Reserved4,
+    Ask_Reserved5,
+    Ask_Reserved6,
+    Ask_Reserved7,
+    Ask_Reserved8
 }

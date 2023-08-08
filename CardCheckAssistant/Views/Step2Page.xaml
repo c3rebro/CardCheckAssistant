@@ -3,7 +3,10 @@
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      xmlns:extensions="using:CardCheckAssistant.Extensions"
+      xmlns:models="using:CardCheckAssistant.Models"
       xmlns:viewmodels="using:CardCheckAssistant.ViewModels"
+      xmlns:ctWinUI="using:CommunityToolkit.WinUI.UI"
       xmlns:ctWinUIConv="using:CommunityToolkit.WinUI.UI.Converters"
       Loaded="Page_Loaded"
       mc:Ignorable="d"
@@ -115,11 +118,11 @@
             Grid.Row="0"
             Visibility="{Binding TextBlockCheckFinishedAndResultIsSuppOnlyIsVisible, Converter={StaticResource boolean}, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}">
             <Run Text="RFiDGear hat die Karte geprüft und ist zu folgendem Ergebnis gekommen:&#x0a;
-            &#xa;Die Kartentechnologie wird Unterstützt. Aber: Die Karte ist so in der LSM nicht programmierbar. Eventuell ist kein Speicher frei oder es fehlen Zugriffsschlüssel. Weitere Details sind dem erstelleten Bericht zu entnehmen."></Run>
+            &#xa;Die Kartentechnologie wird Unterstützt. Aber: Die Karte ist so in der LSM nicht programmierbar. Weitere Details sind dem erstelleten Bericht zu entnehmen:"></Run>
         </TextBlock>
 
         <TextBlock 
-            Margin="8,8,0,0" 
+            Margin="8,8,0,8" 
             TextWrapping="Wrap" 
             Grid.ColumnSpan="4" 
             Grid.Column="0" 
@@ -129,8 +132,7 @@
                  &#x0a;
                  &#x0a;Die Kartentechnologie wird Unterstützt und sollte in der LSM programmierbar sein.
                  &#xa;
-                 &#xa;Bitte nimm den Chip vom Leser und fahre mit dem Prüfvorgang in der LSM fort. Kehre im Anschluss hierher zurück und lege den Chip wieder auf den Leser. Klicke auf Weiter um zum letzten Schritt &quot;Auslesen des freien Speichers&quot; zu gelangen.
-                 &#xa;"></Run>
+                 &#xa;Bitte nimm den Chip vom Leser und fahre mit dem Prüfvorgang in der LSM fort. Kehre im Anschluss hierher zurück und lege den Chip wieder auf den Leser."></Run>
         </TextBlock>
         
         <HyperlinkButton 
@@ -150,11 +152,72 @@
             Visibility="{Binding HyperlinkButtonReportIsVisible, Converter={StaticResource boolean}, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
 
         <TextBlock 
-            Margin="8,8" 
+            Margin="8,8,0,0" 
+            TextWrapping="Wrap" 
+            Grid.ColumnSpan="4" 
+            Grid.Column="0" 
+            Grid.Row="3"
+            Visibility="{Binding TextBlockCheckFinishedAndResultIsSuppAndProgIsVisible, Converter={StaticResource boolean}, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}">
+            <Run Text="Klicke danach auf Weiter, um zum letzten Schritt &quot;Auslesen des freien Speichers&quot; zu gelangen.
+                 &#xa;"></Run>
+        </TextBlock>
+
+        <TextBlock 
+            Margin="8,8,0,0" 
             TextWrapping="Wrap" 
             Grid.ColumnSpan="4" 
             Grid.Column="0" 
             Grid.Row="4"
+            Visibility="{Binding TextBlockCheckFinishedAndResultIsMissingPICCKeyIsVisible, Converter={StaticResource boolean}, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}">
+            <Run Text="Zusatz: Die Kartentechnologie wird zwar Unterstütz, es fehlet jedoch der Zugriffsschlüssel. (Allow Create/Delete = false)&#x0a;
+            &#xa;Es besteht nun die möglichkeit, den Einsender der Karte über das Ergebnis zu informieren und ggf. weitere Informationen zu erbitten. Wähle hierfür bitte eine Textvorlage aus. Der Einsender hat 14 Tage Zeit diese Informationen zu übermitteln um die Prüfung erneut durch zu führen. Nach Ablauf der Zeit wird der Vorgang automatisch geschlossen."></Run>
+        </TextBlock>
+
+        <TextBlock 
+            Margin="8,8,0,0" 
+            TextWrapping="Wrap" 
+            Grid.ColumnSpan="4" 
+            Grid.Column="0" 
+            Grid.Row="4"
+            Visibility="{Binding TextBlockCheckFinishedAndResultIsNotEnoughMemoryIsVisible, Converter={StaticResource boolean}, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}">
+            <Run Text="Die Kartentechnologie wird zwar Unterstütz, es ist jedoch kein Speicher mehr frei. (Free Memory &lt;= 224 Bytes)&#x0a;
+            &#xa;Es besteht nun die möglichkeit, den Einsender der Karte über das Ergebnis zu informieren und ggf. weitere Informationen zu erbitten. Wähle hierfür bitte eine Textvorlage aus. Der Einsender hat 14 Tage Zeit diese Informationen zu übermitteln um die Prüfung erneut durch zu führen. Nach Ablauf der Zeit wird der Vorgang automatisch geschlossen."></Run>
+        </TextBlock>
+        
+        <TextBlock 
+            Margin="8,16,16,16"
+            Grid.ColumnSpan="3" 
+            Grid.Column="0" 
+            Grid.Row="5" 
+            VerticalAlignment="Center" 
+            Visibility="{Binding TextBlockCheckFinishedAndResultIsSuppOnlyIsVisible, Converter={StaticResource boolean}, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}">
+            <Run Text="Bitte eine Textvorlage auswählen:"/>
+        </TextBlock>
+        <ComboBox 
+            Grid.ColumnSpan="1" 
+            Grid.Column="3" 
+            Grid.Row="5" 
+            VerticalAlignment="Center" 
+            ItemsSource="{ctWinUI:EnumValues Type=models:CustomerRequestTemplate}" 
+            Visibility="{Binding TextBlockCheckFinishedAndResultIsSuppOnlyIsVisible, Converter={StaticResource boolean}, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+            SelectedItem="{Binding SelectedCustomerRequestTemplate, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
+
+        <TextBlock 
+            Margin="8,8" 
+            TextWrapping="Wrap" 
+            Grid.ColumnSpan="4" 
+            Grid.Column="0" 
+            Grid.Row="6"
+            Visibility="{Binding TextBlockCheckFinishedAndResultIsSuppOnlyIsVisible, Converter={StaticResource boolean}, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}">
+            <Run Text="Der Status für diese Kartenprüfung wird auf &quot;RequestCustomerFeedback&quot; gesetzt und ist für diesen Chip vorerst Abgeschlossen. Ein Klick auf &quot;Fertigstellen&quot; führt wieder zur Startseite."></Run>
+        </TextBlock>
+        
+        <TextBlock 
+            Margin="8,8" 
+            TextWrapping="Wrap" 
+            Grid.ColumnSpan="4" 
+            Grid.Column="0" 
+            Grid.Row="6"
             Visibility="{Binding TextBlockCheckFinishedIsVisible, Converter={StaticResource boolean}, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}">
             <Run Text="Die Kartenprüfung für diesen Chip ist damit Abgeschlossen. Ein Klick auf &quot;Fertigstellen&quot; führt wieder zur Startseite."></Run>
         </TextBlock>

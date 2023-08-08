@@ -10,6 +10,7 @@
       Background="Transparent">
 
     <Page.Resources>
+        <viewmodels:Step3PageViewModel x:Name="Step3PageVM" />
         <ctWinUIConv:BoolToVisibilityConverter x:Key="boolean" />
     </Page.Resources>
     
@@ -71,21 +72,6 @@
             </Border>
         </Border>
 
-        <ProgressRing 
-            Grid.Column="0"
-            Grid.Row="0"
-            Grid.ColumnSpan="4"
-            Grid.RowSpan="7"
-            Width="auto"
-            Height="auto"
-            MaxWidth="250"
-            MaxHeight="250"
-            Margin="10"
-            VerticalContentAlignment="Stretch"
-            HorizontalContentAlignment="Stretch"
-            Visibility="{Binding TextBlockCheckNotYetFinishedIsVisible, Converter={StaticResource boolean}, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}">
-        </ProgressRing>
-
         <TextBlock 
             Margin="8,8,0,0" 
             TextWrapping="Wrap" 
@@ -102,12 +88,12 @@
             Grid.ColumnSpan="4" 
             Grid.Column="0" 
             Grid.Row="0"
-            Visibility="{Binding TextBlockCheckFinishedAndResultIsSuppOnlyIsVisible, Converter={StaticResource boolean}, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}">
-            <Run Text="RFiDGear hat den freien Speicher der Karte geprüft und den Bericht ergänzt.&#x0a;"></Run>
+            Visibility="{Binding HyperlinkButtonReportIsVisible, Converter={StaticResource boolean}, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}">
+            <Run Text="RFiDGear hat den freien Speicher der Karte geprüft und den Bericht ergänzt."></Run>
         </TextBlock>
 
         <HyperlinkButton 
-            Margin="8,0" 
+            Margin="8,8,0,8" 
             Grid.Column="0" 
             Grid.Row="1" 
             Content="Bericht aufrufen" 
@@ -128,8 +114,8 @@
             Grid.ColumnSpan="4" 
             Grid.Column="0" 
             Grid.Row="4"
-            Visibility="{Binding TextBlockCheckFinishedIsVisible, Converter={StaticResource boolean}, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}">
-            <Run Text="Die Kartenprüfung für diesen Chip ist damit Abgeschlossen. Ein Klick auf &quot;Fertigstellen&quot; führt wieder zur Startseite."></Run>
+            Visibility="{Binding HyperlinkButtonReportIsVisible, Converter={StaticResource boolean}, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}">
+            <Run Text="Die Kartenprüfung für diesen Chip ist damit Abgeschlossen. Ein Klick auf &quot;Fertigstellen&quot; Lädt den Bericht in die Datenbank hoch und führt im Anschluss wieder zur Startseite."></Run>
         </TextBlock>
 
         <Button 
@@ -203,5 +189,35 @@
                 </ResourceDictionary>
             </Button.Resources>
         </Button>
+
+        <ProgressRing 
+            Grid.Column="0"
+            Grid.Row="0"
+            Grid.ColumnSpan="4"
+            Grid.RowSpan="7"
+            Width="auto"
+            Height="auto"
+            MaxWidth="250"
+            MaxHeight="250"
+            Margin="10"
+            VerticalContentAlignment="Stretch"
+            HorizontalContentAlignment="Stretch"
+            Visibility="{x:Bind Step3PageVM.NavigateNextStepCommand.IsRunning, Converter={StaticResource boolean}, Mode=OneWay}">
+        </ProgressRing>
+        
+        <ProgressRing 
+            Grid.Column="0"
+            Grid.Row="0"
+            Grid.ColumnSpan="4"
+            Grid.RowSpan="7"
+            Width="auto"
+            Height="auto"
+            MaxWidth="250"
+            MaxHeight="250"
+            Margin="10"
+            VerticalContentAlignment="Stretch"
+            HorizontalContentAlignment="Stretch"
+            Visibility="{x:Bind Step3PageVM.RunRFiDGearCommand.IsRunning, Converter={StaticResource boolean}, Mode=OneWay}">
+        </ProgressRing>
     </Grid>
 </Page>
