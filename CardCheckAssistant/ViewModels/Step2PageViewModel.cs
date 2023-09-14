@@ -27,6 +27,11 @@ public class Step2PageViewModel : ObservableObject
 {
     private readonly DispatcherTimer scanChipTimer;
     private ObservableCollection<CardCheckProcess> cardCheckProcesses;
+    private int amountOfFreeMemory = 0;
+    private bool notEnoughFreeMemory = true;
+    private bool supported = false;
+    private bool programmable = false;
+
 
 #if DEBUG
     private const string DBNAME = "OT_CardCheck_Test";
@@ -39,6 +44,7 @@ public class Step2PageViewModel : ObservableObject
         scanChipTimer = new DispatcherTimer();
         scanChipTimer.Tick += ScanChipEvent;
         scanChipTimer.Interval = new TimeSpan(0, 0, 0, 0, 3000);
+        scanChipTimer.Stop();
 
         NextStepCanExecute = false;
         GoBackCanExecute = true;
@@ -165,9 +171,11 @@ public class Step2PageViewModel : ObservableObject
 
     private async Task ExecuteRFIDGearCommand()
     {
-        await Task.Delay(2000);
-
+        using ReportReaderWriterService reportReader = new ReportReaderWriterService();
         using SettingsReaderWriter settings = new SettingsReaderWriter();
+
+        await Task.Delay(1000);
+
         settings.ReadSettings();
 
         var p = new Process();
@@ -194,23 +202,19 @@ public class Step2PageViewModel : ObservableObject
 
         try
         {
-            using ReportReaderWriterService reportReader = new ReportReaderWriterService();
-
             p.StartInfo = info;
 
             p.Exited += (sender, eventArgs) =>
             {
-                reportReader.ReportTemplatePath = settings.DefaultSettings.DefaultProjectOutputPath + "\\" + CheckProcessService.CurrentCardCheckProcess.JobNr + "-" + CheckProcessService.CurrentCardCheckProcess.ChipNumber + ".pdf";                    
+                reportReader.ReportTemplatePath = settings.DefaultSettings.DefaultProjectOutputPath + "\\" + CheckProcessService.CurrentCardCheckProcess.JobNr + "-" + CheckProcessService.CurrentCardCheckProcess.ChipNumber + ".pdf";
+
+                supported = reportReader.GetReportField("CheckBox_isChipSuppYes") != null && reportReader.GetReportField("CheckBox_isChipSuppYes") == "Yes";
+                programmable = reportReader.GetReportField("CheckBox_ChipCanUseYes") != null && reportReader.GetReportField("CheckBox_ChipCanUseYes") == "Yes";
             };
 
             p.Start();
 
             await p.WaitForExitAsync();
-
-            var supported = reportReader.GetReportField("CheckBox_isChipSuppYes") != null && reportReader.GetReportField("CheckBox_isChipSuppYes") == "Yes";
-            var programmable = reportReader.GetReportField("CheckBox_ChipCanUseYes") != null && reportReader.GetReportField("CheckBox_ChipCanUseYes") == "Yes";
-            var amountOfFreeMemory = 0;
-            var notEnoughFreeMemory = true;
 
             if (reportReader.GetReportField("TextBox_Detail_FreeMem_1") != null)
             {
@@ -218,6 +222,20 @@ public class Step2PageViewModel : ObservableObject
                 {
                     if(amountOfFreeMemory >= 225) 
                     { 
+                        notEnoughFreeMemory = false;
+                    }
+                    else
+                    {
+                        notEnoughFreeMemory = true;
+                    }
+                }
+
+                else if(reportReader.GetReportField("TextBox_Detail_FreeMem_1").Split(',').Count() >= 1)
+                {
+                    var sectors = reportReader.GetReportField("TextBox_Detail_FreeMem_1").Split(',');
+
+                    if (sectors.Length >= 1)
+                    {
                         notEnoughFreeMemory = false;
                     }
                     else
@@ -242,7 +260,6 @@ public class Step2PageViewModel : ObservableObject
                 HyperlinkButtonReportIsVisible = true;
 
                 NextStepButtonContent = "Fertigstellen";
-
                 TextBlockCheckFinishedIsVisible = true;
             }
 
@@ -254,6 +271,7 @@ public class Step2PageViewModel : ObservableObject
                 TextBlockCheckFinishedAndResultIsMissingPICCKeyIsVisible = true;
                 HyperlinkButtonReportIsVisible = true;
 
+                NextStepCanExecute = true;
                 NextStepButtonContent = "Fertigstellen";
             }
 
@@ -274,44 +292,65 @@ public class Step2PageViewModel : ObservableObject
 
                 TextBlockCheckFinishedAndResultIsSuppAndProgIsVisible = true;
                 HyperlinkButtonReportIsVisible = true;
-                NextStepCanExecute = false;
-                /*
-                await App.MainRoot.MessageDialogAsync(
-                    "Prüfung erfolgreich abgeschlossen.\n" +
-                    "Ergebnis: Die Karte sollte programmierbar sein...",
-                    string.Format("Bitte nimm den Chip vom Leser und verwende die Berichte um die Korrekten Einstellungen für die LSM zu finden.\n\nHinweis: Dieses Fenster schließt sich erst, wenn Du den Chip vom Leser nimmst. "));
-                */
-                await ChipIsRemoved();
 
-                NextStepCanExecute = true;
+                NextStepCanExecute = false;
                 scanChipTimer.Start();
             }
-
-
-            //TextBlockCheckFinishedIsVisible = true;
         }
 
         catch (Exception e)
         {
-            //LogWriter.CreateLogEntry(string.Format("{0}: {1}; {2}", DateTime.Now, e.Message, e.InnerException != null ? e.InnerException.Message : ""), FacilityName);
+            LogWriter.CreateLogEntry(e, Application.Current.GetType().FullName);
 
+            scanChipTimer.Stop();
+
+            await App.MainRoot.MessageDialogAsync(
+                "Fehler beim starten von RFIDGear.\n",
+                string.Format("Bitte melde den folgenden Fehler an mich:\n{0}",e.Message));
+
+            NextStepCanExecute = false;
             return;
         }
     }
 
-    private async Task ChipIsRemoved()
+    private async Task ChipIsRemoved(ReaderService readerService)
     {
         try
         {
-            using (ReaderService readerService = new ReaderService())
+            scanChipTimer.Stop();
+
+            await readerService.ReadChipPublic();
+
+            while (readerService.GenericChip != null)
             {
-                while (readerService.GenericChip != null)
-                {
-                    await readerService.ReadChipPublic();
-                }
+                await readerService.ReadChipPublic();
             }
+
+            scanChipTimer.Start();
         } 
         
+        catch (Exception e)
+        {
+
+        }
+    }
+
+    private async Task ChipIsPlacedAgain(ReaderService readerService)
+    {
+        try
+        {
+            scanChipTimer.Stop();
+
+            await readerService.ReadChipPublic();
+
+            while (readerService.GenericChip == null)
+            {
+                await readerService.ReadChipPublic();
+            }
+
+            scanChipTimer.Start();
+        }
+
         catch (Exception e)
         {
 
@@ -333,10 +372,27 @@ public class Step2PageViewModel : ObservableObject
 
                 else
                 {
-
-                    if (readerService.GenericChip != null)
+                    if (readerService.GenericChip != null && !NextStepCanExecute)
                     {
+                        await ChipIsRemoved(readerService);
+
+                        ReaderHasNoChipInfoBarIsVisible = true;
+
+                        await ChipIsPlacedAgain(readerService);
+
+                        var ChipInfoMessage = string.Format("Es wurde ein Chip erkannt:\nErkannt 1: {0}", readerService.GenericChip.CardType.ToString());
+
+                        if (readerService.GenericChip.Child != null)
+                        {
+                            ChipInfoMessage = ChipInfoMessage + string.Format("\nErkannt 2: {0}", readerService.GenericChip.Child.CardType);
+                        }
+
                         NextStepCanExecute = true;
+                    }
+
+                    if (readerService.GenericChip != null && NextStepCanExecute)
+                    {
+
                         ReaderHasNoChipInfoBarIsVisible = false;
 
                         var ChipInfoMessage = string.Format("Es wurde ein Chip erkannt:\nErkannt 1: {0}", readerService.GenericChip.CardType.ToString());
@@ -345,11 +401,13 @@ public class Step2PageViewModel : ObservableObject
                         {
                             ChipInfoMessage = ChipInfoMessage + string.Format("\nErkannt 2: {0}", readerService.GenericChip.Child.CardType);
                         }
+
+                        NextStepCanExecute = true;
                     }
 
                     else
                     {
-                        NextStepCanExecute = false;
+                        NextStepCanExecute = true;
                         ReaderHasNoChipInfoBarIsVisible = true;
                     }
                 }
@@ -368,8 +426,6 @@ public class Step2PageViewModel : ObservableObject
         scanChipTimer.Stop();
 
         await ExecuteRFIDGearCommand();
-
-        NextStepCanExecute = true;
     }
 
     private void OpenReportCommand_Executed()

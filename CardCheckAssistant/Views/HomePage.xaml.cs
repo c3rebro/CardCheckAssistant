@@ -29,27 +29,27 @@ namespace CardCheckAssistant.Views
 
         private void FilterStatusInProgress_Click(object sender, RoutedEventArgs e)
         {
-            DataGrid.ItemsSource = ViewModel.FilterData(HomePageViewModel.FilterOptions.InProgress);
+            DataGrid.ItemsSource = ViewModel.FilterData(HomePageViewModel.FilterOptions.InProgress).OrderByDescending(x => x.Date);
         }
 
         private void FilterStatusWaitForCustomer_Click(object sender, RoutedEventArgs e)
         {
-            DataGrid.ItemsSource = ViewModel.FilterData(HomePageViewModel.FilterOptions.WaitForCustomer);
+            DataGrid.ItemsSource = ViewModel.FilterData(HomePageViewModel.FilterOptions.WaitForCustomer).OrderByDescending(x => x.Date);
         }
 
         private void FilterStatusCheckFinished_Click(object sender, RoutedEventArgs e)
         {
-            DataGrid.ItemsSource = ViewModel.FilterData(HomePageViewModel.FilterOptions.CheckFinisched);
+            DataGrid.ItemsSource = ViewModel.FilterData(HomePageViewModel.FilterOptions.CheckFinisched).OrderByDescending(x => x.Date);
         }
 
         private void FilterClear_Click(object sender, RoutedEventArgs e)
         {
-            DataGrid.ItemsSource = ViewModel.FilterData(HomePageViewModel.FilterOptions.All);
+            DataGrid.ItemsSource = ViewModel.FilterData(HomePageViewModel.FilterOptions.All).OrderByDescending(x => x.Date);
         }
 
         private void SearchQuery_Submitted(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)
         {
-            DataGrid.ItemsSource = ViewModel.SearchData(args.QueryText);
+            DataGrid.ItemsSource = ViewModel.SearchData(args.QueryText).OrderByDescending(x => x.Date);
         }
 
         private void OpenPDFButton_PointerEntered(object sender, PointerRoutedEventArgs e)

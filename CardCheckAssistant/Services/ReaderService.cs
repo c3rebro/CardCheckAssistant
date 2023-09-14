@@ -97,13 +97,26 @@ namespace CardCheckAssistant.Services
 
                                 if (lfTag != null && lfTag?.CardType != ChipType.NOTAG)
                                 {
-                                    GenericChip.Child = new GenericChipModel(lfTag.UID, lfTag.CardType);
+                                    if(GenericChip != null && GenericChip.CardType != ChipType.NOTAG)
+                                    {
+                                        GenericChip.Child = new GenericChipModel(lfTag.UID, lfTag.CardType);
+                                    }
+                                    else
+                                    {
+                                        GenericChip = new GenericChipModel(lfTag.UID, lfTag.CardType);
+                                    }
                                 }
                                 else if (legicTag != null && legicTag?.CardType != ChipType.NOTAG)
                                 {
-                                    GenericChip.Child = new GenericChipModel(legicTag.UID, legicTag.CardType);
+                                    if (GenericChip != null && GenericChip.CardType != ChipType.NOTAG)
+                                    {
+                                        GenericChip.Child = new GenericChipModel(legicTag.UID, legicTag.CardType);
+                                    }
+                                    else
+                                    {
+                                        GenericChip = new GenericChipModel(legicTag.UID, legicTag.CardType);
+                                    }
                                 }
-                                //readerDevice.GetSingleChip(true);
 
                                 return 0;
                             }

@@ -132,7 +132,9 @@
                  &#x0a;
                  &#x0a;Die Kartentechnologie wird Unterstützt und sollte in der LSM programmierbar sein.
                  &#xa;
-                 &#xa;Bitte nimm den Chip vom Leser und fahre mit dem Prüfvorgang in der LSM fort. Kehre im Anschluss hierher zurück und lege den Chip wieder auf den Leser."></Run>
+                 &#xa;Bitte nimm den Chip vom Leser und fahre mit dem Prüfvorgang in der LSM fort. Kehre im Anschluss hierher zurück und lege den Chip wieder auf den Leser.
+                 &#xa;"></Run>
+            <Run Foreground="Crimson" FontWeight="ExtraBold" Text="&#xa;ACHTUNG: Vor dem nächsten Schritt muss der Bericht noch mit dem Prüfergebnis aus dem Programmiervorgang in der LSM vervollständigt und dann mit der Schaltfläche &quot;READ ONLY&quot; (Im PDF ganz unten links) geschlossen werden. Anderenfalls kann der Kunde den Bericht selbst verändern!"></Run>
         </TextBlock>
         
         <HyperlinkButton 
@@ -158,7 +160,7 @@
             Grid.Column="0" 
             Grid.Row="3"
             Visibility="{Binding TextBlockCheckFinishedAndResultIsSuppAndProgIsVisible, Converter={StaticResource boolean}, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}">
-            <Run Text="Klicke danach auf Weiter, um zum letzten Schritt &quot;Auslesen des freien Speichers&quot; zu gelangen.
+            <Run Text="Klicke danach auf Weiter, um zum letzten Schritt zu gelangen.
                  &#xa;"></Run>
         </TextBlock>
 

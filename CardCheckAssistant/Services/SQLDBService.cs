@@ -7,6 +7,7 @@ using System.Data.SQLite;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Text;
 using CardCheckAssistant.Models;
 using Elatec.NET;
 using Log4CSharp;
@@ -36,8 +37,8 @@ public class SQLDBService : IDisposable
         "CC_CreationDate VARCHAR(25)",
         "CC_ChangedDate VARCHAR(25)",
         "CC_CustomerName VARCHAR(50)",
-        "CC_Status VARCHAR(25)", 
-        "CC_Report BLOB",
+        "CC_Status VARCHAR(25)",
+        "CC_ReportBase64 VARCHAR(MAX)",
         "CC_EditorName VARCHAR(25)",
         "CC_EditorComment TEXT" };
 
@@ -206,6 +207,7 @@ public class SQLDBService : IDisposable
                                         Status = (OrderStatus)Enum.Parse(typeof(OrderStatus), await sql_datareader.IsDBNullAsync(6) ? null : sql_datareader.GetString(6))
                                     };
                                     CardChecks.Add(cardCheckProcess);
+                                    CardChecks = CardChecks.OrderByDescending(x => x.Date).ToList();
                                 }
                                 catch(Exception ex)
                                 {
@@ -311,7 +313,7 @@ public class SQLDBService : IDisposable
 
                     using (SqlCommand sql_cmd = sqlConnection.CreateCommand())
                     {
-                        sql_cmd.CommandText = "SELECT [CC-Report] FROM " + OMNITABLENAME + " Where [CC-ID] = @id";
+                        sql_cmd.CommandText = "SELECT [CC-ReportBase64] FROM " + OMNITABLENAME + " Where [CC-ID] = @id";
 
                         sql_cmd.Parameters.AddWithValue("@id", id);
 
@@ -323,14 +325,11 @@ public class SQLDBService : IDisposable
                             {
                                 if (!(await reader.IsDBNullAsync(0)))
                                 {
-                                    using (FileStream file = new FileStream(tmpFilePath, FileMode.Create, FileAccess.Write))
+                                    using (FileStream file = File.Create(tmpFilePath))
                                     {
-                                        using (Stream data = reader.GetStream(0))
-                                        {
+                                        var data = ConvertFromBase64(reader.GetString(0));
 
-                                            // Asynchronously copy the stream from the server to the file we just created
-                                            await data.CopyToAsync(file);
-                                        }
+                                        await file.WriteAsync(data, 0, data.Length);
                                     }
                                 }
                             }
@@ -409,13 +408,14 @@ public class SQLDBService : IDisposable
 
                     using (SqlCommand sql_cmd = sqlConnection.CreateCommand())
                     {
-                        sql_cmd.CommandText = "UPDATE " + OMNITABLENAME + " SET [CC-Report] = @data Where [CC-ID] = @id";
+                        sql_cmd.CommandText = "UPDATE " + OMNITABLENAME + " SET [CC-ReportBase64] = @data Where [CC-ID] = @id";
 
                         sql_cmd.Parameters.AddWithValue("@id", key);
 
                         // Add a parameter which uses the FileStream we just opened
                         // Size is set to -1 to indicate "MAX"
-                        sql_cmd.Parameters.Add("@data", SqlDbType.Binary, -1).Value = fs;
+
+                        sql_cmd.Parameters.Add("@data", SqlDbType.NText, -1).Value = ConvertToBase64(fs);
 
                         // Send the data to the server asynchronously
                         await sql_cmd.ExecuteScalarAsync();
@@ -556,6 +556,23 @@ public class SQLDBService : IDisposable
         {
             throw new System.ArgumentException("Data.ConnectionState must be open");
         }
+    }
+
+    private string ConvertToBase64(Stream stream)
+    {
+        byte[] bytes;
+        using (var memoryStream = new MemoryStream())
+        {
+            stream.CopyTo(memoryStream);
+            bytes = memoryStream.ToArray();
+        }
+
+        return Convert.ToBase64String(bytes);
+    }
+
+    private byte[] ConvertFromBase64(string base64)
+    {
+        return Convert.FromBase64String(base64);
     }
 
     protected void Dispose(bool disposing)

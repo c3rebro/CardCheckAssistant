@@ -26,8 +26,9 @@
     <DefaultLanguage>de-DE</DefaultLanguage>
     <ApplicationIcon>Assets\AppIco.ico</ApplicationIcon>
     <PackageIcon>Assets\StoreLogo.scale-400.png</PackageIcon>
-    <FileVersion>1.0.16</FileVersion>
-    <AssemblyVersion>1.0.16</AssemblyVersion>
+    <FileVersion>1.0.17</FileVersion>
+    <AssemblyVersion>1.0.17</AssemblyVersion>
+    <RepositoryUrl>https://github.com/c3rebro/CardCheckassistant</RepositoryUrl>
   </PropertyGroup>
   <ItemGroup>
     <Compile Remove="App.xaml.Settings.cs" />
