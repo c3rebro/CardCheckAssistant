@@ -99,7 +99,6 @@ namespace CardCheckAssistant.Extensions
     /// </summary>
     public sealed class ResourceLoader : IValueConverter, IDisposable
     {
-        private static readonly string FacilityName = "CardCheckAssistant";
         private readonly ResourceManager resManager;
 
         /// <summary>
@@ -152,7 +151,7 @@ namespace CardCheckAssistant.Extensions
             }
             catch (Exception e)
             {
-                LogWriter.CreateLogEntry(e, FacilityName);
+                LogWriter.CreateLogEntry(e);
 
                 throw new ArgumentOutOfRangeException(
                     string.Format("parameter:{0}\nvalue:{1}",
@@ -219,7 +218,7 @@ namespace CardCheckAssistant.Extensions
             }
             catch (Exception e)
             {
-                LogWriter.CreateLogEntry(e, FacilityName);
+                LogWriter.CreateLogEntry(e);
                 return string.Empty;
             }
         }

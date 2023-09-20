@@ -46,7 +46,7 @@ namespace CardCheckAssistant.Extensions
                 target.DataContext = FindParent(target, ancestorType);
         }
 
-        private static object FindParent(DependencyObject dependencyObject, Type ancestorType)
+        private static object? FindParent(DependencyObject dependencyObject, Type ancestorType)
         {
             DependencyObject parent = VisualTreeHelper.GetParent(dependencyObject);
             if (parent == null)

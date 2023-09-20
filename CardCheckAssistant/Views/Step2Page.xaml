@@ -13,6 +13,7 @@
       Background="Transparent">
 
     <Page.Resources>
+        <viewmodels:Step2PageViewModel x:Name="Step2PageVM" />
         <ctWinUIConv:BoolToVisibilityConverter x:Key="boolean" />
     </Page.Resources>
     
@@ -23,12 +24,16 @@
     <Grid Margin="0 0 0 80">
         <!-- Beef -->
         <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="250"/>
+            <ColumnDefinition Width="0.3*"/>
+            <ColumnDefinition Width="0.3*"/>
             <ColumnDefinition Width="auto"/>
-            <ColumnDefinition Width="20"/>
-            <ColumnDefinition Width="auto"/>
-            <ColumnDefinition Width="0.1*"/>
+            <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
             <RowDefinition Height="auto"/>
             <RowDefinition Height="auto"/>
             <RowDefinition Height="auto"/>
@@ -41,7 +46,8 @@
 
         <Border
             Grid.Row="0"
-            CornerRadius="8,8,8,8" Grid.ColumnSpan="4" Grid.RowSpan="7">
+            Grid.Column="0"
+            CornerRadius="8,8,8,8" Grid.ColumnSpan="5" Grid.RowSpan="10">
             <Border>
                 <Border.Background>
                     <RadialGradientBrush>
@@ -77,8 +83,8 @@
         <ProgressRing 
             Grid.Column="0"
             Grid.Row="0"
-            Grid.ColumnSpan="4"
-            Grid.RowSpan="7"
+            Grid.ColumnSpan="5"
+            Grid.RowSpan="10"
             Width="auto"
             Height="auto"
             MaxWidth="250"
@@ -89,10 +95,73 @@
             Visibility="{Binding TextBlockCheckNotYetFinishedIsVisible, Converter={StaticResource boolean}, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}">
         </ProgressRing>
 
+        <ProgressRing 
+            Grid.Column="0"
+            Grid.Row="0"
+            Grid.ColumnSpan="5"
+            Grid.RowSpan="10"
+            Width="auto"
+            Height="auto"
+            MaxWidth="250"
+            MaxHeight="250"
+            Margin="10"
+            VerticalContentAlignment="Stretch"
+            HorizontalContentAlignment="Stretch"
+            Visibility="{Binding NavigateNextStepCommand.IsRunning, Converter={StaticResource boolean}, Mode=OneWay}">
+        </ProgressRing>
+        
+        <Image
+            Grid.Column="4"
+            Grid.ColumnSpan="2"
+            Grid.Row="0"
+            Grid.RowSpan="10"
+            Source="/Assets/yetmswait.gif"
+            Opacity="0.5"
+            HorizontalAlignment="Right"
+            VerticalAlignment="Top"
+            Stretch="None"
+            Visibility="{Binding TextBlockCheckNotYetFinishedIsVisible, Converter={StaticResource boolean}, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
+
+        <Image
+            Grid.Column="4"
+            Grid.ColumnSpan="2"
+            Grid.Row="0"
+            Grid.RowSpan="10"
+            Source="/Assets/yetmsohno.png"
+            Opacity="0.5"
+            HorizontalAlignment="Right"
+            VerticalAlignment="Top"
+            Stretch="None" 
+            Visibility="{Binding TextBlockCheckFinishedAndResultIsNotSuppIsVisible, Converter={StaticResource boolean}, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
+
+        <Image
+            Grid.Column="4"
+            Grid.ColumnSpan="2"
+            Grid.Row="0"
+            Grid.RowSpan="10"
+            Source="/Assets/yetmsohno.png"
+            Opacity="0.5"
+            HorizontalAlignment="Right"
+            VerticalAlignment="Top"
+            Stretch="None" 
+            Visibility="{Binding TextBlockCheckFinishedAndResultIsSuppOnlyIsVisible, Converter={StaticResource boolean}, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
+
+        <Image
+            Grid.Column="4"
+            Grid.ColumnSpan="2"
+            Grid.Row="0"
+            Grid.RowSpan="10"
+            Source="/Assets/yetmsok.png"
+            Opacity="0.5"
+            HorizontalAlignment="Right"
+            VerticalAlignment="Top"
+            Stretch="None" 
+            Visibility="{Binding TextBlockCheckFinishedAndResultIsSuppAndProgIsVisible, Converter={StaticResource boolean}, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
+
         <TextBlock 
             Margin="8,8,0,0" 
             TextWrapping="Wrap" 
-            Grid.ColumnSpan="4" 
+            Grid.ColumnSpan="5" 
             Grid.Column="0" 
             Grid.Row="0"
             Visibility="{Binding TextBlockCheckNotYetFinishedIsVisible, Converter={StaticResource boolean}, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}">
@@ -102,29 +171,31 @@
         <TextBlock 
             Margin="8,8,0,0" 
             TextWrapping="Wrap" 
-            Grid.ColumnSpan="4" 
+            Grid.ColumnSpan="5" 
             Grid.Column="0" 
             Grid.Row="0"
             Visibility="{Binding TextBlockCheckFinishedAndResultIsNotSuppIsVisible, Converter={StaticResource boolean}, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}">
             <Run Text="RFiDGear hat die Karte geprüft und ist zu folgendem Ergebnis gekommen:&#x0a;
-            &#xa;Die Kartentechnologie wird leider nicht Unterstützt. Weitere Details sind dem erstelleten Bericht zu entnehmen."></Run>
+                 &#xa;Die Kartentechnologie wird leider nicht Unterstützt. Weitere Details sind dem erstelleten Bericht zu entnehmen.
+                 &#xa;"></Run>
         </TextBlock>
         
         <TextBlock 
             Margin="8,8,0,0" 
             TextWrapping="Wrap" 
-            Grid.ColumnSpan="4" 
+            Grid.ColumnSpan="5" 
             Grid.Column="0" 
             Grid.Row="0"
             Visibility="{Binding TextBlockCheckFinishedAndResultIsSuppOnlyIsVisible, Converter={StaticResource boolean}, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}">
             <Run Text="RFiDGear hat die Karte geprüft und ist zu folgendem Ergebnis gekommen:&#x0a;
-            &#xa;Die Kartentechnologie wird Unterstützt. Aber: Die Karte ist so in der LSM nicht programmierbar. Weitere Details sind dem erstelleten Bericht zu entnehmen:"></Run>
+                &#xa;Die Kartentechnologie wird Unterstützt. Aber: Die Karte ist so in der LSM nicht programmierbar. Weitere Details sind dem erstelleten Bericht zu entnehmen:
+                &#xa;"></Run>
         </TextBlock>
 
         <TextBlock 
             Margin="8,8,0,8" 
             TextWrapping="Wrap" 
-            Grid.ColumnSpan="4" 
+            Grid.ColumnSpan="5" 
             Grid.Column="0" 
             Grid.Row="0"
             Visibility="{Binding TextBlockCheckFinishedAndResultIsSuppAndProgIsVisible, Converter={StaticResource boolean}, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}">
@@ -134,21 +205,194 @@
                  &#xa;
                  &#xa;Bitte nimm den Chip vom Leser und fahre mit dem Prüfvorgang in der LSM fort. Kehre im Anschluss hierher zurück und lege den Chip wieder auf den Leser.
                  &#xa;"></Run>
-            <Run Foreground="Crimson" FontWeight="ExtraBold" Text="&#xa;ACHTUNG: Vor dem nächsten Schritt muss der Bericht noch mit dem Prüfergebnis aus dem Programmiervorgang in der LSM vervollständigt und dann mit der Schaltfläche &quot;READ ONLY&quot; (Im PDF ganz unten links) geschlossen werden. Anderenfalls kann der Kunde den Bericht selbst verändern!"></Run>
+            <Run Foreground="Crimson" FontWeight="ExtraBold" Text="&#xa;ACHTUNG: Vor dem nächsten Schritt muss der Bericht noch mit dem Prüfergebnis aus dem Programmiervorgang in der LSM vervollständigt werden."></Run>
         </TextBlock>
+
+        <TextBlock
+            Margin="8,8,0,8" 
+            Grid.Column="0" 
+            Grid.Row="1" 
+            VerticalAlignment="Center" 
+            Visibility="{Binding TextBlockCheckFinishedAndResultIsSuppAndProgIsVisible, Converter={StaticResource boolean}, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+            Text="Verwendetes Template:"/>
+
+        <!--ItemsSource="{ctWinUI:EnumValues Type=models:LSMCardTemplate}" -->
+        <ComboBox
+            Margin="8,8,8,8" 
+            Grid.ColumnSpan="2" 
+            Grid.Column="1" 
+            Grid.Row="1" 
+            VerticalAlignment="Center" 
+            HorizontalAlignment="Stretch"
+            ItemsSource="{Binding CardTemplates}"
+            ToolTipService.ToolTip="Auswahl:\nTemplate entsprechend der verfügbaren Sektoren.\n\nHinweis zur Sektorengröße: Die Größe der Sektoren ab Sektor 32 (nur Classic 4K) entsprechen jeweils 4 Sektoren niedriger Nummer.\\Beispiel: Für das Template MC1200L (benötigt 4 Sektoren) ist sowohl auf Sektor 3,4,5,6 als auch auf dem Sektor 32 genug Platz."
+            Visibility="{Binding TextBlockCheckFinishedAndResultIsSuppAndProgIsVisible, Converter={StaticResource boolean}, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+            SelectedItem="{Binding SelectedLSMCardTemplate, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}">
+            <ComboBox.ItemTemplate>
+                <DataTemplate>
+                    <TextBlock ToolTipService.ToolTip="{Binding TemplateToolTip, Mode=OneTime}" Text="{Binding TemplateText}"/>
+                </DataTemplate>
+            </ComboBox.ItemTemplate>
+        </ComboBox>
+
+        <TextBlock
+            Margin="8,8,0,8" 
+            Grid.Column="3" 
+            Grid.Row="1" 
+            VerticalAlignment="Center" 
+            Visibility="{Binding TextBlockCheckFinishedAndResultIsSuppAndProgIsVisible, Converter={StaticResource boolean}, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+            Text="Unterstützter Chiptyp:"/>
+        
+        <TextBlock 
+            Margin="8,0,0,8" 
+            TextWrapping="Wrap" 
+            Grid.ColumnSpan="5" 
+            Grid.Column="0" 
+            Grid.Row="2"
+            VerticalAlignment="Center" 
+            Visibility="{Binding TextBlockCheckFinishedAndResultIsSuppAndProgIsVisible, Converter={StaticResource boolean}, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}">
+            <Run Text="Programmierung erfolgreich:"></Run>
+        </TextBlock>
+        
+        <CheckBox
+            Margin="8,0,0,8" 
+            Grid.ColumnSpan="1" 
+            Grid.Column="1" 
+            VerticalAlignment="Center" 
+            Content="Ja"
+            Grid.Row="2"
+            Visibility="{Binding TextBlockCheckFinishedAndResultIsSuppAndProgIsVisible, Converter={StaticResource boolean}, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+            IsChecked="{Binding CheckBoxChipProgrammableYes, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"></CheckBox>
+
+        <CheckBox
+            Margin="8,0,0,8" 
+            Grid.ColumnSpan="1" 
+            Grid.Column="2" 
+            VerticalAlignment="Center" 
+            Content="Nein"
+            Grid.Row="2"
+            Visibility="{Binding TextBlockCheckFinishedAndResultIsSuppAndProgIsVisible, Converter={StaticResource boolean}, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+            IsChecked="{Binding CheckBoxChipProgrammableNo, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"></CheckBox>
+
+        <TextBlock 
+            Margin="8,0,0,8" 
+            TextWrapping="Wrap" 
+            Grid.ColumnSpan="5" 
+            Grid.Column="0" 
+            Grid.Row="3"
+            VerticalAlignment="Center" 
+            Visibility="{Binding TextBlockCheckFinishedAndResultIsSuppAndProgIsVisible, Converter={StaticResource boolean}, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}">
+            <Run Text="Funktionstest an der Schließung: "></Run>
+        </TextBlock>
+
+        <CheckBox
+            Margin="8,0,0,8" 
+            Grid.ColumnSpan="1" 
+            Grid.Column="1" 
+            VerticalAlignment="Center" 
+            Content="Erfolgreich"
+            Grid.Row="3"
+            Visibility="{Binding TextBlockCheckFinishedAndResultIsSuppAndProgIsVisible, Converter={StaticResource boolean}, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+            IsChecked="{Binding CheckBoxTestOnLockSuccess, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"></CheckBox>
+
+        <CheckBox
+            Margin="8,0,0,8" 
+            Grid.ColumnSpan="1" 
+            Grid.Column="2" 
+            VerticalAlignment="Center" 
+            Content="Fehlgeschlagen"
+            Grid.Row="3"
+            Visibility="{Binding TextBlockCheckFinishedAndResultIsSuppAndProgIsVisible, Converter={StaticResource boolean}, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+            IsChecked="{Binding CheckBoxTestOnLockFailed, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"></CheckBox>
+
+        <TextBlock 
+            Margin="8,0,0,8" 
+            TextWrapping="Wrap" 
+            Grid.ColumnSpan="5" 
+            Grid.Column="0" 
+            Grid.Row="4"
+            VerticalAlignment="Center" 
+            Visibility="{Binding TextBlockCheckFinishedAndResultIsSuppAndProgIsVisible, Converter={StaticResource boolean}, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}">
+            <Run Text="Funktion mit Einschränkungen: "></Run>
+        </TextBlock>
+
+        <CheckBox
+            Margin="8,0,0,8" 
+            Grid.ColumnSpan="1" 
+            Grid.Column="1" 
+            VerticalAlignment="Center" 
+            Content="Ja"
+            Grid.Row="4"
+            Visibility="{Binding TextBlockCheckFinishedAndResultIsSuppAndProgIsVisible, Converter={StaticResource boolean}, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+            IsChecked="{Binding CheckBoxTestOnLockLimitedYes, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"></CheckBox>
+
+        <CheckBox
+            Margin="8,0,0,8" 
+            Grid.ColumnSpan="1" 
+            Grid.Column="2" 
+            VerticalAlignment="Center" 
+            Content="Nein"
+            Grid.Row="4"
+            Visibility="{Binding TextBlockCheckFinishedAndResultIsSuppAndProgIsVisible, Converter={StaticResource boolean}, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+            IsChecked="{Binding CheckBoxTestOnLockLimitedNo, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"></CheckBox>
+
+        <TextBlock 
+            Margin="8,0,0,8" 
+            TextWrapping="Wrap" 
+            Grid.ColumnSpan="2" 
+            Grid.Column="0" 
+            Grid.Row="5"
+            VerticalAlignment="Center" 
+            Visibility="{Binding TextBlockCheckFinishedAndResultIsSuppAndProgIsVisible, Converter={StaticResource boolean}, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}">
+            <Run Text="Freier Speicher vor der Prüfung:"></Run>
+        </TextBlock>
+
+        <TextBox 
+            Margin="8,0,8,8"
+            TextWrapping="Wrap"
+            Grid.ColumnSpan="2"
+            Grid.Column="1"
+            Grid.Row="5"
+            IsReadOnly="True"
+            VerticalAlignment="Center" 
+            Text="{Binding TextBlockFreeMem, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}"
+            Visibility="{Binding TextBlockCheckFinishedAndResultIsSuppAndProgIsVisible, Converter={StaticResource boolean}, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}">
+        </TextBox>
+
+        <TextBlock 
+            Margin="8,0,0,8" 
+            TextWrapping="Wrap" 
+            Grid.ColumnSpan="1" 
+            Grid.Column="3" 
+            Grid.Row="5"
+            VerticalAlignment="Center" 
+            Visibility="{Binding IsSupportedAndIsClassicChip, Converter={StaticResource boolean}, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}">
+            <Run Text="Verwendete Sektoren:"></Run>
+        </TextBlock>
+        
+        <TextBox 
+            Margin="8,0,8,8"
+            TextWrapping="Wrap"
+            Grid.ColumnSpan="3"
+            Grid.Column="4"
+            Grid.Row="5"
+            VerticalAlignment="Center" 
+            Text="{Binding TextBoxSectorsUsed, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+            Visibility="{Binding IsSupportedAndIsClassicChip, Converter={StaticResource boolean}, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}">
+        </TextBox>
         
         <HyperlinkButton 
             Margin="8,0" 
             Grid.Column="0" 
-            Grid.Row="1" 
+            Grid.Row="6" 
             Content="Bericht aufrufen" 
             Command="{Binding OpenReportCommand}"
             Visibility="{Binding HyperlinkButtonReportIsVisible, Converter={StaticResource boolean}, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
         
         <HyperlinkButton 
-            Margin="8,0" 
+            Margin="8,0,0,10" 
             Grid.Column="0" 
-            Grid.Row="2" 
+            Grid.Row="7" 
             Content="Speicherpfad anzeigen" 
             Command="{Binding OpenReportPathCommand}"
             Visibility="{Binding HyperlinkButtonReportIsVisible, Converter={StaticResource boolean}, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
@@ -156,9 +400,9 @@
         <TextBlock 
             Margin="8,8,0,0" 
             TextWrapping="Wrap" 
-            Grid.ColumnSpan="4" 
+            Grid.ColumnSpan="5" 
             Grid.Column="0" 
-            Grid.Row="3"
+            Grid.Row="9"
             Visibility="{Binding TextBlockCheckFinishedAndResultIsSuppAndProgIsVisible, Converter={StaticResource boolean}, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}">
             <Run Text="Klicke danach auf Weiter, um zum letzten Schritt zu gelangen.
                  &#xa;"></Run>
@@ -167,18 +411,7 @@
         <TextBlock 
             Margin="8,8,0,0" 
             TextWrapping="Wrap" 
-            Grid.ColumnSpan="4" 
-            Grid.Column="0" 
-            Grid.Row="4"
-            Visibility="{Binding TextBlockCheckFinishedAndResultIsMissingPICCKeyIsVisible, Converter={StaticResource boolean}, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}">
-            <Run Text="Zusatz: Die Kartentechnologie wird zwar Unterstütz, es fehlet jedoch der Zugriffsschlüssel. (Allow Create/Delete = false)&#x0a;
-            &#xa;Es besteht nun die möglichkeit, den Einsender der Karte über das Ergebnis zu informieren und ggf. weitere Informationen zu erbitten. Wähle hierfür bitte eine Textvorlage aus. Der Einsender hat 14 Tage Zeit diese Informationen zu übermitteln um die Prüfung erneut durch zu führen. Nach Ablauf der Zeit wird der Vorgang automatisch geschlossen."></Run>
-        </TextBlock>
-
-        <TextBlock 
-            Margin="8,8,0,0" 
-            TextWrapping="Wrap" 
-            Grid.ColumnSpan="4" 
+            Grid.ColumnSpan="5" 
             Grid.Column="0" 
             Grid.Row="4"
             Visibility="{Binding TextBlockCheckFinishedAndResultIsNotEnoughMemoryIsVisible, Converter={StaticResource boolean}, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}">
@@ -186,48 +419,46 @@
             &#xa;Es besteht nun die möglichkeit, den Einsender der Karte über das Ergebnis zu informieren und ggf. weitere Informationen zu erbitten. Wähle hierfür bitte eine Textvorlage aus. Der Einsender hat 14 Tage Zeit diese Informationen zu übermitteln um die Prüfung erneut durch zu führen. Nach Ablauf der Zeit wird der Vorgang automatisch geschlossen."></Run>
         </TextBlock>
         
-        <TextBlock 
-            Margin="8,16,16,16"
-            Grid.ColumnSpan="3" 
-            Grid.Column="0" 
-            Grid.Row="5" 
-            VerticalAlignment="Center" 
-            Visibility="{Binding TextBlockCheckFinishedAndResultIsSuppOnlyIsVisible, Converter={StaticResource boolean}, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}">
-            <Run Text="Bitte eine Textvorlage auswählen:"/>
-        </TextBlock>
-        <ComboBox 
-            Grid.ColumnSpan="1" 
-            Grid.Column="3" 
-            Grid.Row="5" 
-            VerticalAlignment="Center" 
-            ItemsSource="{ctWinUI:EnumValues Type=models:CustomerRequestTemplate}" 
-            Visibility="{Binding TextBlockCheckFinishedAndResultIsSuppOnlyIsVisible, Converter={StaticResource boolean}, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
-            SelectedItem="{Binding SelectedCustomerRequestTemplate, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
 
         <TextBlock 
             Margin="8,8" 
             TextWrapping="Wrap" 
-            Grid.ColumnSpan="4" 
+            Grid.ColumnSpan="5" 
             Grid.Column="0" 
-            Grid.Row="6"
+            Grid.Row="9"
             Visibility="{Binding TextBlockCheckFinishedAndResultIsSuppOnlyIsVisible, Converter={StaticResource boolean}, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}">
-            <Run Text="Der Status für diese Kartenprüfung wird auf &quot;RequestCustomerFeedback&quot; gesetzt und ist für diesen Chip vorerst Abgeschlossen. Ein Klick auf &quot;Fertigstellen&quot; führt wieder zur Startseite."></Run>
+            <Run Text="Die Kartenprüfung für diesen Chip ist damit Abgeschlossen. Ein Klick auf &quot;Fertigstellen&quot; führt wieder zur Startseite."></Run>
         </TextBlock>
         
         <TextBlock 
             Margin="8,8" 
             TextWrapping="Wrap" 
-            Grid.ColumnSpan="4" 
+            Grid.ColumnSpan="5" 
             Grid.Column="0" 
-            Grid.Row="6"
+            Grid.Row="9"
             Visibility="{Binding TextBlockCheckFinishedIsVisible, Converter={StaticResource boolean}, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}">
             <Run Text="Die Kartenprüfung für diesen Chip ist damit Abgeschlossen. Ein Klick auf &quot;Fertigstellen&quot; führt wieder zur Startseite."></Run>
         </TextBlock>
 
         <InfoBar
+            Grid.Column="4"
+            Grid.Row="1"
+            Grid.ColumnSpan="1"
+            Margin="8,0"
+            Width="400"
+            HorizontalAlignment="Left"
+            IsOpen="True"
+            IsIconVisible="True"
+            IsClosable="False"
+            Title="{Binding InfoBarSupportedChipType, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}"
+            Visibility="{Binding IsSupported, Converter={StaticResource boolean}, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+            Severity="Informational"
+            />
+        
+        <InfoBar
             Grid.Column="0"
-            Grid.Row="5"
-            Grid.ColumnSpan="4"
+            Grid.Row="8"
+            Grid.ColumnSpan="5"
             Margin="15"
             IsOpen="True"
             IsIconVisible="True"
@@ -235,14 +466,16 @@
             Title="Hinweis:"
             Severity="Informational"
             Visibility="{Binding ReaderHasNoChipInfoBarIsVisible, Converter={StaticResource boolean}, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
-            Message="Um mit dem Auslesen der verbleibenden Speicherplatzes nach Programmierung Forfahren zu können, wird der soeben getestete Chip benötigt."/>
+            Message="Um mit dem Auslesen der verbleibenden Speicherplatzes nach Programmierung Forfahren zu können, wird der soeben getestete Chip benötigt."
+            />
         
         <Button 
-            Grid.Row="7"
+            Grid.Row="11"
             Grid.Column="0"
             Height="36"
             Margin="0,6,0,0"
             Padding="30,6"
+            VerticalAlignment="Bottom"
             HorizontalAlignment="Left"
             IsEnabled="{Binding GoBackCanExecute, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
             Opacity="1"
@@ -272,7 +505,7 @@
             </Button.Resources>
         </Button>
         <Button
-            Grid.Row="7"
+            Grid.Row="10"
             Grid.Column="4"
             Height="36"
             Margin="0,6,8,0"

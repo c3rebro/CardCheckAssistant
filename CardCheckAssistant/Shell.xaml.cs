@@ -26,7 +26,7 @@ public sealed partial class Shell : Page
     {
         ViewModel.OnLoaded();
 
-        var window = (Application.Current as App)?.Window as MainWindow;
+        var window = (Application.Current as App)?.Window as MainWindow ?? new MainWindow();
         var navigation = window.Navigation;
         var homePage = navigation.GetNavigationViewItems(typeof(HomePage)).First();
         navigation.SetCurrentNavigationViewItem(homePage);

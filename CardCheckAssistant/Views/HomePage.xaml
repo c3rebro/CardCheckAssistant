@@ -23,13 +23,14 @@
     </Page.Resources>
    
     <Grid 
-        Margin="0 0 0 20">
+        Margin="10 0 10 80">
         <Grid.Background>
             <ImageBrush
                     ImageSource="/Assets/fluent-ui-microsoft.png"
                     Opacity="0.5"
                     Stretch="UniformToFill" />
         </Grid.Background>
+
         <!-- Beef -->
         
         <Grid>
@@ -254,18 +255,21 @@
                 </ctWinUI:DataGrid.RowStyle>
                 <ctWinUI:DataGrid.Columns>
                     <ctWinUI:DataGridTextColumn Binding="{Binding JobNr}" x:Uid="dataGridHeaderJobNr"/>
-                    <ctWinUI:DataGridTextColumn Binding="{Binding ChipNumber}" x:Uid="dataGridHeaderChipNr" />
-                    <!--  The Email property contains a URI.  For example "mailto:lucy0@adventure-works.com"  -->
-                    <!-- <DataGridHyperlinkColumn
-                        Binding="{Binding MailTo}"
-                        ContentBinding="{Binding Email}"
-                        Header="Omni-Link" /> -->
-                    <!-- <DataGridCheckBoxColumn Binding="{Binding IsMember}" Header="Referenz / Beschreibung" /> -->
-                    <!-- <DataGridCheckBoxColumn Binding="{Binding IsMember}" Header="Referenz / Beschreibung" /> -->
-                    <!-- <DataGridTextColumn Binding="{Binding Date}" Header="Referenz / Beschreibung" /> -->
-                    <ctWinUI:DataGridTextColumn Binding="{Binding CName}" Header="Kunde" />
-                    <ctWinUI:DataGridTextColumn Binding="{Binding Date}" Header="Auftragsdatum" />
+                    <ctWinUI:DataGridTextColumn 
+                        MaxWidth="100"
+                        Binding="{Binding ChipNumber}" x:Uid="dataGridHeaderChipNr" />
+                    <ctWinUI:DataGridTextColumn 
+                        MaxWidth="300"
+                        Binding="{Binding CName}" 
+                        Header="Kunde" />
+                    <ctWinUI:DataGridTextColumn 
+                        MaxWidth="300"
+                        Binding="{Binding DealerName}" 
+                        Header="Händler" />
+                    <ctWinUI:DataGridTextColumn Binding="{Binding DateCreated}" Header="Erstellt" />
+                    <ctWinUI:DataGridTextColumn Binding="{Binding DateModified}" Header="Geändert" />
                     <ctWinUI:DataGridTextColumn Binding="{Binding EditorName}" Header="Prüfer" />
+                    <ctWinUI:DataGridTextColumn Binding="{Binding SalesName}" Header="ADM" />
                     <ctWinUI:DataGridTextColumn Binding="{Binding Status}" Header="Auftragsstatus"  />
                     <ctWinUI:DataGridTemplateColumn Header="PDF Bericht">
                         <ctWinUI:DataGridTemplateColumn.CellTemplate>

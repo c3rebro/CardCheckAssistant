@@ -110,7 +110,7 @@ public class SettingsReaderWriter : IDisposable
         }
         catch (Exception ex)
         {
-            LogWriter.CreateLogEntry(ex, FacilityName);
+            LogWriter.CreateLogEntry(ex);
         }
 
         if (!File.Exists(Path.Combine(appDataPath, _settingsFileFileName)))
@@ -129,7 +129,7 @@ public class SettingsReaderWriter : IDisposable
             }
             catch (Exception ex)
             {
-                LogWriter.CreateLogEntry(ex, FacilityName);
+                LogWriter.CreateLogEntry(ex);
             }
         }
         else
@@ -140,7 +140,7 @@ public class SettingsReaderWriter : IDisposable
             }
             catch (Exception ex)
             {
-                LogWriter.CreateLogEntry(ex, FacilityName);
+                LogWriter.CreateLogEntry(ex);
             }
         }
     }
@@ -210,7 +210,7 @@ public class SettingsReaderWriter : IDisposable
             }
             catch (Exception e)
             {
-                LogWriter.CreateLogEntry(string.Format("{0}: {1}; {2}", DateTime.Now, e.Message, e.InnerException != null ? e.InnerException.Message : ""), FacilityName);
+                LogWriter.CreateLogEntry(string.Format("{0}: {1}; {2}", DateTime.Now, e.Message, e.InnerException != null ? e.InnerException.Message : ""));
 
                 return true;
             }
@@ -241,7 +241,7 @@ public class SettingsReaderWriter : IDisposable
         }
         catch (XmlException ex)
         {
-            LogWriter.CreateLogEntry(ex, FacilityName);
+            LogWriter.CreateLogEntry(ex);
             return false;
         }
     }
@@ -266,7 +266,7 @@ public class SettingsReaderWriter : IDisposable
 
                 catch (Exception ex)
                 {
-                    LogWriter.CreateLogEntry(ex, FacilityName);
+                    LogWriter.CreateLogEntry(ex);
                 }
             }
 

@@ -16,9 +16,6 @@ namespace CardCheckAssistant.Views
 {
     public sealed partial class HomePage : Page
     {
-        private long _token;
-        private string _grouping;
-
         public HomePage()
         {
             InitializeComponent();
@@ -29,27 +26,27 @@ namespace CardCheckAssistant.Views
 
         private void FilterStatusInProgress_Click(object sender, RoutedEventArgs e)
         {
-            DataGrid.ItemsSource = ViewModel.FilterData(HomePageViewModel.FilterOptions.InProgress).OrderByDescending(x => x.Date);
+            DataGrid.ItemsSource = ViewModel.FilterData(HomePageViewModel.FilterOptions.InProgress).OrderByDescending(x => x.DateCreated);
         }
 
         private void FilterStatusWaitForCustomer_Click(object sender, RoutedEventArgs e)
         {
-            DataGrid.ItemsSource = ViewModel.FilterData(HomePageViewModel.FilterOptions.WaitForCustomer).OrderByDescending(x => x.Date);
+            DataGrid.ItemsSource = ViewModel.FilterData(HomePageViewModel.FilterOptions.WaitForCustomer).OrderByDescending(x => x.DateCreated);
         }
 
         private void FilterStatusCheckFinished_Click(object sender, RoutedEventArgs e)
         {
-            DataGrid.ItemsSource = ViewModel.FilterData(HomePageViewModel.FilterOptions.CheckFinisched).OrderByDescending(x => x.Date);
+            DataGrid.ItemsSource = ViewModel.FilterData(HomePageViewModel.FilterOptions.CheckFinisched).OrderByDescending(x => x.DateCreated);
         }
 
         private void FilterClear_Click(object sender, RoutedEventArgs e)
         {
-            DataGrid.ItemsSource = ViewModel.FilterData(HomePageViewModel.FilterOptions.All).OrderByDescending(x => x.Date);
+            DataGrid.ItemsSource = ViewModel.FilterData(HomePageViewModel.FilterOptions.All).OrderByDescending(x => x.DateCreated);
         }
 
         private void SearchQuery_Submitted(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)
         {
-            DataGrid.ItemsSource = ViewModel.SearchData(args.QueryText).OrderByDescending(x => x.Date);
+            DataGrid.ItemsSource = ViewModel.SearchData(args.QueryText).OrderByDescending(x => x.DateCreated);
         }
 
         private void OpenPDFButton_PointerEntered(object sender, PointerRoutedEventArgs e)

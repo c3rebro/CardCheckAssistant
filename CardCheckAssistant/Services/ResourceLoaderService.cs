@@ -125,8 +125,6 @@ namespace CardCheckAssistant.Services
     /// </summary>
     public sealed class ResourceLoaderService : IValueConverter, IDisposable
     {
-        private static readonly string FacilityName = "RFiDGear";
-
         /// <summary>
         ///
         /// </summary>
@@ -169,7 +167,7 @@ namespace CardCheckAssistant.Services
             }
             catch (Exception e)
             {
-                LogWriter.CreateLogEntry(e, FacilityName);
+                LogWriter.CreateLogEntry(e);
 
                 throw new ArgumentOutOfRangeException(
                     string.Format("parameter:{0}\nvalue:{1}",
@@ -234,7 +232,7 @@ namespace CardCheckAssistant.Services
             }
             catch (Exception e)
             {
-                LogWriter.CreateLogEntry(e, FacilityName);
+                LogWriter.CreateLogEntry(e);
                 return string.Empty;
             }
         }

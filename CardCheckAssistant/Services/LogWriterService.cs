@@ -1,10 +1,11 @@
 ﻿/*
  * Created by SharpDevelop.
- * Date: 31.08.2017
+ * DateCreated: 31.08.2017
  * Time: 20:32
  *
  */
 
+using Microsoft.UI.Xaml;
 using System;
 using System.IO;
 
@@ -16,6 +17,7 @@ namespace Log4CSharp
     public static class LogWriter
     {
         private static StreamWriter textStream;
+        private static readonly string FacilityName = Application.Current.GetType().Name;
 
         private static readonly string _logFileName = "log.txt";
 
@@ -23,9 +25,9 @@ namespace Log4CSharp
         ///
         /// </summary>
         /// <param name="entry"></param>
-        public static void CreateLogEntry(string entry, string appDataSubPath)
+        public static void CreateLogEntry(string entry)
         {
-            string _logFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), appDataSubPath, "log");
+            string _logFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), FacilityName, "log");
 
             if (!Directory.Exists(_logFilePath))
             {
@@ -56,9 +58,9 @@ namespace Log4CSharp
         ///
         /// </summary>
         /// <param name="entry"></param>
-        public static void CreateLogEntry(Exception e, string appDataSubPath)
+        public static void CreateLogEntry(Exception e)
         {
-            string _logFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), appDataSubPath, "log");
+            string _logFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), FacilityName, "log");
 
             if (!Directory.Exists(_logFilePath))
             {

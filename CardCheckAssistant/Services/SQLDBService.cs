@@ -22,10 +22,10 @@ public class SQLDBService : IDisposable
     private static readonly object syncRoot = new object();
     private static SQLDBService instance;
 
-    private readonly string? serverName;
+    private readonly string serverName = string.Empty;
     private readonly string dbName;
-    private readonly string? usr;
-    private readonly string? pwd;
+    private readonly string usr;
+    private readonly string pwd;
 
 #if DEBUG
     private const string OMNIDBNAME = "OT_CardCheck_Test";
@@ -121,7 +121,7 @@ public class SQLDBService : IDisposable
         }
         catch (Exception ex)
         {
-            LogWriter.CreateLogEntry(ex, Assembly.GetExecutingAssembly().GetName().Name);
+            LogWriter.CreateLogEntry(ex);
         }
     }
 
@@ -187,7 +187,7 @@ public class SQLDBService : IDisposable
 
                     using (SqlCommand sql_cmd = sqlConnection.CreateCommand())
                     {
-                        sql_cmd.CommandText = "SELECT [CC-ID], [CC-JobNumber], [CC-CardNumber], [CC-CreationDate], [CC-Customername], [CC-EditorName], [CC-Status] FROM " + OMNITABLENAME;
+                        sql_cmd.CommandText = "SELECT [CC-ID], [CC-JobNumber], [CC-CardNumber], [CC-CreationDate], [CC-Customername], [CC-EditorName], [CC-Status], [CC-DealerName], [CC-SalesName], [CC-ChangedDate] FROM " + OMNITABLENAME;
 
                         using (SqlDataReader sql_datareader = await sql_cmd.ExecuteReaderAsync())
                         {
@@ -197,21 +197,24 @@ public class SQLDBService : IDisposable
                                 {
                                     cardCheckProcess = new CardCheckProcess
                                     {
-                                        ID = await sql_datareader.IsDBNullAsync(2) ? null : sql_datareader.GetString(0),
-                                        JobNr = await sql_datareader.IsDBNullAsync(1) ? null : sql_datareader.GetString(1),
-                                        ChipNumber = await sql_datareader.IsDBNullAsync(2) ? null : sql_datareader.GetString(2),
-                                        Date = await sql_datareader.IsDBNullAsync(3) ? null : sql_datareader.GetString(3),
-
-                                        CName = await sql_datareader.IsDBNullAsync(5) ? null : sql_datareader.GetString(4),
-                                        EditorName = await sql_datareader.IsDBNullAsync(6) ? null : sql_datareader.GetString(5),
-                                        Status = (OrderStatus)Enum.Parse(typeof(OrderStatus), await sql_datareader.IsDBNullAsync(6) ? null : sql_datareader.GetString(6))
+                                        ID = await sql_datareader.IsDBNullAsync(2) ? "" : sql_datareader.GetString(0),
+                                        JobNr = await sql_datareader.IsDBNullAsync(1) ? "" : sql_datareader.GetString(1),
+                                        ChipNumber = await sql_datareader.IsDBNullAsync(2) ? "" : sql_datareader.GetString(2),
+                                        DateCreated = await sql_datareader.IsDBNullAsync(3) ? "" : sql_datareader.GetString(3),
+                                        DealerName = await sql_datareader.IsDBNullAsync(7) ? "" : sql_datareader.GetString(7),
+                                        CName = await sql_datareader.IsDBNullAsync(5) ? "" : sql_datareader.GetString(4),
+                                        EditorName = await sql_datareader.IsDBNullAsync(6) ? "" : sql_datareader.GetString(5),
+                                        SalesName = await sql_datareader.IsDBNullAsync(8) ? "" : sql_datareader.GetString(8),
+                                        DateModified = await sql_datareader.IsDBNullAsync(9) ? "" : sql_datareader.GetString(9),
+                                        Status = (OrderStatus)Enum.Parse(typeof(OrderStatus), await sql_datareader.IsDBNullAsync(6) ? "NA" : sql_datareader.GetString(6))
+                                        
                                     };
                                     CardChecks.Add(cardCheckProcess);
-                                    CardChecks = CardChecks.OrderByDescending(x => x.Date).ToList();
+                                    CardChecks = CardChecks.OrderByDescending(x => x.DateCreated).ToList();
                                 }
                                 catch(Exception ex)
                                 {
-                                    LogWriter.CreateLogEntry(ex, Assembly.GetExecutingAssembly().GetName().Name);
+                                    LogWriter.CreateLogEntry(ex);
                                 }
                             }
                         }
@@ -222,7 +225,7 @@ public class SQLDBService : IDisposable
         }
         catch (Exception ex)
         {
-            LogWriter.CreateLogEntry(ex, Assembly.GetExecutingAssembly().GetName().Name);
+            LogWriter.CreateLogEntry(ex);
             IsConnected = false;
         }
 
@@ -264,7 +267,7 @@ public class SQLDBService : IDisposable
                                     EditorName = sqlite_datareader.GetString(8),
                                     //NumberOfChipsToCheck = sqlite_datareader.GetInt32(3),
                                     Status = (OrderStatus)Enum.Parse(typeof(OrderStatus), sqlite_datareader.GetString(6)),
-                                    Date = sqlite_datareader.GetString(3),
+                                    DateCreated = sqlite_datareader.GetString(3),
                                 };
 
                                 cardChecks.Add(cardCheckProcess);
@@ -277,7 +280,7 @@ public class SQLDBService : IDisposable
         }
         catch (Exception ex)
         {
-            LogWriter.CreateLogEntry(ex, Assembly.GetExecutingAssembly().GetName().Name);
+            LogWriter.CreateLogEntry(ex);
         }
 
         return null;
@@ -340,7 +343,7 @@ public class SQLDBService : IDisposable
         }
         catch (Exception ex)
         {
-            LogWriter.CreateLogEntry(ex, Assembly.GetExecutingAssembly().GetName().Name);
+            LogWriter.CreateLogEntry(ex);
             IsConnected = false;
         }
     }
@@ -360,7 +363,7 @@ public class SQLDBService : IDisposable
         }
         catch (Exception e)
         {
-            LogWriter.CreateLogEntry(e, Assembly.GetExecutingAssembly().GetName().Name);
+            LogWriter.CreateLogEntry(e);
         }
     }
 
@@ -376,7 +379,7 @@ public class SQLDBService : IDisposable
         }
         catch (Exception e)
         {
-            LogWriter.CreateLogEntry(e, Assembly.GetExecutingAssembly().GetName().Name);
+            LogWriter.CreateLogEntry(e);
         }
     }
 
@@ -384,7 +387,6 @@ public class SQLDBService : IDisposable
     {
         try
         {
-            CardCheckProcess cardCheckProcess;
             CardChecks = new List<CardCheckProcess>();
 
             SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder();
@@ -428,7 +430,7 @@ public class SQLDBService : IDisposable
         }
         catch (Exception ex)
         {
-            LogWriter.CreateLogEntry(ex, Assembly.GetExecutingAssembly().GetName().Name);
+            LogWriter.CreateLogEntry(ex);
             IsConnected = false;
         }
     }
@@ -437,7 +439,19 @@ public class SQLDBService : IDisposable
     {
         try
         {
-            CardCheckProcess cardCheckProcess;
+            await InsertData("CC-Status", key, value);
+        }
+        catch (Exception ex)
+        {
+            LogWriter.CreateLogEntry(ex);
+            IsConnected = false;
+        }
+    }
+
+    public async Task InsertData(string columnID, string key, string value)
+    {
+        try
+        {
             CardChecks = new List<CardCheckProcess>();
 
             SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder();
@@ -462,7 +476,7 @@ public class SQLDBService : IDisposable
 
                     using (SqlCommand sql_cmd = sqlConnection.CreateCommand())
                     {
-                        sql_cmd.CommandText = string.Format("UPDATE {0} SET [CC-Status] = @status Where [CC-ID] = @id",OMNITABLENAME);
+                        sql_cmd.CommandText = string.Format("UPDATE {0} SET [{1}] = @status Where [CC-ID] = @id", OMNITABLENAME, columnID);
 
                         sql_cmd.Parameters.AddWithValue("@id", key);
                         sql_cmd.Parameters.AddWithValue("@status", value);
@@ -470,13 +484,12 @@ public class SQLDBService : IDisposable
                         sql_cmd.ExecuteNonQuery();
                         sqlConnection.Close();
                     }
-                    
                 }
             }
         }
         catch (Exception ex)
         {
-            LogWriter.CreateLogEntry(ex, Assembly.GetExecutingAssembly().GetName().Name);
+            LogWriter.CreateLogEntry(ex);
             IsConnected = false;
         }
     }
@@ -532,7 +545,7 @@ public class SQLDBService : IDisposable
         }
         catch(Exception ex)
         {
-            LogWriter.CreateLogEntry(ex, Assembly.GetExecutingAssembly().GetName().Name);
+            LogWriter.CreateLogEntry(ex);
             return false;
         }
 

@@ -1,6 +1,6 @@
 ﻿/*
  * Created by SharpDevelop.
- * Date: 12.10.2017
+ * DateCreated: 12.10.2017
  * Time: 15:26
  *
  */
@@ -20,7 +20,7 @@ namespace CardCheckAssistant.DataAccessLayer;
 [XmlRoot("DefaultSettings", IsNullable = false)]
 public class DefaultSettings : IDisposable
 {
-    private Version Version = Assembly.GetExecutingAssembly().GetName().Version;
+    private Version Version = Assembly.GetExecutingAssembly().GetName().Version ?? new Version();
 
     public DefaultSettings()
     {
@@ -28,7 +28,7 @@ public class DefaultSettings : IDisposable
 
     public DefaultSettings(bool init)
     {
-        ManifestVersion = string.Format("{0}.{1}.{2}", Version.Major, Version.Minor, Version.Build);
+        ManifestVersion = string.Format("{0}.{1}.{2}", Version?.Major, Version?.Minor, Version?.Build);
 
         if(init)
         {
@@ -56,7 +56,7 @@ public class DefaultSettings : IDisposable
     /// <summary>
     ///
     /// </summary>
-    public string ManifestVersion
+    public string? ManifestVersion
     {
         get; set;
     }
@@ -64,143 +64,143 @@ public class DefaultSettings : IDisposable
     /// <summary>
     ///
     /// </summary>
-    public bool CardCheckUseMSSQL
+    public bool? CardCheckUseMSSQL
     {
         get => _cardCheckUseSQLLite;
         set => _cardCheckUseSQLLite = value;
     }
-    private bool _cardCheckUseSQLLite;
+    private bool? _cardCheckUseSQLLite;
 
     /// <summary>
     /// 
     /// </summary>
-    public string SelectedDBServerName
+    public string? SelectedDBServerName
     {
         get => _selectedDBServerName;
         set => _selectedDBServerName = value;
     }
-    private string _selectedDBServerName;
+    private string? _selectedDBServerName;
 
     /// <summary>
     /// 
     /// </summary>
-    public string SelectedDBServerPort
+    public string? SelectedDBServerPort
     {
         get => _selectedDBServerPort;
         set => _selectedDBServerPort = value;
     }
-    private string _selectedDBServerPort;
+    private string? _selectedDBServerPort;
 
     /// <summary>
     /// 
     /// </summary>
-    public string SelectedDBName
+    public string? SelectedDBName
     {
         get => _selectedDBName;
         set => _selectedDBName = value;
     }
-    private string _selectedDBName;
+    private string? _selectedDBName;
 
     /// <summary>
     /// 
     /// </summary>
-    public string SelectedDBUsername
+    public string? SelectedDBUsername
     {
         get => _selectedDBUsername;
         set => _selectedDBUsername = value;
     }
-    private string _selectedDBUsername;
+    private string? _selectedDBUsername;
 
     /// <summary>
     /// 
     /// </summary>
-    public string SelectedDBUserPwd
+    public string? SelectedDBUserPwd
     {
         get => _selectedDBUserPwd;
         set => _selectedDBUserPwd = value;
     }
-    private string _selectedDBUserPwd;
+    private string? _selectedDBUserPwd;
 
     /// <summary>
     ///
     /// </summary>
-    public string DefaultTheme
+    public string? DefaultTheme
     {
         get => _defaultTheme;
         set => _defaultTheme = value;
     }
-    private string _defaultTheme;
+    private string? _defaultTheme;
 
     /// <summary>
     ///
     /// </summary>
-    public bool AutoCheckForUpdates
+    public bool? AutoCheckForUpdates
     {
         get => _autoCheckForUpdates;
         set => _autoCheckForUpdates = value;
     }
-    private bool _autoCheckForUpdates;
+    private bool? _autoCheckForUpdates;
 
     /// <summary>
     ///
     /// </summary>
-    public string DefaultLanguage
+    public string? DefaultLanguage
     {
         get => _defaultLanguage;
         set => _defaultLanguage = value;
     }
-    private string _defaultLanguage;
+    private string? _defaultLanguage;
 
     /// <summary>
     ///
     /// </summary>
-    public bool AutoLoadProjectOnStart
+    public bool? AutoLoadProjectOnStart
     {
         get => _autoLoadProjectOnStart;
         set => _autoLoadProjectOnStart = value;
     }
-    private bool _autoLoadProjectOnStart;
+    private bool? _autoLoadProjectOnStart;
 
     /// <summary>
     ///
     /// </summary>
-    public string LastUsedProjectPath
+    public string? LastUsedProjectPath
     {
         get => _lastUsedProjectPath;
         set => _lastUsedProjectPath = value;
     }
-    private string _lastUsedProjectPath;
+    private string? _lastUsedProjectPath;
 
 
     /// <summary>
     ///
     /// </summary>
-    public string LastUsedCustomProjectPath
+    public string? LastUsedCustomProjectPath
     {
         get => _lastUsedCustomProjectPath;
         set => _lastUsedCustomProjectPath = value;
     }
-    private string _lastUsedCustomProjectPath;
+    private string? _lastUsedCustomProjectPath;
 
     /// <summary>
     ///
     /// </summary>
-    public string DefaultRFIDGearExePath
+    public string? DefaultRFIDGearExePath
     {
         get => _defaultRFIDGearExePath;
         set => _defaultRFIDGearExePath = value;
     }
-    private string _defaultRFIDGearExePath;
+    private string? _defaultRFIDGearExePath;
 
     /// <summary>
     ///
     /// </summary>
-    public string DefaultProjectOutputPath
+    public string? DefaultProjectOutputPath
     {
         get => _defaultProjectOutputPath;
         set => _defaultProjectOutputPath = value;
     }
-    private string _defaultProjectOutputPath;
+    private string? _defaultProjectOutputPath;
     #endregion properties
 
     #region Extensions

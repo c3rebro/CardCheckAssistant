@@ -1,24 +1,24 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Media;
-using System.Diagnostics;
-using System.Threading.Tasks;
-using System.Windows.Input;
-using System.Linq;
+
+
 using CardCheckAssistant.Models;
 using CardCheckAssistant.Services;
-using System.Collections.Generic;
 using CardCheckAssistant.Views;
 using CardCheckAssistant.AppNotification;
-using System.Security.Cryptography.X509Certificates;
+
 using Log4CSharp;
+
+using System.Diagnostics;
+using System.Windows.Input;
 using System.Reflection;
-using System.Timers;
 using System.Collections.ObjectModel;
-using System.Runtime.CompilerServices;
-using Newtonsoft.Json.Linq;
+using System.IO.Packaging;
+
+using Windows.ApplicationModel;
 
 namespace CardCheckAssistant.ViewModels;
 
@@ -36,6 +36,9 @@ public class HomePageViewModel : ObservableObject, IDisposable
     private const string DBNAME = "OT_CardCheck";
 #endif
 
+    /// <summary>
+    /// 
+    /// </summary>
     public HomePageViewModel()
     {
 
@@ -75,7 +78,7 @@ public class HomePageViewModel : ObservableObject, IDisposable
         }
 
 
-        var window = (Application.Current as App)?.Window as MainWindow;
+        var window = (Application.Current as App)?.Window as MainWindow ?? new MainWindow();
         var navigation = window.Navigation;
 
         // At AppLaunch: Disable all "In between" Steps.
@@ -86,14 +89,29 @@ public class HomePageViewModel : ObservableObject, IDisposable
     }
 
     #region Properties
+
+    /// <summary>
+    /// 
+    /// </summary>
     public string HomePageVersionString
     {
         get {
             Assembly assembly = Assembly.GetExecutingAssembly();
             FileVersionInfo fvi = FileVersionInfo.GetVersionInfo(assembly.Location);
-            return string.Format("CardCheckAssistant                  Version: {0}",fvi.FileVersion); }
+            PackageVersion? packageVersion = null;
+
+            try
+            {
+                packageVersion = Windows.ApplicationModel.Package.Current?.Id?.Version;
+            }
+            catch { }
+
+            return string.Format("CardCheckAssistant                  Version: {0}", packageVersion == null ? fvi.FileVersion : packageVersion.ToString()); }
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
     public string ButtonStartCheckContent
     {
         get => _buttonStartCheckContent;
@@ -101,6 +119,9 @@ public class HomePageViewModel : ObservableObject, IDisposable
     }
     private string _buttonStartCheckContent;
 
+    /// <summary>
+    /// 
+    /// </summary>
     public string WelcomeScreenText
     {
         get => _welcomeScreenText;
@@ -108,6 +129,9 @@ public class HomePageViewModel : ObservableObject, IDisposable
     }
     private string _welcomeScreenText;
 
+    /// <summary>
+    /// 
+    /// </summary>
     public string NumberOfChecksText
     {
         get => _umberOfChecksText;
@@ -115,6 +139,9 @@ public class HomePageViewModel : ObservableObject, IDisposable
     }
     private string _umberOfChecksText;
 
+    /// <summary>
+    /// 
+    /// </summary>
     public bool HomePageIsBusy
     {
         get => _homePageIsBusy;
@@ -122,6 +149,9 @@ public class HomePageViewModel : ObservableObject, IDisposable
     }
     private bool _homePageIsBusy;
 
+    /// <summary>
+    /// 
+    /// </summary>
     public bool StartCheckCanExecute
     {
         get => _startCheckCanExecute;
@@ -129,6 +159,9 @@ public class HomePageViewModel : ObservableObject, IDisposable
     }
     private bool _startCheckCanExecute;
 
+    /// <summary>
+    /// 
+    /// </summary>
     public bool ShowAllJobs
     {
         get => _showAllJobs;
@@ -139,7 +172,10 @@ public class HomePageViewModel : ObservableObject, IDisposable
     }
     private bool _showAllJobs;
 
-    public CardCheckProcess SelectedCardCheckProcess
+    /// <summary>
+    /// 
+    /// </summary>
+    public CardCheckProcess? SelectedCardCheckProcess
     {
         get => _selectedCardCheckProcess;
         set {
@@ -164,6 +200,10 @@ public class HomePageViewModel : ObservableObject, IDisposable
                         StartCheckCanExecute = true;
                         ButtonStartCheckContent = "Prüfvorgang starten";
                         break;
+                    case OrderStatus.CheckFinished:
+                        StartCheckCanExecute = true;
+                        ButtonStartCheckContent = "Berichtschreibschutz entfernen";
+                        break;
                     default:
                         StartCheckCanExecute = false;
                         ButtonStartCheckContent = "Vorgang auswählen";
@@ -173,7 +213,7 @@ public class HomePageViewModel : ObservableObject, IDisposable
             SetProperty(ref _selectedCardCheckProcess, value);
         }
     }
-    private CardCheckProcess _selectedCardCheckProcess;
+    private CardCheckProcess? _selectedCardCheckProcess;
     #endregion
 
     #region ObservableObjects
@@ -184,7 +224,6 @@ public class HomePageViewModel : ObservableObject, IDisposable
         set => SetProperty(ref _dataGridItemCollection, value);
     }
     private ObservableCollection<CardCheckProcess> _dataGridItemCollection;
-
 
     #region Filter
 
@@ -232,13 +271,13 @@ public class HomePageViewModel : ObservableObject, IDisposable
                 if (ascending)
                 {
                     return new ObservableCollection<CardCheckProcess>(from item in _dataGridItemCollection
-                                                                      orderby item.Date ascending
+                                                                      orderby item.DateCreated ascending
                                                                       select item);
                 }
                 else
                 {
                     return new ObservableCollection<CardCheckProcess>(from item in _dataGridItemCollection
-                                                                      orderby item.Date descending
+                                                                      orderby item.DateCreated descending
                                                                       select item);
                 }
 
@@ -259,43 +298,6 @@ public class HomePageViewModel : ObservableObject, IDisposable
 
         return _dataGridItemCollection;
     }
-
-    // Grouping implementation using LINQ
-
-    /*
-    public CollectionViewSource GroupData(string groupBy = "Range")
-    {
-        ObservableCollection<GroupInfoCollection<DataGridDataItem>> groups = new ObservableCollection<GroupInfoCollection<DataGridDataItem>>();
-        var query = from item in _items
-                    orderby item
-                    group item by item.Range into g
-                    select new { GroupName = g.Key, Items = g };
-        if (groupBy == "Parent_Mountain")
-        {
-            query = from item in _items
-                    orderby item
-                    group item by item.Parent_mountain into g
-                    select new { GroupName = g.Key, Items = g };
-        }
-        foreach (var g in query)
-        {
-            GroupInfoCollection<DataGridDataItem> info = new GroupInfoCollection<DataGridDataItem>();
-            info.Key = g.GroupName;
-            foreach (var item in g.Items)
-            {
-                info.Add(item);
-            }
-
-            groups.Add(info);
-        }
-
-        groupedItems = new CollectionViewSource();
-        groupedItems.IsSourceGrouped = true;
-        groupedItems.Source = groups;
-
-        return groupedItems;
-    }
-    */
 
     public class GroupInfoCollection<T> : ObservableCollection<T>
     {
@@ -345,8 +347,10 @@ public class HomePageViewModel : ObservableObject, IDisposable
                                                               where (
                                                               item.JobNr.Contains(queryText, StringComparison.InvariantCultureIgnoreCase) ||
                                                               item.CName.Contains(queryText, StringComparison.InvariantCultureIgnoreCase) ||
+                                                              item.DealerName.Contains(queryText, StringComparison.InvariantCultureIgnoreCase) ||
+                                                              item.SalesName.Contains(queryText, StringComparison.InvariantCultureIgnoreCase) ||
                                                               item.EditorName.Contains(queryText, StringComparison.InvariantCultureIgnoreCase) ||
-                                                              item.Date.Contains(queryText, StringComparison.InvariantCultureIgnoreCase))
+                                                              item.DateCreated.Contains(queryText, StringComparison.InvariantCultureIgnoreCase))
                                                               select item);
         }
 
@@ -364,16 +368,15 @@ public class HomePageViewModel : ObservableObject, IDisposable
     public IAsyncRelayCommand OpenSelectedReportCommand { get; }
 
     public ICommand PostPageLoadedCommand => new AsyncRelayCommand(PostPageLoadedCommand_Executed);
-    public ICommand InputStringCommand => new AsyncRelayCommand(InputString_Executed);
 
     public ICommand NavigateCommand => 
         new RelayCommand(() => 
         {
-            if (SelectedCardCheckProcess.Status == OrderStatus.Created)
+            if (SelectedCardCheckProcess?.Status == OrderStatus.Created)
             {
                 BeginCardCheck_Executed();
             }
-            else if (SelectedCardCheckProcess.Status == OrderStatus.InProgress)
+            else if (SelectedCardCheckProcess?.Status == OrderStatus.InProgress)
             {
                 ContinueCardCheck_Executed();
             }
@@ -409,7 +412,7 @@ public class HomePageViewModel : ObservableObject, IDisposable
 
         catch(Exception ex)
         {
-            LogWriter.CreateLogEntry(ex, Assembly.GetExecutingAssembly().GetName().Name);
+            LogWriter.CreateLogEntry(ex);
         }
     }
 
@@ -428,32 +431,17 @@ public class HomePageViewModel : ObservableObject, IDisposable
                                 "Datenbankverbindung",
                                 "Aufträge werden geladen...", "Abbrechen", "connectWaitMsgDlg");
 
-            HomePageIsBusy= true;
+            HomePageIsBusy = true;
             // ensure attention of user
             await Task.Delay(2000);
-
 
             try
             {
                 // Connect to DB Async
-                cardCheckProcesses = await ReadCardChecks();
+                cardCheckProcesses = await ReadCardChecks() ?? new ObservableCollection<CardCheckProcess>();
 
                 if (cardCheckProcesses != null)
                 {
-                    /*
-                    foreach (var cardCheck in cardCheckProcesses)
-                    {
-                        if (cardCheck.Status != OrderStatus.InProgress)
-                        {
-                            cardCheck.IsVisible = "Collapsed";
-                        }
-                        else
-                        {
-                            cardCheck.IsVisible = "Collapsed";
-                        }
-                    }
-                    */
-
                     if(DataGridItemCollection == null)
                     {
                         DataGridItemCollection = new ObservableCollection<CardCheckProcess>(cardCheckProcesses.OrderBy(x => x.Status));
@@ -467,7 +455,7 @@ public class HomePageViewModel : ObservableObject, IDisposable
             //I expect the Delay to be not so sufficient on some machines
             catch (Exception e)
             {
-                LogWriter.CreateLogEntry(e, Assembly.GetExecutingAssembly().GetName().Name);
+                LogWriter.CreateLogEntry(e);
             }
 
 
@@ -495,10 +483,14 @@ public class HomePageViewModel : ObservableObject, IDisposable
         }
         catch (Exception e)
         {
-            LogWriter.CreateLogEntry(e, Assembly.GetExecutingAssembly().GetName().Name);
+            LogWriter.CreateLogEntry(e);
         }
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <returns></returns>
     private async Task NoJobFoundInDB_Executed()
     {
         await App.MainRoot.MessageDialogAsync(
@@ -510,6 +502,10 @@ public class HomePageViewModel : ObservableObject, IDisposable
         "Happy CardChecking ;-)");
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <returns></returns>
     private async Task DBConnectFailed_Executed()
     {
         await App.MainRoot.MessageDialogAsync(
@@ -519,89 +515,94 @@ public class HomePageViewModel : ObservableObject, IDisposable
     }
     #endregion
 
-    public async void InputText_Click(object sender, RoutedEventArgs e)
-    {
-        Debug.WriteLine("Opening Text Input Dialog.");
-        var inputText = await App.MainRoot.InputTextDialogAsync(
-                "What would Faramir say?",
-                "“War must be, while we defend our lives against a destroyer who would devour all; but I do not love the bright sword for its sharpness, nor the arrow for its swiftness, nor the warrior for his glory. I love only that which they defend.”\n\nJ.R.R. Tolkien"
-            );
-
-            Debug.WriteLine($"Text Input Dialog was closed with {inputText}.");
-    }
-
-    private async Task InputString_Executed()
-    {
-        Debug.WriteLine("Opening String Input Dialog.");
-        var inputString = await App.MainRoot.InputStringDialogAsync(
-                "How can we help you?",
-                "I need ammunition, not a ride.",
-                "OK",
-                "Forget it"
-            );
-        Debug.WriteLine($"String Input Dialog was closed with '{inputString}'.");
-    }
-    
+    /// <summary>
+    /// 
+    /// </summary>
     public void BeginCardCheck_Executed()
     {
-        SelectedCardCheckProcess.Status = OrderStatus.InProgress;
+        if(SelectedCardCheckProcess != null)
+        {
+            SelectedCardCheckProcess.Status = OrderStatus.InProgress;
 
-        var window = (Application.Current as App)?.Window as MainWindow;
-        var navigation = window.Navigation;
-        var step1Page = navigation.GetNavigationViewItems(typeof(Step1Page)).First();
-        navigation.SetCurrentNavigationViewItem(step1Page);
-        step1Page.IsEnabled = true;
+            var window = (Application.Current as App)?.Window as MainWindow ?? new MainWindow();
+            var navigation = window.Navigation;
+            var step1Page = navigation.GetNavigationViewItems(typeof(Step1Page)).First();
+            navigation.SetCurrentNavigationViewItem(step1Page);
+            step1Page.IsEnabled = true;
+        }
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
     public void ContinueCardCheck_Executed()
     {
         scanDBTimer.Stop();
 
-        var window = (Application.Current as App)?.Window as MainWindow;
+        var window = (Application.Current as App)?.Window as MainWindow ?? new MainWindow();
         var navigation = window.Navigation;
         NavigationViewItem page = navigation.GetNavigationViewItems(typeof(Step1Page)).First();
-        switch (SelectedCardCheckProcess.CurrentProcessNumber)
+
+        if (SelectedCardCheckProcess != null)
         {
-            case 1:
-                page = navigation.GetNavigationViewItems(typeof(Step1Page)).First();
-                break;
-            case 2:
-                page = navigation.GetNavigationViewItems(typeof(Step2Page)).First();
-                break;
-            case 3:
-                //page = navigation.GetNavigationViewItems(typeof(Step3Page)).First();
-                break;
+            switch (SelectedCardCheckProcess.CurrentProcessNumber)
+            {
+                case 1:
+                    page = navigation.GetNavigationViewItems(typeof(Step1Page)).First();
+                    break;
+                case 2:
+                    page = navigation.GetNavigationViewItems(typeof(Step2Page)).First();
+                    break;
+                case 3:
+                    //page = navigation.GetNavigationViewItems(typeof(Step3Page)).First();
+                    break;
+            }
         }
         
         page.IsEnabled = true;
         navigation.SetCurrentNavigationViewItem(page);
     }
 
-    private async Task<ObservableCollection<CardCheckProcess>> ReadCardChecks()
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <returns></returns>
+    private async Task<ObservableCollection<CardCheckProcess>?> ReadCardChecks()
     {
-        using (SettingsReaderWriter settings = new SettingsReaderWriter())
+        try
         {
-            // Connect to DB Async
+            using (SettingsReaderWriter settings = new SettingsReaderWriter())
+            {
+                // Connect to DB Async
 
-            if (settings.DefaultSettings.CardCheckUseMSSQL)
-            {
-                return await SQLDBService.Instance.GetCardChecksFromMSSQLAsync();
+                if (settings.DefaultSettings.CardCheckUseMSSQL ?? false)
+                {
+                    return await SQLDBService.Instance.GetCardChecksFromMSSQLAsync();
+                }
+                else
+                {
+                    return await SQLDBService.Instance.GetCardChecksFromSQLLiteAsync();
+                }
             }
-            else
-            {
-                return await SQLDBService.Instance.GetCardChecksFromSQLLiteAsync();
-            }
+        }
+        catch(Exception ex)
+        {
+            LogWriter.CreateLogEntry(ex);
+
+            return null;
         }
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
     private async void OnTimedEvent(object? sender, object e)
     {
         try
         {
-            //scanDBTimer.Stop();
-            //var t = await SQLDBService.Instance.GetCardCheckReportFromMSSQLAsync("KP-000038-1");
-            
-            var cardCheckProcessesFromDB = await ReadCardChecks();
+            var cardCheckProcessesFromDB = await ReadCardChecks() ?? new ObservableCollection<CardCheckProcess>();
 
             var selectedID = SelectedCardCheckProcess?.ID;
 
@@ -613,12 +614,20 @@ public class HomePageViewModel : ObservableObject, IDisposable
             {
                 foreach(var item in cardCheckProcessesFromDB)
                 {
+                    // There are new ID's, got from DB
                     if(!cardCheckProcesses.Where(x => x.ID == item.ID).Any())
                     {
-                        cardCheckProcesses = new ObservableCollection<CardCheckProcess>(cardCheckProcessesFromDB.OrderBy(x => x.Status));
-                        DataGridItemCollection = FilterData(currentFilter);
+
+                        ToastWithAvatar.Instance.ScenarioName = "Neue Aufträge gefunden...";
+                        ToastWithAvatar.Instance.SendToast(string.Format("Es wurde ein neuer Auftrag gefunden:\n" +
+                            "ID: {0}\n" +
+                            "Job ID: {1}\n" +
+                            "Kunde: {2}", item.ID, item.JobNr, item.CName), "Assistent öffnen", "refreshDB", null);
                     }
                 }
+
+                cardCheckProcesses = new ObservableCollection<CardCheckProcess>(cardCheckProcessesFromDB.OrderBy(x => x.Status));
+                DataGridItemCollection = FilterData(currentFilter);
             }
 
             try
@@ -632,19 +641,6 @@ public class HomePageViewModel : ObservableObject, IDisposable
 
             if (cardCheckProcesses != null)
             {
-                //Notify on new DB entry / on new ID
-                foreach (var cc in cardCheckProcesses.Where(x => x.Status == OrderStatus.InProgress))
-                {
-                    if (!cardCheckProcessesFromDB.Where(y => y.Status == OrderStatus.InProgress).Select(x => x.ID).Contains(cc.ID))
-                    {
-                        ToastWithAvatar.Instance.ScenarioName = "Neue Aufträge gefunden...";
-                        ToastWithAvatar.Instance.SendToast(string.Format("Es wurde ein neuer Auftrag gefunden:\n" +
-                            "ID: {0}\n" +
-                            "Job ID: {1}" +
-                            "Kunde: {2}", cc.ID, cc.JobNr, cc.CName), "Assistent öffnen", "refreshDB", null);
-                    }
-                }
-
                 if (cardCheckProcessesFromDB == null)
                 {
                     await DBConnectFailed_Executed();
@@ -662,7 +658,6 @@ public class HomePageViewModel : ObservableObject, IDisposable
                     WelcomeScreenText = "Aufträge gefunden";
                     NumberOfChecksText = string.Format("Zahl der neuen Aufträge: {0}", cardCheckProcessesFromDB.Where(x => x.Status == OrderStatus.InProgress).Count());
                 }
-
             }
         }
         catch 

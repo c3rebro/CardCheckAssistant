@@ -39,7 +39,7 @@
 
         <Border
             Grid.Row="0"
-            CornerRadius="8,8,8,8" Grid.ColumnSpan="4" Grid.RowSpan="7">
+            CornerRadius="8,8,8,8" Grid.ColumnSpan="5" Grid.RowSpan="7">
             <Border>
                 <Border.Background>
                     <RadialGradientBrush>
@@ -75,7 +75,7 @@
         <TextBlock 
             Margin="8,8,0,0" 
             TextWrapping="Wrap" 
-            Grid.ColumnSpan="4" 
+            Grid.ColumnSpan="5" 
             Grid.Column="0" 
             Grid.Row="0"
             Visibility="{Binding TextBlockCheckNotYetFinishedIsVisible, Converter={StaticResource boolean}, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}">
@@ -85,7 +85,7 @@
         <TextBlock 
             Margin="8,8,0,0" 
             TextWrapping="Wrap" 
-            Grid.ColumnSpan="4" 
+            Grid.ColumnSpan="5" 
             Grid.Column="0" 
             Grid.Row="0"
             Visibility="{Binding HyperlinkButtonReportIsVisible, Converter={StaticResource boolean}, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}">
@@ -111,7 +111,7 @@
         <TextBlock 
             Margin="8,8" 
             TextWrapping="Wrap" 
-            Grid.ColumnSpan="4" 
+            Grid.ColumnSpan="5" 
             Grid.Column="0" 
             Grid.Row="4"
             Visibility="{Binding HyperlinkButtonReportIsVisible, Converter={StaticResource boolean}, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}">
@@ -161,7 +161,7 @@
             HorizontalAlignment="Right"
             IsEnabled="{Binding NextStepCanExecute, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
             Opacity="1"
-            Command="{Binding NavigateNextStepCommand}"
+            Command="{x:Bind Step3PageVM.NavigateNextStepCommand}"
             Content="Fertigstellen">
             <Button.Resources>
                 <ResourceDictionary>
@@ -193,7 +193,7 @@
         <ProgressRing 
             Grid.Column="0"
             Grid.Row="0"
-            Grid.ColumnSpan="4"
+            Grid.ColumnSpan="5"
             Grid.RowSpan="7"
             Width="auto"
             Height="auto"
@@ -208,7 +208,7 @@
         <ProgressRing 
             Grid.Column="0"
             Grid.Row="0"
-            Grid.ColumnSpan="4"
+            Grid.ColumnSpan="5"
             Grid.RowSpan="7"
             Width="auto"
             Height="auto"

@@ -26,9 +26,16 @@
     <DefaultLanguage>de-DE</DefaultLanguage>
     <ApplicationIcon>Assets\AppIco.ico</ApplicationIcon>
     <PackageIcon>Assets\StoreLogo.scale-400.png</PackageIcon>
-    <FileVersion>1.0.17</FileVersion>
-    <AssemblyVersion>1.0.17</AssemblyVersion>
-    <RepositoryUrl>https://github.com/c3rebro/CardCheckassistant</RepositoryUrl>
+    <AssemblyVersion>1.0.19</AssemblyVersion>
+    <RepositoryUrl>https://github.com/c3rebro/CardCheckAssistant</RepositoryUrl>
+    <FileVersion>1.0.19</FileVersion>
+    <PackageReleaseNotes>v1.0.19
+------------------------------------------------------
++ Abfrage der LSM Programmieroptionen: Wie wurde programmiert?
+   Dies kann jetzt direkt eingegeben werden ohne das PDF öffnen zu müssen.
++ Mifare Classic wird während der Prüfung anders behandelt (z.B. Angabe verwendeter Sektoren)
++ Händler und ADM als neue Spalten.</PackageReleaseNotes>
+    <PackageOutputPath>$(OutputPath)</PackageOutputPath>
   </PropertyGroup>
   <ItemGroup>
     <Compile Remove="App.xaml.Settings.cs" />
@@ -224,6 +231,21 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Update="Assets\S3.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Update="Assets\test.gif">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Update="Assets\yetmsohno.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Update="Assets\yetmsok.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Update="Assets\yetmswait.gif">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Update="Assets\yetmswait1.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

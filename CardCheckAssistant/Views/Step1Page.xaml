@@ -38,7 +38,7 @@
 
         <Border
             Grid.Row="0"
-            CornerRadius="8,8,8,8" Grid.ColumnSpan="4" Grid.RowSpan="7">
+            CornerRadius="8,8,8,8" Grid.ColumnSpan="5" Grid.RowSpan="7">
             <Border>
                 <Border.Background>
                     <RadialGradientBrush>
@@ -73,7 +73,7 @@
 
         <TextBlock 
             Margin="8,8,8,8" 
-            Grid.ColumnSpan="4" 
+            Grid.ColumnSpan="5" 
             Grid.Column="0" 
             Grid.Row="0" 
             VerticalAlignment="Center" >
@@ -82,7 +82,7 @@
         <InfoBar
             Grid.Column="0"
             Grid.Row="1"
-            Grid.ColumnSpan="4"
+            Grid.ColumnSpan="5"
             Margin="15"
             IsOpen="True"
             IsIconVisible="True"
@@ -94,7 +94,7 @@
         <InfoBar
             Grid.Column="0"
             Grid.Row="1"
-            Grid.ColumnSpan="4"
+            Grid.ColumnSpan="5"
             Margin="15"
             IsOpen="True"
             IsIconVisible="True"
@@ -117,7 +117,7 @@
             Message="{Binding ChipInfoMessage, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}"/>
         <TextBlock 
             Margin="8,8,8,8" 
-            Grid.ColumnSpan="4" 
+            Grid.ColumnSpan="5" 
             Grid.Column="0" 
             Grid.Row="2" 
             VerticalAlignment="Center" >

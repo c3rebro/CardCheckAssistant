@@ -7,22 +7,24 @@ using CommunityToolkit.Mvvm.Input;
 using Microsoft.UI.Xaml;
 
 using System.Diagnostics;
-using System;
-using System.IO;
-using System.Threading.Tasks;
 using System.Windows.Input;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Threading;
-using System.Windows.Threading;
-using Windows.Foundation;
+
+using Log4CSharp;
+
 using CardCheckAssistant.Models;
 using Microsoft.UI.Xaml.Controls;
 
 namespace CardCheckAssistant.ViewModels;
 
+/// <summary>
+/// 
+/// </summary>
 public class Step3PageViewModel : ObservableObject
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public Step3PageViewModel()
     {
         NextStepCanExecute = false;
@@ -40,6 +42,11 @@ public class Step3PageViewModel : ObservableObject
         RunRFiDGearCommand = new AsyncRelayCommand(ExecuteRFIDGearCommand);
     }
 
+    #region ObservableProperties
+
+    /// <summary>
+    /// 
+    /// </summary>
     public string NextStepButtonContent
     {
         get => _nextStepButtonContent;
@@ -47,6 +54,9 @@ public class Step3PageViewModel : ObservableObject
     }
     private string _nextStepButtonContent;
 
+    /// <summary>
+    /// 
+    /// </summary>
     public bool TextBlockCheckFinishedAndResultIsSuppAndProgIsVisible
     {
         get => _textBlockCheckFinishedAndResultIsSuppAndProgIsVisible;
@@ -54,6 +64,9 @@ public class Step3PageViewModel : ObservableObject
     }
     private bool _textBlockCheckFinishedAndResultIsSuppAndProgIsVisible;
 
+    /// <summary>
+    /// 
+    /// </summary>
     public bool HyperlinkButtonReportIsVisible
     {
         get => _hyperlinkButtonReportIsVisible;
@@ -61,6 +74,9 @@ public class Step3PageViewModel : ObservableObject
     }
     private bool _hyperlinkButtonReportIsVisible;
 
+    /// <summary>
+    /// 
+    /// </summary>
     public bool TextBlockCheckFinishedIsVisible
     {
         get => _textBlockCheckFinishedIsVisible;
@@ -68,13 +84,19 @@ public class Step3PageViewModel : ObservableObject
     }
     private bool _textBlockCheckFinishedIsVisible;
 
+    /// <summary>
+    /// 
+    /// </summary>
     public bool TextBlockCheckNotYetFinishedIsVisible
     {
         get => _textBlockCheckNotYetFinishedIsVisible;
         set => SetProperty(ref _textBlockCheckNotYetFinishedIsVisible, value);
     }
     private bool _textBlockCheckNotYetFinishedIsVisible;
-    
+
+    /// <summary>
+    /// 
+    /// </summary>
     public bool TextBlockCheckFinishedAndResultIsSuppOnlyIsVisible
     {
         get => _textBlockCheckFinishedAndResultIsSuppOnlyIsVisible;
@@ -82,6 +104,9 @@ public class Step3PageViewModel : ObservableObject
     }
     private bool _textBlockCheckFinishedAndResultIsSuppOnlyIsVisible;
 
+    /// <summary>
+    /// 
+    /// </summary>
     public bool NextStepCanExecute
     {
         get => _nextStepCanExecute;
@@ -89,6 +114,9 @@ public class Step3PageViewModel : ObservableObject
     }
     private bool _nextStepCanExecute;
 
+    /// <summary>
+    /// 
+    /// </summary>
     public bool GoBackCanExecute
     {
         get => _goBackCanExecute;
@@ -96,65 +124,113 @@ public class Step3PageViewModel : ObservableObject
     }
     private bool _goBackCanExecute;
 
-    public string JobNumber => string.Format("JobNr.: {0}; {1}",CheckProcessService.CurrentCardCheckProcess.JobNr, CheckProcessService.CurrentCardCheckProcess.CName);
+    /// <summary>
+    /// 
+    /// </summary>
+    public string JobNumber => string.Format("JobNr.: {0}; ChipNummer: {1}; Kunde: {2}", CheckProcessService.CurrentCardCheckProcess.JobNr, CheckProcessService.CurrentCardCheckProcess.ChipNumber, CheckProcessService.CurrentCardCheckProcess.CName);
+
+    /// <summary>
+    /// 
+    /// </summary>
     public string ReportLanguage => string.Format("{0}", CheckProcessService.CurrentCardCheckProcess.ReportLanguage);
 
+    /// <summary>
+    /// 
+    /// </summary>
+    public ObservableCollection<string> ChipCount { get; set; }
+
+    #endregion
+
     #region Commands
+
+    /// <summary>
+    /// 
+    /// </summary>
     public IAsyncRelayCommand NavigateNextStepCommand { get; }
+
+    /// <summary>
+    /// 
+    /// </summary>
     public IAsyncRelayCommand RunRFiDGearCommand { get; }
 
+    /// <summary>
+    /// 
+    /// </summary>
     public ICommand NavigateBackCommand => new RelayCommand(NavigateBackCommand_Executed);
 
+    /// <summary>
+    /// 
+    /// </summary>
     public ICommand PostPageLoadedCommand => new AsyncRelayCommand(PostPageLoadedCommand_Executed);
 
+    /// <summary>
+    /// 
+    /// </summary>
     public ICommand OpenReportCommand => new RelayCommand(OpenReportCommand_Executed);
+
+    /// <summary>
+    /// 
+    /// </summary>
     public ICommand OpenReportPathCommand => new RelayCommand(OpenReportPathCommand_Executed);
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <returns></returns>
     private async Task ExecuteRFIDGearCommand()
     {
-        using SettingsReaderWriter settings = new SettingsReaderWriter();
-        settings.ReadSettings();
-
-        var p = new Process();
-        var tokenSource = new CancellationTokenSource();
-        var ct = tokenSource.Token;
-
-        var info = new ProcessStartInfo()
-        {
-            FileName = settings.DefaultSettings.DefaultRFIDGearExePath,
-            Verb = "",
-            Arguments = string.Format(
-                "REPORTTARGETPATH=" + "\"" + "{0}" + "\" " +
-                "REPORTTEMPLATEFILE=" + "\"" + "{1}" + "\" " +
-                "CUSTOMPROJECTFILE=" + "\"" + "{2}" + "\" " +
-                "$JOBNUMBER=" + "\"" + "{3}" + "\" " +
-                "$CHIPNUMBER=" + "\"" + "{4}" + "\" " +
-                "{5}",
-                settings.DefaultSettings.DefaultProjectOutputPath + "\\" + CheckProcessService.CurrentCardCheckProcess.JobNr + "-" + CheckProcessService.CurrentCardCheckProcess.ChipNumber + "_final.pdf",
-                settings.DefaultSettings.DefaultProjectOutputPath + "\\" + CheckProcessService.CurrentCardCheckProcess.JobNr + "-" + CheckProcessService.CurrentCardCheckProcess.ChipNumber + ".pdf",
-                settings.DefaultSettings.LastUsedCustomProjectPath,
-                CheckProcessService.CurrentCardCheckProcess.JobNr,
-                CheckProcessService.CurrentCardCheckProcess.ChipNumber,
-                settings.DefaultSettings.AutoLoadProjectOnStart ? "AUTORUN=1" : "AUTORUN=0"),
-
-            UseShellExecute = false,
-            WorkingDirectory = settings.DefaultSettings.DefaultProjectOutputPath
-        };
-
         try
         {
+            using SettingsReaderWriter settings = new SettingsReaderWriter();
+            settings.ReadSettings();
+
             using ReportReaderWriterService reportReader = new ReportReaderWriterService();
+
+            string finalPath = settings.DefaultSettings.DefaultProjectOutputPath + "\\" + CheckProcessService.CurrentCardCheckProcess.JobNr + "-" + CheckProcessService.CurrentCardCheckProcess.ChipNumber + "_final.pdf";
+            string semiFinalPath = settings.DefaultSettings.DefaultProjectOutputPath + "\\" + CheckProcessService.CurrentCardCheckProcess.JobNr + "-" + CheckProcessService.CurrentCardCheckProcess.ChipNumber + "_.pdf";
+
+            var p = new Process();
+            var tokenSource = new CancellationTokenSource();
+            var ct = tokenSource.Token;
+
+            var info = new ProcessStartInfo()
+            {
+                FileName = settings.DefaultSettings.DefaultRFIDGearExePath,
+                Verb = "",
+                Arguments = string.Format(
+                    "REPORTTARGETPATH=" + "\"" + "{0}" + "\" " +
+                    "REPORTTEMPLATEFILE=" + "\"" + "{1}" + "\" " +
+                    "CUSTOMPROJECTFILE=" + "\"" + "{2}" + "\" " +
+                    "$JOBNUMBER=" + "\"" + "{3}" + "\" " +
+                    "$CHIPNUMBER=" + "\"" + "{4}" + "\" " +
+                    "{5}",
+                    finalPath,
+                    semiFinalPath,
+                    settings.DefaultSettings.LastUsedCustomProjectPath,
+                    CheckProcessService.CurrentCardCheckProcess.JobNr,
+                    CheckProcessService.CurrentCardCheckProcess.ChipNumber,
+                    (settings.DefaultSettings.AutoLoadProjectOnStart ?? false) ? "AUTORUN=1" : "AUTORUN=0"),
+
+                UseShellExecute = false,
+                WorkingDirectory = settings.DefaultSettings.DefaultProjectOutputPath
+            };
 
             p.StartInfo = info;
 
             p.Exited += (sender, eventArgs) =>
             {
-                reportReader.ReportTemplatePath = settings.DefaultSettings.DefaultProjectOutputPath + "\\" + CheckProcessService.CurrentCardCheckProcess.JobNr + "-" + CheckProcessService.CurrentCardCheckProcess.ChipNumber + ".pdf";                    
+                if (File.Exists(finalPath))
+                {
+                    File.Copy(finalPath, semiFinalPath, true);
+                }
             };
 
             p.Start();
 
             await p.WaitForExitAsync();
+
+            reportReader.ReportTemplatePath = semiFinalPath;
+            reportReader.ReportOutputPath = finalPath;
 
             var supported = reportReader.GetReportField("CheckBox_isChipSuppYes") != null && reportReader.GetReportField("CheckBox_isChipSuppYes") == "Yes";
             var programmable = reportReader.GetReportField("CheckBox_ChipCanUseYes") != null && reportReader.GetReportField("CheckBox_ChipCanUseYes") == "Yes";
@@ -190,93 +266,156 @@ public class Step3PageViewModel : ObservableObject
                 TextBlockCheckFinishedAndResultIsSuppAndProgIsVisible = true;
 
             }
+
+            reportReader.SetReadOnlyOnAllFields(true);
         }
 
         catch (Exception e)
         {
-            //LogWriter.CreateLogEntry(string.Format("{0}: {1}; {2}", DateTime.Now, e.Message, e.InnerException != null ? e.InnerException.Message : ""), FacilityName);
-
-            return;
+            LogWriter.CreateLogEntry(e);
         }
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <returns></returns>
     public async Task PostPageLoadedCommand_Executed()
     {
-        await RunRFiDGearCommand.ExecuteAsync(null);
-
-        NextStepCanExecute = true;
+        try
+        {
+            await RunRFiDGearCommand.ExecuteAsync(null);
+            NextStepCanExecute = true;
+        }
+        catch (Exception e)
+        {
+            LogWriter.CreateLogEntry(e);
+        }
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
     private void OpenReportCommand_Executed()
     {
-        using SettingsReaderWriter settings = new SettingsReaderWriter();
-        settings.ReadSettings();
-
-        var p = new Process();
-
-        var info = new ProcessStartInfo()
+        try
         {
-            FileName = settings.DefaultSettings.DefaultProjectOutputPath + "\\" + CheckProcessService.CurrentCardCheckProcess.JobNr + "-" + CheckProcessService.CurrentCardCheckProcess.ChipNumber + ".pdf",
-            Verb = "",     
-            UseShellExecute = true
-        };
+            using SettingsReaderWriter settings = new SettingsReaderWriter();
+            settings.ReadSettings();
 
-        p.StartInfo = info;
+            var p = new Process();
 
-        p.Start();
+            var info = new ProcessStartInfo()
+            {
+                FileName = settings.DefaultSettings.DefaultProjectOutputPath + "\\" + CheckProcessService.CurrentCardCheckProcess.JobNr + "-" + CheckProcessService.CurrentCardCheckProcess.ChipNumber + "_final.pdf",
+                Verb = "",
+                UseShellExecute = true
+            };
+
+            p.StartInfo = info;
+
+            p.Start();
+        }
+        catch (Exception e)
+        {
+            LogWriter.CreateLogEntry(e);
+        }
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
     private void OpenReportPathCommand_Executed()
     {
-        using SettingsReaderWriter settings = new SettingsReaderWriter();
-        settings.ReadSettings();
-
-        var p = new Process();
-
-        var info = new ProcessStartInfo()
+        try
         {
-            FileName = settings.DefaultSettings.DefaultProjectOutputPath + "\\",
-            Verb = "",
-            UseShellExecute = true
-        };
+            using SettingsReaderWriter settings = new SettingsReaderWriter();
+            settings.ReadSettings();
 
-        p.StartInfo = info;
+            var p = new Process();
 
-        p.Start();
+            var info = new ProcessStartInfo()
+            {
+                FileName = settings.DefaultSettings.DefaultProjectOutputPath + "\\",
+                Verb = "",
+                UseShellExecute = true
+            };
+
+            p.StartInfo = info;
+
+            p.Start();
+        }
+        catch (Exception e)
+        {
+            LogWriter.CreateLogEntry(e);
+        }
     }
 
     #endregion
 
-    public ObservableCollection<string> ChipCount { get; set; }
+    #region ExtensionMethods
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <returns></returns>
     private async Task NavigateNextStepCommand_Executed()
     {
-        using SettingsReaderWriter settings = new SettingsReaderWriter();
-        settings.ReadSettings();
+        try
+        {
+            using SettingsReaderWriter settings = new SettingsReaderWriter();
 
-        var window = (Application.Current as App)?.Window as MainWindow;
-        var navigation = window.Navigation;
-        NavigationViewItem nextpage;
-        nextpage = navigation.GetNavigationViewItems(typeof(HomePage)).First();
+            settings.ReadSettings();
 
-        List<CardCheckProcess> cardChecks = SQLDBService.Instance.CardChecks;
+            string finalPath = settings.DefaultSettings.DefaultProjectOutputPath + "\\" + CheckProcessService.CurrentCardCheckProcess.JobNr + "-" + CheckProcessService.CurrentCardCheckProcess.ChipNumber + "_final.pdf";
+            string semiFinalPath = settings.DefaultSettings.DefaultProjectOutputPath + "\\" + CheckProcessService.CurrentCardCheckProcess.JobNr + "-" + CheckProcessService.CurrentCardCheckProcess.ChipNumber + "_.pdf";
+            string preFinalPath = settings.DefaultSettings.DefaultProjectOutputPath + "\\" + CheckProcessService.CurrentCardCheckProcess.JobNr + "-" + CheckProcessService.CurrentCardCheckProcess.ChipNumber + ".pdf";
 
-        var fileName = settings.DefaultSettings.DefaultProjectOutputPath + "\\" + CheckProcessService.CurrentCardCheckProcess.JobNr + "-" + CheckProcessService.CurrentCardCheckProcess.ChipNumber + "_final.pdf";
-        var fileStream = File.Open(fileName, FileMode.Open);
+            var window = (Application.Current as App)?.Window as MainWindow ?? new MainWindow();
+            var navigation = window.Navigation;
+            NavigationViewItem nextpage;
+            nextpage = navigation.GetNavigationViewItems(typeof(HomePage)).First();
 
-        await SQLDBService.Instance.InsertData(CheckProcessService.CurrentCardCheckProcess.ID, fileStream);
-        await SQLDBService.Instance.InsertData(CheckProcessService.CurrentCardCheckProcess.ID, OrderStatus.CheckFinished.ToString());
+            List<CardCheckProcess> cardChecks = SQLDBService.Instance.CardChecks;
 
-        navigation.SetCurrentNavigationViewItem(nextpage);
-        nextpage.IsEnabled = true;
+            var fileName = finalPath;
+            var fileStream = File.Open(fileName, FileMode.Open);
+
+            await SQLDBService.Instance.InsertData(CheckProcessService.CurrentCardCheckProcess.ID, fileStream);
+            await SQLDBService.Instance.InsertData(CheckProcessService.CurrentCardCheckProcess.ID, OrderStatus.CheckFinished.ToString());
+
+            fileStream.Close();
+
+            File.Delete(preFinalPath);
+            File.Delete(semiFinalPath);
+
+            navigation.SetCurrentNavigationViewItem(nextpage);
+            nextpage.IsEnabled = true;
+        }
+        catch (Exception e)
+        {
+            LogWriter.CreateLogEntry(e);
+        }
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
     private void NavigateBackCommand_Executed()
     {
-        var window = (Application.Current as App)?.Window as MainWindow;
-        var navigation = window.Navigation;
-        var step1Page = navigation.GetNavigationViewItems(typeof(Step1Page)).First();
-        navigation.SetCurrentNavigationViewItem(step1Page);
+        try
+        {
+            var window = (Application.Current as App)?.Window as MainWindow ?? new MainWindow();
+            var navigation = window.Navigation;
+            var step1Page = navigation.GetNavigationViewItems(typeof(Step1Page)).First();
+            navigation.SetCurrentNavigationViewItem(step1Page);
+        }
+        catch (Exception e)
+        {
+            LogWriter.CreateLogEntry(e);
+        }
     }
+    #endregion
+
 
 }

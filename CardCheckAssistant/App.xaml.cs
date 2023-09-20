@@ -70,11 +70,9 @@ public partial class App : Application
             notificationManager.Init(notificationManager, OnNotificationInvoked);
         }
 
-        //m_window.Activate();
-
         MainRoot = m_window.Content as FrameworkElement;
 
-        m_window.SetWindowSize(1000, 700);
+        m_window.SetWindowSize(1150, 750);
 
         var hWnd = WinRT.Interop.WindowNative.GetWindowHandle(m_window);
         Microsoft.UI.WindowId windowId = Microsoft.UI.Win32Interop.GetWindowIdFromWindow(hWnd);

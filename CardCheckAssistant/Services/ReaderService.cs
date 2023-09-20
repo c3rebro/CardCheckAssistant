@@ -31,7 +31,7 @@ namespace CardCheckAssistant.Services
             }
             catch (Exception e)
             {
-                LogWriter.CreateLogEntry(e, App.Current.GetType().Name);
+                LogWriter.CreateLogEntry(e);
             }
         }
 
@@ -40,7 +40,7 @@ namespace CardCheckAssistant.Services
             get { return readerDevice.MoreThanOneReader; }
         }
 
-        public GenericChipModel GenericChip
+        public GenericChipModel? GenericChip
         {
             get; private set;
         }
@@ -88,33 +88,33 @@ namespace CardCheckAssistant.Services
                                 readerDevice.RedLED(false);
 
 
-                                GenericChip = new GenericChipModel(hfTag.UID,
-                                    hfTag.CardType,
-                                    hfTag.SAK,
-                                    hfTag.RATS,
-                                    hfTag.VersionL4
+                                GenericChip = new GenericChipModel(hfTag?.UID ?? "",
+                                    hfTag?.CardType ?? ChipType.NOTAG,
+                                    hfTag?.SAK ?? "",
+                                    hfTag?.RATS ?? "",
+                                    hfTag?.VersionL4 ?? ""
                                     );
 
                                 if (lfTag != null && lfTag?.CardType != ChipType.NOTAG)
                                 {
                                     if(GenericChip != null && GenericChip.CardType != ChipType.NOTAG)
                                     {
-                                        GenericChip.Child = new GenericChipModel(lfTag.UID, lfTag.CardType);
+                                        GenericChip.Child = new GenericChipModel(lfTag?.UID ?? "", lfTag?.CardType ?? ChipType.NOTAG);
                                     }
                                     else
                                     {
-                                        GenericChip = new GenericChipModel(lfTag.UID, lfTag.CardType);
+                                        GenericChip = new GenericChipModel(lfTag?.UID ?? "", lfTag?.CardType ?? ChipType.NOTAG);
                                     }
                                 }
                                 else if (legicTag != null && legicTag?.CardType != ChipType.NOTAG)
                                 {
                                     if (GenericChip != null && GenericChip.CardType != ChipType.NOTAG)
                                     {
-                                        GenericChip.Child = new GenericChipModel(legicTag.UID, legicTag.CardType);
+                                        GenericChip.Child = new GenericChipModel(legicTag?.UID ?? "", legicTag?.CardType ?? ChipType.NOTAG);
                                     }
                                     else
                                     {
-                                        GenericChip = new GenericChipModel(legicTag.UID, legicTag.CardType);
+                                        GenericChip = new GenericChipModel(legicTag?.UID ?? "", legicTag?.CardType ?? ChipType.NOTAG);
                                     }
                                 }
 
@@ -122,7 +122,7 @@ namespace CardCheckAssistant.Services
                             }
                             catch (Exception e)
                             {
-                                LogWriter.CreateLogEntry(e, App.Current.GetType().Name);
+                                LogWriter.CreateLogEntry(e);
                                 return 1;
                             }
                         }
@@ -149,7 +149,7 @@ namespace CardCheckAssistant.Services
                         readerDevice.Dispose();
                     }
 
-                    LogWriter.CreateLogEntry(e, App.Current.GetType().Name);
+                    LogWriter.CreateLogEntry(e);
 
                     return 2;
                 }

@@ -2,12 +2,15 @@
 
 using Log4CSharp;
 
+using Microsoft.UI.Xaml;
+
 using System;
 using System.Collections.ObjectModel;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Xml;
+
 using Newtonsoft.Json.Linq;
 
 namespace CardCheckAssistant.Services;
@@ -18,8 +21,6 @@ namespace CardCheckAssistant.Services;
 public class ReportReaderWriterService : IDisposable
 {
     #region fields
-    private static readonly string FacilityName = "CardCheckAssistant";
-
     private readonly Version Version = Assembly.GetExecutingAssembly().GetName().Version;
 
     private const string reportTemplateTempFileName = "temptemplate.pdf";
@@ -29,6 +30,11 @@ public class ReportReaderWriterService : IDisposable
 
     #endregion fields
 
+   #region Public Methods
+
+    /// <summary>
+    /// 
+    /// </summary>
     public ReportReaderWriterService()
     {
         try
@@ -52,11 +58,14 @@ public class ReportReaderWriterService : IDisposable
         }
         catch (Exception e)
         {
-            LogWriter.CreateLogEntry(string.Format("{0}; {1}; {2}", DateTime.Now, e.Message, e.InnerException != null ? e.InnerException.Message : ""), FacilityName);
-            return;
+            LogWriter.CreateLogEntry(e);
         }
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <returns></returns>
     public ObservableCollection<string> GetReportFields()
     {
         try
@@ -79,7 +88,7 @@ public class ReportReaderWriterService : IDisposable
                 }
                 catch (Exception e)
                 {
-                    LogWriter.CreateLogEntry(e, FacilityName);
+                    LogWriter.CreateLogEntry(e);
                 }
             }
 
@@ -88,16 +97,66 @@ public class ReportReaderWriterService : IDisposable
         }
         catch (XmlException e)
         {
-            LogWriter.CreateLogEntry(e, FacilityName);
+            LogWriter.CreateLogEntry(e);
             return null;
         }
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="isReadOnly"></param>
+    public void SetReadOnlyOnAllFields(bool isReadOnly)
+    {
+        try
+        {
+            if (!String.IsNullOrWhiteSpace(ReportOutputPath))
+            {
+                using (var pdfDoc = PdfDocument.Load(ReportTemplatePath))
+                {
+                    try
+                    {
+                        if(pdfDoc != null)
+                        {
+                            ReportTemplatePath = System.IO.Path.Combine(appDataPath, reportTemplateTempFileName);
+
+                            var form = pdfDoc.Form;
+
+                            foreach (var _field in form.Fields)
+                            {
+                                pdfDoc.Form.Fields[_field.Name].ReadOnly = isReadOnly;
+                            }
+
+                            pdfDoc.Save(ReportOutputPath);
+                            pdfDoc.Close();
+
+                            File.Copy(ReportOutputPath, System.IO.Path.Combine(appDataPath, reportTemplateTempFileName), true);
+                        }
+
+                    }
+                    catch (Exception e)
+                    {
+                        LogWriter.CreateLogEntry(e);
+                    }
+                }
+            }
+        }
+        catch (XmlException e)
+        {
+            LogWriter.CreateLogEntry(e);
+        }
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="_field"></param>
+    /// <param name="_value"></param>
     public void SetReportField(string _field, string _value)
     {
-        if (!String.IsNullOrWhiteSpace(ReportOutputPath))
+        try
         {
-            try
+            if (!String.IsNullOrWhiteSpace(ReportOutputPath))
             {
                 using (var pdfDoc = PdfDocument.Load(ReportTemplatePath)) // (new PdfReader(ReportTemplatePath), new PdfWriter(ReportOutputPath)))
                 {
@@ -107,9 +166,13 @@ public class ReportReaderWriterService : IDisposable
 
                         var form = pdfDoc.Form;
 
-                        pdfDoc.Form.Fields[_field].Hidden = false;
-                        pdfDoc.Form.Fields[_field].ReadOnly = false;
-                        pdfDoc.Form.Fields[_field].Value = _value;
+                        if(pdfDoc.Form.Fields[_field] != null)
+                        {
+                            pdfDoc.Form.Fields[_field].Hidden = false;
+                            pdfDoc.Form.Fields[_field].ReadOnly = false;
+                            pdfDoc.Form.Fields[_field].Value = _value;
+                        }
+
 
                         pdfDoc.Save(ReportOutputPath);
                         pdfDoc.Close();
@@ -118,23 +181,27 @@ public class ReportReaderWriterService : IDisposable
                     }
                     catch (Exception e)
                     {
-                        LogWriter.CreateLogEntry(e, FacilityName);
+                        LogWriter.CreateLogEntry(e);
                     }
                 }
             }
-            catch (XmlException e)
-            {
-                LogWriter.CreateLogEntry(e, FacilityName);
-            }
         }
-
+        catch (XmlException e)
+        {
+            LogWriter.CreateLogEntry(e);
+        }
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="_field"></param>
+    /// <param name="_value"></param>
     public void ConcatReportField(string _field, string _value)
     {
-        if (!String.IsNullOrWhiteSpace(ReportOutputPath))
+        try
         {
-            try
+            if (!String.IsNullOrWhiteSpace(ReportOutputPath))
             {
                 ReportTemplatePath = System.IO.Path.Combine(appDataPath, reportTemplateTempFileName);
 
@@ -155,26 +222,32 @@ public class ReportReaderWriterService : IDisposable
                     }
                     catch (Exception e)
                     {
-                        LogWriter.CreateLogEntry(e, FacilityName);
+                        LogWriter.CreateLogEntry(e);
                     }
                 }
             }
-            catch (XmlException e)
-            {
-                LogWriter.CreateLogEntry(e, FacilityName);
-            }
         }
-
+        catch (XmlException e)
+        {
+            LogWriter.CreateLogEntry(e);
+        }
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="_field"></param>
+    /// <returns></returns>
     public string GetReportField(string _field)
     {
-        var result = "";
-
-        if (!String.IsNullOrWhiteSpace(ReportTemplatePath))
+        try
         {
-            try
+            var result = "";
+
+            if (!String.IsNullOrWhiteSpace(ReportTemplatePath))
             {
+                    
+
                 using (var pdfDoc = PdfDocument.Load(ReportTemplatePath))
                 {
                     try
@@ -187,23 +260,38 @@ public class ReportReaderWriterService : IDisposable
                     }
                     catch (Exception e)
                     {
-                        LogWriter.CreateLogEntry(e, FacilityName);
+                        LogWriter.CreateLogEntry(e);
                     }
                 }
-            }
-            catch (XmlException e)
-            {
-                LogWriter.CreateLogEntry(e, FacilityName);
-            }
-        }
 
-        return result;
+                    
+            }
+            return result;
+        }
+        catch (XmlException e)
+        {
+            LogWriter.CreateLogEntry(e);
+
+            return string.Empty;
+        }
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
     public void DeleteDatabase()
     {
-        File.Delete(System.IO.Path.Combine(ReportOutputPath));
+        try
+        {
+            File.Delete(System.IO.Path.Combine(ReportOutputPath));
+        }
+        catch (XmlException e)
+        {
+            LogWriter.CreateLogEntry(e);
+        }
     }
+    #endregion
+ 
 
     protected virtual void Dispose(bool disposing)
     {
@@ -219,7 +307,7 @@ public class ReportReaderWriterService : IDisposable
 
                 catch (XmlException e)
                 {
-                    LogWriter.CreateLogEntry(e, FacilityName);
+                    LogWriter.CreateLogEntry(e);
                 }
             }
 

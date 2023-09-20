@@ -1,25 +1,29 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+
 using Microsoft.UI.Xaml;
-using System.Diagnostics;
-using System.Threading.Tasks;
+
 using System.Windows.Input;
-using CardCheckAssistant.Models;
 using CardCheckAssistant.Services;
-using System;
 using System.Collections.ObjectModel;
-using System.Linq;
 using CardCheckAssistant.Views;
-using Windows.Storage.Pickers;
-using CommunityToolkit.Common;
+using Log4CSharp;
 
 namespace CardCheckAssistant.ViewModels;
 
+/// <summary>
+/// 
+/// </summary>
 public class Step1PageViewModel : ObservableObject, IDisposable
 {
-
+    /// <summary>
+    /// 
+    /// </summary>
     private readonly DispatcherTimer scanChipTimer;
 
+    /// <summary>
+    /// 
+    /// </summary>
     public Step1PageViewModel()
     {
         scanChipTimer = new DispatcherTimer();
@@ -31,7 +35,7 @@ public class Step1PageViewModel : ObservableObject, IDisposable
             "Deutsch" 
         };
 
-        SelectedReportLaguage = Languages.FirstOrDefault();
+        SelectedReportLaguage = Languages.FirstOrDefault() ?? "de";
 
         NextStepCanExecute = false;
         GoBackCanExecute = true;
@@ -43,11 +47,17 @@ public class Step1PageViewModel : ObservableObject, IDisposable
 
     #region ObservableObjects
 
+    /// <summary>
+    /// 
+    /// </summary>
     public ObservableCollection<string> Languages
     {
         get; set;
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
     public bool HasTwoReadersInfoBarIsVisible
     {
         get => hasTwoReadersInfoBarIsVisible;
@@ -55,6 +65,9 @@ public class Step1PageViewModel : ObservableObject, IDisposable
     }
     private bool hasTwoReadersInfoBarIsVisible;
 
+    /// <summary>
+    /// 
+    /// </summary>
     public bool NoChipDetectedInfoBarIsVisible
     {
         get => noChipDetectedInfoBarIsVisible;
@@ -62,6 +75,9 @@ public class Step1PageViewModel : ObservableObject, IDisposable
     }
     private bool noChipDetectedInfoBarIsVisible;
 
+    /// <summary>
+    /// 
+    /// </summary>
     public bool ChipDetectedInfoBarIsVisible
     {
         get => chipDetectedInfoBarIsVisible;
@@ -69,6 +85,9 @@ public class Step1PageViewModel : ObservableObject, IDisposable
     }
     private bool chipDetectedInfoBarIsVisible;
 
+    /// <summary>
+    /// 
+    /// </summary>
     public string ChipInfoMessage
     {
         get => chipInfoMessage;
@@ -76,19 +95,9 @@ public class Step1PageViewModel : ObservableObject, IDisposable
     }
     private string chipInfoMessage;
 
-    public async void InputText_Click(object sender, RoutedEventArgs e)
-    {
-        /*
-        Debug.WriteLine("Opening Text Input Dialog.");
-        var inputText = await App.MainRoot.InputTextDialogAsync(
-                "What would Faramir say?",
-                "“War must be, while we defend our lives against a destroyer who would devour all; but I do not love the bright sword for its sharpness, nor the arrow for its swiftness, nor the warrior for his glory. I love only that which they defend.”\n\nJ.R.R. Tolkien"
-            );
-
-        Debug.WriteLine($"Text Input Dialog was closed with {inputText}.");
-        */
-    }
-
+    /// <summary>
+    /// 
+    /// </summary>
     public bool NextStepCanExecute
     {
         get => _nextStepCanExecute;
@@ -96,6 +105,9 @@ public class Step1PageViewModel : ObservableObject, IDisposable
     }
     private bool _nextStepCanExecute;
 
+    /// <summary>
+    /// 
+    /// </summary>
     public bool GoBackCanExecute
     {
         get => _goBackCanExecute;
@@ -103,8 +115,14 @@ public class Step1PageViewModel : ObservableObject, IDisposable
     }
     private bool _goBackCanExecute;
 
+    /// <summary>
+    /// 
+    /// </summary>
     public string JobNumber => string.Format("JobNr.: {0}; ChipNummer: {1}; Kunde: {2}",CheckProcessService.CurrentCardCheckProcess.JobNr, CheckProcessService.CurrentCardCheckProcess.ChipNumber, CheckProcessService.CurrentCardCheckProcess.CName);
 
+    /// <summary>
+    /// 
+    /// </summary>
     public string SelectedReportLaguage
     {
         get => _selectedReportLaguage;
@@ -120,16 +138,26 @@ public class Step1PageViewModel : ObservableObject, IDisposable
 
     #region Commands
 
-    public ICommand NavigateNextStepCommand => new AsyncRelayCommand(NavigateNextStepCommand_Executed);
+    /// <summary>
+    /// 
+    /// </summary>
+    public ICommand NavigateNextStepCommand => new RelayCommand(NavigateNextStepCommand_Executed);
 
+    /// <summary>
+    /// 
+    /// </summary>
     public ICommand NavigateBackCommand => new RelayCommand(NavigateBackCommand_Executed);
-
-    public ICommand InputStringCommand => new AsyncRelayCommand(InputString_Executed);
 
     #endregion
 
+    #region Extension Methods
 
-    private async void ScanChipEvent(object? sender, object e)
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
+    private async void ScanChipEvent(object? sender, object? e)
     {
         try
         {
@@ -176,46 +204,55 @@ public class Step1PageViewModel : ObservableObject, IDisposable
 
             }
         }
-        catch
+        catch(Exception ex)
         {
-
+            LogWriter.CreateLogEntry(ex);
         }
     }
 
-    private async Task InputString_Executed()
-    {
-        Debug.WriteLine("Opening String Input Dialog.");
-        var inputString = await App.MainRoot.InputStringDialogAsync(
-                "How can we help you?",
-                "I need ammunition, not a ride.",
-                "OK",
-                "Forget it"
-            );
-        Debug.WriteLine($"String Input Dialog was closed with '{inputString}'.");
-    }
-    
-    private async Task NavigateNextStepCommand_Executed()
-    {
-        scanChipTimer.Stop();
+    #endregion
 
-        var window = (Application.Current as App)?.Window as MainWindow;
-        var navigation = window.Navigation;
-        var step2Page = navigation.GetNavigationViewItems(typeof(Step2Page)).First();
-        navigation.SetCurrentNavigationViewItem(step2Page);
-        step2Page.IsEnabled = true;
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <returns></returns>
+    private void NavigateNextStepCommand_Executed()
+    {
+        try
+        {
+            scanChipTimer.Stop();
+
+            var window = (Application.Current as App)?.Window as MainWindow ?? new MainWindow();
+            var navigation = window.Navigation;
+            var step2Page = navigation.GetNavigationViewItems(typeof(Step2Page)).First();
+            navigation.SetCurrentNavigationViewItem(step2Page);
+            step2Page.IsEnabled = true;
+        }
+        catch(Exception e)
+        {
+            LogWriter.CreateLogEntry(e);
+        }
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
     private void NavigateBackCommand_Executed()
     {
-        scanChipTimer.Stop();
+        try
+        {
+            scanChipTimer.Stop();
 
-        var window = (Application.Current as App)?.Window as MainWindow;
-        var navigation = window.Navigation;
-        var homePage = navigation.GetNavigationViewItems(typeof(HomePage)).First();
-        navigation.SetCurrentNavigationViewItem(homePage);
+            var window = (Application.Current as App)?.Window as MainWindow ?? new MainWindow();
+            var navigation = window.Navigation;
+            var homePage = navigation.GetNavigationViewItems(typeof(HomePage)).First();
+            navigation.SetCurrentNavigationViewItem(homePage);
+        }
+        catch(Exception e)
+        {
+            LogWriter.CreateLogEntry(e);
+        }
 
-        this.Dispose();
-        //Step1Page.IsEnabled = true;
     }
 
     protected void Dispose(bool disposing)

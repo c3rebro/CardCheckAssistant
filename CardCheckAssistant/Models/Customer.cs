@@ -10,9 +10,12 @@ public class Customer
     public string JobNr { get; set; }
     public string ChipNumber { get; set; }
     public string OmniLink { get; set; }
-    public string Date { get; set; }
+    public string DateCreated { get; set; }
+    public string DateModified { get; set; }
     public string CName { get; set; }
+    public string DealerName { get; set; }
     public string EditorName { get; set; }
+    public string SalesName { get; set; }
     public bool IsMember { get; set; }
     public OrderStatus Status { get; set; }
 }

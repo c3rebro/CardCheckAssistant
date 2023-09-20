@@ -56,13 +56,13 @@ public class SettingsPageViewModel : ObservableObject
         }
         catch (Exception ex)
         {
-            Log4CSharp.LogWriter.CreateLogEntry(ex, Assembly.GetExecutingAssembly().GetName().Name);
+            Log4CSharp.LogWriter.CreateLogEntry(ex);
         }
     }
 
     #region ObservableObjects
 
-    public bool CardCheckUseSQLLite
+    public bool? CardCheckUseSQLLite
     {
         get => _cardCheckUseSQLLite;
         set
@@ -73,9 +73,9 @@ public class SettingsPageViewModel : ObservableObject
             SetProperty(ref _cardCheckUseSQLLite, value);
         }
     }
-    private bool _cardCheckUseSQLLite;
+    private bool? _cardCheckUseSQLLite;
 
-    public string SelectedDBServerName
+    public string? SelectedDBServerName
     {
         get => _selectedDBServerName;
         set
@@ -86,9 +86,9 @@ public class SettingsPageViewModel : ObservableObject
             SetProperty(ref _selectedDBServerName, value);
         }
     }
-    private string _selectedDBServerName;
+    private string? _selectedDBServerName;
 
-    public string SelectedDBServerPort
+    public string? SelectedDBServerPort
     {
         get => _selectedDBServerPort;
         set
@@ -99,9 +99,9 @@ public class SettingsPageViewModel : ObservableObject
             SetProperty(ref _selectedDBServerPort, value);
         }
     }
-    private string _selectedDBServerPort;
+    private string? _selectedDBServerPort;
 
-    public string SelectedDBName
+    public string? SelectedDBName
     {
         get => _selectedDBName;
         set
@@ -112,9 +112,9 @@ public class SettingsPageViewModel : ObservableObject
             SetProperty(ref _selectedDBName, value);
         }
     }
-    private string _selectedDBName;
+    private string? _selectedDBName;
 
-    public string SelectedDBUsername
+    public string? SelectedDBUsername
     {
         get => _selectedDBUsername;
         set
@@ -125,9 +125,9 @@ public class SettingsPageViewModel : ObservableObject
             SetProperty(ref _selectedDBUsername, value);
         }
     }
-    private string _selectedDBUsername;
+    private string? _selectedDBUsername;
 
-    public string SelectedDBUserPwd
+    public string? SelectedDBUserPwd
     {
         get => _selectedDBUserPwd;
         set
@@ -139,9 +139,9 @@ public class SettingsPageViewModel : ObservableObject
             SetProperty(ref _selectedDBUserPwd, value);
         }
     }
-    private string _selectedDBUserPwd;
+    private string? _selectedDBUserPwd;
 
-    public string SelectedCustomProjectFolder
+    public string? SelectedCustomProjectFolder
     {
         get => _selectedCustomProjectFolder;
         set
@@ -152,9 +152,9 @@ public class SettingsPageViewModel : ObservableObject
             SetProperty(ref _selectedCustomProjectFolder, value);
         }
     }
-    private string _selectedCustomProjectFolder;
+    private string? _selectedCustomProjectFolder;
 
-    public string SelectedProjectFolder
+    public string? SelectedProjectFolder
     {
         get => _selectedProjectFolder;
         set 
@@ -165,9 +165,9 @@ public class SettingsPageViewModel : ObservableObject
             SetProperty(ref _selectedProjectFolder, value);
         }
     }
-    private string _selectedProjectFolder;
+    private string? _selectedProjectFolder;
 
-    public string SelectedRFIDGearPath
+    public string? SelectedRFIDGearPath
     {
         get => _selectedRFIDGearPath;
         set
@@ -178,15 +178,15 @@ public class SettingsPageViewModel : ObservableObject
             SetProperty(ref _selectedRFIDGearPath, value);
         }
     }
-    private string _selectedRFIDGearPath;
+    private string? _selectedRFIDGearPath;
 
-    public string SelectedTheme
+    public string? SelectedTheme
     {
         get => _selectedTheme;
         set
         {
             SetProperty(ref _selectedTheme, value);
-            var m_window = (Application.Current as App)?.Window as MainWindow;
+            var m_window = (Application.Current as App)?.Window as MainWindow ?? new MainWindow();
             m_window.SelectedTheme = value;
             
             using SettingsReaderWriter settings = new SettingsReaderWriter();
@@ -195,9 +195,9 @@ public class SettingsPageViewModel : ObservableObject
             settings.SaveSettings();
         }
     }
-    private string _selectedTheme;
+    private string? _selectedTheme;
 
-    public bool RFiDGearIsAutoRunEnabled
+    public bool? RFiDGearIsAutoRunEnabled
     {
         get => _rFiDGearIsAutoRunEnabled;
         set
@@ -209,9 +209,9 @@ public class SettingsPageViewModel : ObservableObject
             settings.SaveSettings();
         }
     }
-    private bool _rFiDGearIsAutoRunEnabled;
+    private bool? _rFiDGearIsAutoRunEnabled;
 
-    public ObservableCollection<string> ThemeSource
+    public ObservableCollection<string>? ThemeSource
     {
         get => _themeSource;
         set
@@ -219,7 +219,7 @@ public class SettingsPageViewModel : ObservableObject
             SetProperty(ref _themeSource, value);
         }
     }
-    private ObservableCollection<string> _themeSource;
+    private ObservableCollection<string>? _themeSource;
 
     #endregion
 
@@ -244,7 +244,7 @@ public class SettingsPageViewModel : ObservableObject
         using (SettingsReaderWriter settings = new SettingsReaderWriter())
         {
             // Connect to DB Async
-            if (settings.DefaultSettings.CardCheckUseMSSQL)
+            if (settings.DefaultSettings.CardCheckUseMSSQL ?? false)
             {
                 using (SQLDBService dbService = new SQLDBService(
                     settings.DefaultSettings.SelectedDBServerName,
@@ -279,7 +279,7 @@ public class SettingsPageViewModel : ObservableObject
 
     private async Task SelectRFIDGearExe_Executed()
     {
-        var window = (Application.Current as App)?.Window as MainWindow;
+        var window = (Application.Current as App)?.Window as MainWindow ?? new MainWindow();
 
         var filePicker = new FileOpenPicker();
 
@@ -293,13 +293,13 @@ public class SettingsPageViewModel : ObservableObject
         var file = await filePicker.PickSingleFileAsync();
         if (file != null && !string.IsNullOrEmpty(file.Path.ToString()))
         {
-            SelectedRFIDGearPath = file?.Path.ToString();
+            SelectedRFIDGearPath = file?.Path.ToString() ?? "";
         }   
     }
 
     private async Task SelectRFIDGearCustomProjectCommand_Executed()
     {
-        var window = (Application.Current as App)?.Window as MainWindow;
+        var window = (Application.Current as App)?.Window as MainWindow ?? new MainWindow();
 
         var filePicker = new FileOpenPicker();
 
@@ -319,7 +319,7 @@ public class SettingsPageViewModel : ObservableObject
     }
     private async Task SelectProjectFolder_Executed()
     {
-        var window = (Application.Current as App)?.Window as MainWindow;
+        var window = (Application.Current as App)?.Window as MainWindow ?? new MainWindow();
 
         var folderPicker = new FolderPicker();
 
@@ -339,7 +339,7 @@ public class SettingsPageViewModel : ObservableObject
 
     private void NavigateNextStepCommand_Executed()
     {
-        var window = (Application.Current as App)?.Window as MainWindow;
+        var window = (Application.Current as App)?.Window as MainWindow ?? new MainWindow();
         var navigation = window.Navigation;
         var step2Page = navigation.GetNavigationViewItems(typeof(Step2Page)).First();
         navigation.SetCurrentNavigationViewItem(step2Page);
@@ -348,7 +348,7 @@ public class SettingsPageViewModel : ObservableObject
 
     private void NavigateBackCommand_Executed()
     {
-        var window = (Application.Current as App)?.Window as MainWindow;
+        var window = (Application.Current as App)?.Window as MainWindow ?? new MainWindow();
         var navigation = window.Navigation;
         var step1Page = navigation.GetNavigationViewItems(typeof(Step1Page)).First();
         navigation.SetCurrentNavigationViewItem(step1Page);
@@ -371,7 +371,7 @@ public class SettingsPageViewModel : ObservableObject
             }
             catch(Exception ex)
             {
-                Log4CSharp.LogWriter.CreateLogEntry(ex, Assembly.GetExecutingAssembly().GetName().Name);
+                Log4CSharp.LogWriter.CreateLogEntry(ex);
                 return "";
             }
         }
@@ -392,7 +392,7 @@ public class SettingsPageViewModel : ObservableObject
             }
             catch(Exception ex)
             {
-                Log4CSharp.LogWriter.CreateLogEntry(ex, Assembly.GetExecutingAssembly().GetName().Name);
+                Log4CSharp.LogWriter.CreateLogEntry(ex);
                 return "";
             }
         }
@@ -458,7 +458,7 @@ public class SettingsPageViewModel : ObservableObject
 
             // Declare the string used to hold
             // the decrypted text.
-            string plaintext = null;
+            string plaintext = "";
 
             // Create an Rijndael object
             // with the specified key and IV.
@@ -503,7 +503,7 @@ public class SettingsPageViewModel : ObservableObject
 
                     catch (Exception e)
                     {
-                        LogWriter.CreateLogEntry(e, Assembly.GetExecutingAssembly().GetName().Name);
+                        LogWriter.CreateLogEntry(e);
                     }
                 }
 
