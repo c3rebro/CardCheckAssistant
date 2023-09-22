@@ -7,10 +7,13 @@ namespace CardCheckAssistant.Views;
 
 public sealed partial class AppNotificationPage : Page
 {
-    internal static AppNotificationPage Instance;
+    public static AppNotificationPage Instance
+    {
+        get; private set;
+    }
+
     public AppNotificationPage()
     {
-        //this.InitializeComponent();
         Instance = this;
     }
 
@@ -20,19 +23,20 @@ public sealed partial class AppNotificationPage : Page
         {
             if (notification.HasInput)
             {
-                //txtReceived.Text = notification.Input;
+                txtReceived.Text = notification.Input;
             }
             else
             {
-               // txtReceived.Text = "Notification Received";
+               txtReceived.Text = "Notification Received";
             }
         });
     }
+
     public void NotificationInvoked(string message)
     {
         DispatcherQueue.TryEnqueue(() =>
         {
-            //txtInvoked.Text = message;
+            txtInvoked.Text = message;
         });
     }
     private void btnToast1_Click(object sender, RoutedEventArgs e)

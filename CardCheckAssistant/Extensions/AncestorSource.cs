@@ -23,13 +23,19 @@ namespace CardCheckAssistant.Extensions
         public static Type GetAncestorType(FrameworkElement element) =>
             (Type)element.GetValue(AncestorTypeProperty);
 
-        private static void OnAncestorTypeChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        private static void OnAncestorTypeChanged(DependencyObject d, DependencyPropertyChangedEventArgs _)
         {
             FrameworkElement target = (FrameworkElement)d;
             if (target.IsLoaded)
+            {
                 SetDataContext(target);
+            }
+                
             else
+            {
                 target.Loaded += OnTargetLoaded;
+            }
+                
         }
 
         private static void OnTargetLoaded(object sender, RoutedEventArgs e)
@@ -43,17 +49,26 @@ namespace CardCheckAssistant.Extensions
         {
             Type ancestorType = GetAncestorType(target);
             if (ancestorType != null)
+            {
                 target.DataContext = FindParent(target, ancestorType);
+            }
+                
         }
 
         private static object? FindParent(DependencyObject dependencyObject, Type ancestorType)
         {
             DependencyObject parent = VisualTreeHelper.GetParent(dependencyObject);
             if (parent == null)
+            {
                 return null;
+            }
+
 
             if (ancestorType.IsAssignableFrom(parent.GetType()))
+            {
                 return parent;
+            }
+                
 
             return FindParent(parent, ancestorType);
         }

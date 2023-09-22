@@ -265,18 +265,6 @@ public class SettingsPageViewModel : ObservableObject
         }
     }
 
-    private async Task InputString_Executed()
-    {
-        Debug.WriteLine("Opening String Input Dialog.");
-        var inputString = await App.MainRoot.InputStringDialogAsync(
-                "How can we help you?",
-                "I need ammunition, not a ride.",
-                "OK",
-                "Forget it"
-            );
-        Debug.WriteLine($"String Input Dialog was closed with '{inputString}'.");
-    }
-
     private async Task SelectRFIDGearExe_Executed()
     {
         var window = (Application.Current as App)?.Window as MainWindow ?? new MainWindow();
@@ -358,8 +346,8 @@ public class SettingsPageViewModel : ObservableObject
     private class RijndaelEnc : IDisposable
     {
         private bool _disposed;
-        private byte[] IV = { 22, 85, 121, 60, 1, 77, 14, 69, 210, 10, 41, 22, 91, 6, 32, 4 };
-        private byte[] KEY = { 12, 122, 12, 72, 9, 1, 53, 72, 11, 94, 66, 84, 26, 110, 210, 44, 109, 10, 9, 100, 31, 201, 11, 23, 75, 91, 12, 83, 22, 19, 33, 3 };
+        private readonly byte[] IV = { 22, 85, 121, 60, 1, 77, 14, 69, 210, 10, 41, 22, 91, 6, 32, 4 };
+        private readonly byte[] KEY = { 12, 122, 12, 72, 9, 1, 53, 72, 11, 94, 66, 84, 26, 110, 210, 44, 109, 10, 9, 100, 31, 201, 11, 23, 75, 91, 12, 83, 22, 19, 33, 3 };
 
         public RijndaelEnc() { }
 
@@ -450,11 +438,19 @@ public class SettingsPageViewModel : ObservableObject
         {
             // Check arguments.
             if (cipherText == null || cipherText.Length <= 0)
+            {
                 throw new ArgumentNullException("cipherText");
+            }
+                
             if (Key == null || Key.Length <= 0)
+            {
                 throw new ArgumentNullException("Key");
+            }
+
             if (IV == null || IV.Length <= 0)
-                throw new ArgumentNullException("IV");
+            {
+                throw new ArgumentNullException("IV");      
+            }
 
             // Declare the string used to hold
             // the decrypted text.

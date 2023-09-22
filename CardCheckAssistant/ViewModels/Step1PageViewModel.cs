@@ -157,7 +157,7 @@ public class Step1PageViewModel : ObservableObject, IDisposable
     /// </summary>
     /// <param name="sender"></param>
     /// <param name="e"></param>
-    private async void ScanChipEvent(object? sender, object? e)
+    private async void ScanChipEvent(object? _, object? e)
     {
         try
         {

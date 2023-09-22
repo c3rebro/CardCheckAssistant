@@ -12,7 +12,7 @@
     <Nullable>enable</Nullable>
     <UseWinUI>true</UseWinUI>
     <EnableMsixTooling>true</EnableMsixTooling>
-    <GenerateAppInstallerFile>False</GenerateAppInstallerFile>
+    <GenerateAppInstallerFile>True</GenerateAppInstallerFile>
     <AppxPackageSigningEnabled>True</AppxPackageSigningEnabled>
     <PackageCertificateThumbprint>17473166A3D5B4DDF7BEC28DA037402A7C1601F8</PackageCertificateThumbprint>
     <AppxPackageSigningTimestampDigestAlgorithm>SHA256</AppxPackageSigningTimestampDigestAlgorithm>
@@ -39,6 +39,7 @@
     <Authors>Steven Hansen</Authors>
     <AssemblyVersion>$(PackageVersion)</AssemblyVersion>
     <FileVersion>$(PackageVersion)</FileVersion>
+    <AppInstallerUri>https://github.com/c3rebro/CardCheckAssistant/releases/latest/download/CardCheckAssistant_x64.msix</AppInstallerUri>
   </PropertyGroup>
   <ItemGroup>
     <Compile Remove="App.xaml.Settings.cs" />

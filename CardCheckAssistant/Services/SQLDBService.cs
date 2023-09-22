@@ -17,7 +17,7 @@ namespace CardCheckAssistant.Services;
 public class SQLDBService : IDisposable
 {
     public bool IsConnected { get; private set; }
-    public List<CardCheckProcess> CardChecks;
+    public List<CardCheckProcess> CardChecks {get; private set;}
 
     private static readonly object syncRoot = new object();
     private static SQLDBService instance;
@@ -131,10 +131,7 @@ public class SQLDBService : IDisposable
         {
             SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder();
             builder.DataSource = serverName;
-            //builder.UserID = userID;
-            //builder.Password = pwd;
             builder.IntegratedSecurity = true;
-            //builder.Encrypt = true;
             builder.InitialCatalog = dbName;
             builder.ApplicationName = serverName.Split('\\')[1];
 
@@ -274,9 +271,9 @@ public class SQLDBService : IDisposable
                             }
                             return new ObservableCollection<CardCheckProcess>(cardChecks);
                         }
-                    };
+                    }
                 }
-            };    
+            } 
         }
         catch (Exception ex)
         {
@@ -372,7 +369,7 @@ public class SQLDBService : IDisposable
         try
         {
             var dbCmd = conn.CreateCommand();
-            dbCmd.CommandText = "USE " + dbName;
+            dbCmd.CommandText = "USE " + dbName + tableName;
             await dbCmd.ExecuteNonQueryAsync();
 
             conn.Close();

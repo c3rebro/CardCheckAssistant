@@ -13,16 +13,8 @@ public sealed partial class MainWindow : Window
     {
         InitializeComponent();
 
-        //Root.CornerRadius = new CornerRadius(20);
-
         ExtendsContentIntoTitleBar = true;
         SetTitleBar(AppTitleBar);
-        
-        //Instance = this;
-        //TitleBarHelper.Initialize(this, TitleTextBlock, AppTitleBar, LeftPaddingColumn, IconColumn, TitleColumn, LeftDragColumn, null, RightDragColumn, RightPaddingColumn);
-
-        //Localizer.Get().InitializeWindow(Root, Content);
-
     }
 
     public string SelectedTheme

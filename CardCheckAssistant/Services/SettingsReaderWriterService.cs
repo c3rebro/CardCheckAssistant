@@ -224,7 +224,16 @@ public class SettingsReaderWriter : IDisposable
     ///
     /// </summary>
     /// <returns></returns>
-    public bool SaveSettings(string _path = "")
+    public bool SaveSettings()
+    {
+        return SaveSettings("");
+    }
+
+    /// <summary>
+    ///
+    /// </summary>
+    /// <returns></returns>
+    public bool SaveSettings(string _path)
     {
         try
         {

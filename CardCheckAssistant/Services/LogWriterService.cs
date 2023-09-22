@@ -51,6 +51,7 @@ namespace Log4CSharp
             }
             catch
             {
+                throw new Exception("ERROR 0007: Unable to Create Logfile...");
             }
         }
 

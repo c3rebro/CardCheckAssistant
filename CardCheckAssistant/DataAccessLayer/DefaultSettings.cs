@@ -20,7 +20,7 @@ namespace CardCheckAssistant.DataAccessLayer;
 [XmlRoot("DefaultSettings", IsNullable = false)]
 public class DefaultSettings : IDisposable
 {
-    private Version Version = Assembly.GetExecutingAssembly().GetName().Version ?? new Version();
+    private readonly Version Version = Assembly.GetExecutingAssembly().GetName().Version ?? new Version();
 
     public DefaultSettings()
     {
@@ -205,24 +205,13 @@ public class DefaultSettings : IDisposable
 
     #region Extensions
 
-    private bool _disposed;
-
-    void IDisposable.Dispose()
-    {
-    }
-
-    protected virtual void Dispose(bool disposing)
+    protected void Dispose(bool disposing)
     {
         if (!_disposed)
         {
             if (disposing)
             {
-                // Dispose any managed objects
-                // ...
             }
-
-            // Now disposed of any unmanaged objects
-            // ...
 
             _disposed = true;
         }
@@ -230,15 +219,11 @@ public class DefaultSettings : IDisposable
 
     public void Dispose()
     {
+        _disposed = false;
         Dispose(true);
         GC.SuppressFinalize(this);
     }
-
-    // Destructor
-    ~DefaultSettings()
-    {
-        Dispose(false);
-    }
+    private bool _disposed;
 
     #endregion Extensions
 }

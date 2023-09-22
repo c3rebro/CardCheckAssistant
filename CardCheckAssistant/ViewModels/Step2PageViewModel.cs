@@ -64,20 +64,20 @@ public class Step2PageViewModel : ObservableObject
 
         CardTemplates = new List<LSMCardTemplate>()
         {
-            new LSMCardTemplate("N/A", "Keine Auswahl") { },
-            new LSMCardTemplate("MCBasic (Speicherbedarf: 1 Sektor)", string.Empty) { },
-            new LSMCardTemplate("MC1200L (Speicherbedarf: 4 Sektoren)", string.Empty) { },
-            new LSMCardTemplate("MC3800L (Speicherbedarf: 11 Sektoren)", string.Empty) { },
-            new LSMCardTemplate("MC1000L_AV (Speicherbedarf: 11 Sektoren)", string.Empty) { },
-            new LSMCardTemplate("MC2400L_AV (Speicherbedarf: 19 Sektoren)", string.Empty) { },
-            new LSMCardTemplate("MC8000L_AV (Speicherbedarf: 43 Sektoren / 32 + 3)", string.Empty) { },
-            new LSMCardTemplate("MDBasic (Speicherbedarf: 48 + 176 = 224 Bytes)", string.Empty) { },
-            new LSMCardTemplate("MD1200L (Speicherbedarf: 192 + 160 = 352 Bytes)", string.Empty) { },
-            new LSMCardTemplate("MD3800L (Speicherbedarf: 528 + 176 = 704 Bytes)", string.Empty) { },
-            new LSMCardTemplate("MD2500L_AV (Speicherbedarf: 1024 + 160 = 1184 Bytes)", string.Empty) { },
-            new LSMCardTemplate("MD4000L_AV (Speicherbedarf: 1600 + 160 = 1760 Bytes)", string.Empty) { },
-            new LSMCardTemplate("MD10000L_AV (Speicherbedarf: 3048 + 184 = 3232 Bytes)", string.Empty) { },
-            new LSMCardTemplate("MD32000L_AV (Speicherbedarf: 7000 + 168 = 7168 Bytes)", string.Empty) { }
+            new ("N/A", "Keine Auswahl"),
+            new ("MCBasic (Speicherbedarf: 1 Sektor)", string.Empty),
+            new ("MC1200L (Speicherbedarf: 4 Sektoren)", string.Empty),
+            new ("MC3800L (Speicherbedarf: 11 Sektoren)", string.Empty),
+            new ("MC1000L_AV (Speicherbedarf: 11 Sektoren)", string.Empty),
+            new ("MC2400L_AV (Speicherbedarf: 19 Sektoren)", string.Empty),
+            new ("MC8000L_AV (Speicherbedarf: 43 Sektoren / 32 + 3)", string.Empty),
+            new ("MDBasic (Speicherbedarf: 48 + 176 = 224 Bytes)", string.Empty),
+            new ("MD1200L (Speicherbedarf: 192 + 160 = 352 Bytes)", string.Empty),
+            new ("MD3800L (Speicherbedarf: 528 + 176 = 704 Bytes)", string.Empty),
+            new ("MD2500L_AV (Speicherbedarf: 1024 + 160 = 1184 Bytes)", string.Empty),
+            new ("MD4000L_AV (Speicherbedarf: 1600 + 160 = 1760 Bytes)", string.Empty),
+            new ("MD10000L_AV (Speicherbedarf: 3048 + 184 = 3232 Bytes)", string.Empty),
+            new ("MD32000L_AV (Speicherbedarf: 7000 + 168 = 7168 Bytes)", string.Empty) 
         };
 
         SelectedCustomerRequestTemplate = CustomerRequestTemplate.NA;
@@ -434,7 +434,7 @@ public class Step2PageViewModel : ObservableObject
             var tokenSource = new CancellationTokenSource();
             var ct = tokenSource.Token;
 
-            var info = new ProcessStartInfo()
+            var info = new ProcessStartInfo
             {
                 FileName = settings.DefaultSettings.DefaultRFIDGearExePath,
                 Verb = "",
@@ -728,7 +728,7 @@ public class Step2PageViewModel : ObservableObject
 
             var p = new Process();
 
-            var info = new ProcessStartInfo()
+            var info = new ProcessStartInfo
             {
                 FileName = settings.DefaultSettings.DefaultProjectOutputPath + "\\" + CheckProcessService.CurrentCardCheckProcess.JobNr + "-" + CheckProcessService.CurrentCardCheckProcess.ChipNumber + ".pdf",
                 Verb = "",     
@@ -757,7 +757,7 @@ public class Step2PageViewModel : ObservableObject
 
             var p = new Process();
 
-            var info = new ProcessStartInfo()
+            var info = new ProcessStartInfo
             {
                 FileName = settings.DefaultSettings.DefaultProjectOutputPath + "\\",
                 Verb = "",
