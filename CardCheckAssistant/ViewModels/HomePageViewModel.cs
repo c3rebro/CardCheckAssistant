@@ -19,6 +19,7 @@ using System.Collections.ObjectModel;
 using System.IO.Packaging;
 
 using Windows.ApplicationModel;
+using CommunityToolkit.WinUI.Helpers;
 
 namespace CardCheckAssistant.ViewModels;
 
@@ -98,15 +99,15 @@ public class HomePageViewModel : ObservableObject, IDisposable
         get {
             Assembly assembly = Assembly.GetExecutingAssembly();
             FileVersionInfo fvi = FileVersionInfo.GetVersionInfo(assembly.Location);
-            PackageVersion? packageVersion = null;
+            string packageVersion = "";
 
             try
             {
-                packageVersion = Windows.ApplicationModel.Package.Current?.Id?.Version;
+                packageVersion = Windows.ApplicationModel.Package.Current?.Id?.Version.ToFormattedString(3) ?? "";
             }
             catch { }
 
-            return string.Format("CardCheckAssistant                  Version: {0}", packageVersion == null ? fvi.FileVersion : packageVersion.ToString()); }
+            return string.Format("CardCheckAssistant                  Version: {0}", packageVersion == string.Empty ? fvi.FileVersion : packageVersion); }
     }
 
     /// <summary>

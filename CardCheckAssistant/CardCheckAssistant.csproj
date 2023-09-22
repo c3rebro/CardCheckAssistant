@@ -26,16 +26,19 @@
     <DefaultLanguage>de-DE</DefaultLanguage>
     <ApplicationIcon>Assets\AppIco.ico</ApplicationIcon>
     <PackageIcon>Assets\StoreLogo.scale-400.png</PackageIcon>
-    <AssemblyVersion>1.0.19</AssemblyVersion>
     <RepositoryUrl>https://github.com/c3rebro/CardCheckAssistant</RepositoryUrl>
-    <FileVersion>1.0.19</FileVersion>
-    <PackageReleaseNotes>v1.0.19
+    <PackageReleaseNotes>v1.0.20
 ------------------------------------------------------
 + Abfrage der LSM Programmieroptionen: Wie wurde programmiert?
    Dies kann jetzt direkt eingegeben werden ohne das PDF öffnen zu müssen.
 + Mifare Classic wird während der Prüfung anders behandelt (z.B. Angabe verwendeter Sektoren)
 + Händler und ADM als neue Spalten.</PackageReleaseNotes>
     <PackageOutputPath>$(OutputPath)</PackageOutputPath>
+    <Title>CardCheckAssistant</Title>
+    <Company>Messgeraetetechnik Hansen</Company>
+    <Authors>Steven Hansen</Authors>
+    <AssemblyVersion>$(PackageVersion)</AssemblyVersion>
+    <FileVersion>$(PackageVersion)</FileVersion>
   </PropertyGroup>
   <ItemGroup>
     <Compile Remove="App.xaml.Settings.cs" />
@@ -43,11 +46,6 @@
     <Compile Remove="Views\Step1Page - Kopieren.xaml.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Remove="Assets\BadgeLogo.scale-100.png" />
-    <Content Remove="Assets\BadgeLogo.scale-125.png" />
-    <Content Remove="Assets\BadgeLogo.scale-150.png" />
-    <Content Remove="Assets\BadgeLogo.scale-200.png" />
-    <Content Remove="Assets\BadgeLogo.scale-400.png" />
     <Content Remove="Assets\Flag.png" />
     <Content Remove="Assets\FluentIconsSettings.png" />
     <Content Remove="Assets\LargeTile.scale-100.png" />
@@ -58,39 +56,44 @@
     <Content Remove="Assets\LockScreenLogo.scale-200.png" />
     <Content Remove="Assets\S1.xcf" />
     <Content Remove="Assets\S2.xcf" />
-    <Content Remove="Assets\SplashScreen.scale-200.png" />
-    <Content Remove="Assets\Square150x150Logo.scale-200.png" />
-    <Content Remove="Assets\Square44x44Logo.scale-200.png" />
-    <Content Remove="Assets\Square44x44Logo.targetsize-24_altform-unplated.png" />
-    <Content Remove="Assets\SquareLogo.altform-lightunplated_targetsize-16.png" />
-    <Content Remove="Assets\SquareLogo.altform-lightunplated_targetsize-24.png" />
-    <Content Remove="Assets\SquareLogo.altform-lightunplated_targetsize-256.png" />
-    <Content Remove="Assets\SquareLogo.altform-lightunplated_targetsize-32.png" />
-    <Content Remove="Assets\SquareLogo.altform-lightunplated_targetsize-48.png" />
-    <Content Remove="Assets\SquareLogo.altform-unplated_targetsize-16.png" />
-    <Content Remove="Assets\SquareLogo.altform-unplated_targetsize-24.png" />
-    <Content Remove="Assets\SquareLogo.altform-unplated_targetsize-256.png" />
-    <Content Remove="Assets\SquareLogo.altform-unplated_targetsize-32.png" />
-    <Content Remove="Assets\SquareLogo.altform-unplated_targetsize-48.png" />
-    <Content Remove="Assets\SquareLogo.scale-100.png" />
-    <Content Remove="Assets\SquareLogo.scale-125.png" />
-    <Content Remove="Assets\SquareLogo.scale-150.png" />
-    <Content Remove="Assets\SquareLogo.scale-200.png" />
-    <Content Remove="Assets\SquareLogo.scale-400.png" />
-    <Content Remove="Assets\SquareLogo.targetsize-16.png" />
-    <Content Remove="Assets\SquareLogo.targetsize-24.png" />
-    <Content Remove="Assets\SquareLogo.targetsize-32.png" />
-    <Content Remove="Assets\SquareLogo.targetsize-48.png" />
-    <Content Remove="Assets\Wide310x150Logo.scale-200.png" />
-    <Content Remove="Assets\WindowIcon.ico" />
   </ItemGroup>
   <ItemGroup>
     <None Remove="Assets\About.png" />
+    <None Remove="Assets\BadgeLogo.scale-100.png" />
+    <None Remove="Assets\BadgeLogo.scale-125.png" />
+    <None Remove="Assets\BadgeLogo.scale-150.png" />
+    <None Remove="Assets\BadgeLogo.scale-200.png" />
+    <None Remove="Assets\BadgeLogo.scale-400.png" />
     <None Remove="Assets\Flag.png" />
     <None Remove="Assets\Home.png" />
     <None Remove="Assets\S1.xcf" />
     <None Remove="Assets\S2.xcf" />
+    <None Remove="Assets\SplashScreen.scale-200.png" />
+    <None Remove="Assets\Square150x150Logo.scale-200.png" />
+    <None Remove="Assets\Square44x44Logo.scale-200.png" />
+    <None Remove="Assets\Square44x44Logo.targetsize-24_altform-unplated.png" />
+    <None Remove="Assets\SquareLogo.altform-lightunplated_targetsize-16.png" />
+    <None Remove="Assets\SquareLogo.altform-lightunplated_targetsize-24.png" />
+    <None Remove="Assets\SquareLogo.altform-lightunplated_targetsize-256.png" />
+    <None Remove="Assets\SquareLogo.altform-lightunplated_targetsize-32.png" />
+    <None Remove="Assets\SquareLogo.altform-lightunplated_targetsize-48.png" />
+    <None Remove="Assets\SquareLogo.altform-unplated_targetsize-16.png" />
+    <None Remove="Assets\SquareLogo.altform-unplated_targetsize-24.png" />
+    <None Remove="Assets\SquareLogo.altform-unplated_targetsize-256.png" />
+    <None Remove="Assets\SquareLogo.altform-unplated_targetsize-32.png" />
+    <None Remove="Assets\SquareLogo.altform-unplated_targetsize-48.png" />
+    <None Remove="Assets\SquareLogo.scale-100.png" />
+    <None Remove="Assets\SquareLogo.scale-125.png" />
+    <None Remove="Assets\SquareLogo.scale-150.png" />
+    <None Remove="Assets\SquareLogo.scale-200.png" />
+    <None Remove="Assets\SquareLogo.scale-400.png" />
+    <None Remove="Assets\SquareLogo.targetsize-16.png" />
+    <None Remove="Assets\SquareLogo.targetsize-24.png" />
     <None Remove="Assets\SquareLogo.targetsize-256.png" />
+    <None Remove="Assets\SquareLogo.targetsize-32.png" />
+    <None Remove="Assets\SquareLogo.targetsize-48.png" />
+    <None Remove="Assets\Wide310x150Logo.scale-200.png" />
+    <None Remove="Assets\WindowIcon.ico" />
     <None Remove="MainWindow.xaml" />
     <None Remove="Shell.xaml" />
     <None Remove="Views\AboutPage.xaml" />
