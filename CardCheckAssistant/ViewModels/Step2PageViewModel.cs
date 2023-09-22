@@ -431,8 +431,6 @@ public class Step2PageViewModel : ObservableObject
             settings.ReadSettings();
 
             var p = new Process();
-            var tokenSource = new CancellationTokenSource();
-            var ct = tokenSource.Token;
 
             var info = new ProcessStartInfo
             {

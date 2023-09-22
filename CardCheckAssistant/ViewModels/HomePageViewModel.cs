@@ -557,6 +557,9 @@ public class HomePageViewModel : ObservableObject, IDisposable
                 case 3:
                     //page = navigation.GetNavigationViewItems(typeof(Step3Page)).First();
                     break;
+
+                default:
+                    break;
             }
         }
         
@@ -599,7 +602,7 @@ public class HomePageViewModel : ObservableObject, IDisposable
     /// </summary>
     /// <param name="sender"></param>
     /// <param name="e"></param>
-    private async void OnTimedEvent(object? sender, object e)
+    private async void OnTimedEvent(object? _, object e)
     {
         try
         {
@@ -661,7 +664,9 @@ public class HomePageViewModel : ObservableObject, IDisposable
                 }
             }
         }
-        catch 
+
+        //Detection Errors will not throw() because of multiple reasons for this to happen...
+        catch
         { 
 
         }

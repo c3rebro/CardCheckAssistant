@@ -123,8 +123,12 @@ namespace CardCheckAssistant.Services
     /// <summary>
     ///
     /// </summary>
-    public sealed class ResourceLoaderService : IValueConverter, IDisposable
+    public class ResourceLoaderService : IValueConverter, IDisposable
     {
+
+        private bool _disposed;
+
+
         /// <summary>
         ///
         /// </summary>
@@ -208,13 +212,6 @@ namespace CardCheckAssistant.Services
         /// <summary>
         ///
         /// </summary>
-        public void Dispose()
-        {
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
         /// <param name="resName"></param>
         /// <returns></returns>
         public static string GetResource(string resName)
@@ -235,6 +232,37 @@ namespace CardCheckAssistant.Services
                 LogWriter.CreateLogEntry(e);
                 return string.Empty;
             }
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!_disposed)
+            {
+                if (disposing)
+                {
+                    try
+                    {
+                        // Dispose any managed objects
+                        // ...
+                    }
+
+                    catch (Exception e)
+                    {
+                        LogWriter.CreateLogEntry(e);
+                    }
+                }
+
+                // Now disposed of any unmanaged objects
+                // ...
+
+                _disposed = true;
+            }
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
         }
     }
 }

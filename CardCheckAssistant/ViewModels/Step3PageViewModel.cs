@@ -190,10 +190,8 @@ public class Step3PageViewModel : ObservableObject
             string semiFinalPath = settings.DefaultSettings.DefaultProjectOutputPath + "\\" + CheckProcessService.CurrentCardCheckProcess.JobNr + "-" + CheckProcessService.CurrentCardCheckProcess.ChipNumber + "_.pdf";
 
             var p = new Process();
-            var tokenSource = new CancellationTokenSource();
-            var ct = tokenSource.Token;
 
-            var info = new ProcessStartInfo()
+            var info = new ProcessStartInfo
             {
                 FileName = settings.DefaultSettings.DefaultRFIDGearExePath,
                 Verb = "",
@@ -375,8 +373,6 @@ public class Step3PageViewModel : ObservableObject
             var navigation = window.Navigation;
             NavigationViewItem nextpage;
             nextpage = navigation.GetNavigationViewItems(typeof(HomePage)).First();
-
-            List<CardCheckProcess> cardChecks = SQLDBService.Instance.CardChecks;
 
             var fileName = finalPath;
             var fileStream = File.Open(fileName, FileMode.Open);

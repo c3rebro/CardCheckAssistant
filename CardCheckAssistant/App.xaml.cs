@@ -80,7 +80,10 @@ public partial class App : Application
         m_window.Activate();
     }
 
-    
+    /*
+     * This Method will be used later
+     * to get Text Inputs..
+     */
     private void OnNotificationInvoked(string message)
     {
 

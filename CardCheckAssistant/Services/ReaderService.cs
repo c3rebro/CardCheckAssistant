@@ -75,8 +75,8 @@ namespace CardCheckAssistant.Services
 
                         if (
                                 !(
-                                    string.IsNullOrWhiteSpace(hfTag?.UID) &
-                                    string.IsNullOrWhiteSpace(lfTag?.UID) &
+                                    string.IsNullOrWhiteSpace(hfTag?.UID) &&
+                                    string.IsNullOrWhiteSpace(lfTag?.UID) &&
                                     string.IsNullOrWhiteSpace(legicTag?.UID)
                                 )
                             )

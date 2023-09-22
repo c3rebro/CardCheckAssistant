@@ -173,7 +173,7 @@ public class SettingsPageViewModel : ObservableObject
         set
         {
             using var settings = new SettingsReaderWriter();
-            settings.DefaultSettings.DefaultRFIDGearExePath = value.ToString();
+            settings.DefaultSettings.DefaultRFIDGearExePath = value ?? "";
             settings.SaveSettings();
             SetProperty(ref _selectedRFIDGearPath, value);
         }
@@ -229,8 +229,6 @@ public class SettingsPageViewModel : ObservableObject
     public ICommand NavigateNextStepCommand => new RelayCommand(NavigateNextStepCommand_Executed);
 
     public ICommand NavigateBackCommand => new RelayCommand(NavigateBackCommand_Executed);
-
-    public ICommand InputStringCommand => new AsyncRelayCommand(InputString_Executed);
 
     public ICommand SelectRFIDGearExeCommand => new AsyncRelayCommand(SelectRFIDGearExe_Executed);
     

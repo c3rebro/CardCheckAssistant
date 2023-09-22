@@ -164,8 +164,6 @@ public class ReportReaderWriterService : IDisposable
                     {
                         ReportTemplatePath = System.IO.Path.Combine(appDataPath, reportTemplateTempFileName);
 
-                        var form = pdfDoc.Form;
-
                         if(pdfDoc.Form.Fields[_field] != null)
                         {
                             pdfDoc.Form.Fields[_field].Hidden = false;
