@@ -1,25 +1,17 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
-
-using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
-
-
+﻿using System.Collections.ObjectModel;
+using System.Diagnostics;
+using System.Reflection;
+using System.Windows.Input;
+using CardCheckAssistant.AppNotification;
 using CardCheckAssistant.Models;
 using CardCheckAssistant.Services;
 using CardCheckAssistant.Views;
-using CardCheckAssistant.AppNotification;
-
-using Log4CSharp;
-
-using System.Diagnostics;
-using System.Windows.Input;
-using System.Reflection;
-using System.Collections.ObjectModel;
-using System.IO.Packaging;
-
-using Windows.ApplicationModel;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.WinUI.Helpers;
+using Log4CSharp;
+using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
 
 namespace CardCheckAssistant.ViewModels;
 

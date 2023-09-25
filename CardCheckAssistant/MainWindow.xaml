@@ -21,7 +21,7 @@
                 <ColumnDefinition x:Name="RightDragColumn" Width="*"/>
                 <ColumnDefinition x:Name="RightPaddingColumn" Width="0"/>
             </Grid.ColumnDefinitions>
-            <Image x:Name="TitleBarIcon" Source="/Assets/Logo.png"
+            <Image x:Name="TitleBarIcon" Source="/Assets/AppIcon.png"
            Grid.Column="1"
            Width="16" Height="16"
            Margin="8,0,0,0"/>

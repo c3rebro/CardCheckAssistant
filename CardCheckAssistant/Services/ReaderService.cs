@@ -1,12 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using System.IO.Ports;
-
-using CardCheckAssistant.Model;
+﻿using CardCheckAssistant.Model;
 
 using Elatec.NET;
 using Elatec.NET.Model;

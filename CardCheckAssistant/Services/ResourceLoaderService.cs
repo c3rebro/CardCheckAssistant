@@ -1,16 +1,13 @@
-﻿using CardCheckAssistant.DataAccessLayer;
-using Log4CSharp;
-
-using System;
+﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Collections.ObjectModel;
 using System.Globalization;
+using System.Reflection;
 using System.Resources;
 using System.Windows;
 using System.Windows.Data;
 using System.Windows.Markup;
-using Windows.UI.Core;
-using System.Reflection;
+using CardCheckAssistant.DataAccessLayer;
+using Log4CSharp;
 
 namespace CardCheckAssistant.Services
 {

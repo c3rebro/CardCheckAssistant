@@ -1,26 +1,14 @@
-﻿using CardCheckAssistant.Views;
+﻿using System.Collections.ObjectModel;
+using System.Diagnostics;
+using System.Windows.Input;
+using CardCheckAssistant.Models;
 using CardCheckAssistant.Services;
-
+using CardCheckAssistant.Views;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-
-using Microsoft.UI.Xaml;
-
-using System.Diagnostics;
-using System;
-using System.IO;
-using System.Threading.Tasks;
-using System.Windows.Input;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Threading;
-
-using Windows.Foundation;
-using Microsoft.UI.Xaml.Controls;
-using CardCheckAssistant.Models;
 using Log4CSharp;
-using System.Reflection;
-using Elatec.NET;
+using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
 
 namespace CardCheckAssistant.ViewModels;
 

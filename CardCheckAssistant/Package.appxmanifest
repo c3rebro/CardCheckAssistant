@@ -4,17 +4,18 @@
   xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
   xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
   xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
-  IgnorableNamespaces="uap rescap">
+  xmlns:uap3="http://schemas.microsoft.com/appx/manifest/uap/windows10/3"
+  IgnorableNamespaces="uap rescap uap3">
 
   <Identity
     Name="a7309bff-a402-4e9a-a499-6f394b1a770a"
     Publisher="CN=Steven Hansen"
-    Version="1.0.21.0" />
+    Version="1.0.24.0" />
 
   <Properties>
     <DisplayName>CardCheckAssistant</DisplayName>
     <PublisherDisplayName>Steven Hansen</PublisherDisplayName>
-    <Logo>Assets\StoreLogo.png</Logo>
+    <Logo>Assets\StoreLogoNeu.png</Logo>
   </Properties>
 
   <Dependencies>
@@ -32,9 +33,8 @@
       <uap:VisualElements
         DisplayName="CardCheckAssistant"
         Description="Assistent für SimonsVoss Kartenprüfungen. Benötigt Zugriff auf OMNI-SQL Datenbank und eine installierte Version von &quot;RFIDGear&quot;"
-        BackgroundColor="transparent"
-        Square150x150Logo="Assets\Square150x150Logo.png"  Square44x44Logo="Assets\AppIcon.png">
-        <uap:DefaultTile Wide310x150Logo="Assets\Wide310x150Logo.png"  Square71x71Logo="Assets\SmallTile.png" ShortName="CardCheckAssistant" Square310x310Logo="Assets\WinUILogo.png">
+        Square150x150Logo="Assets\SquareLogo.png"  Square44x44Logo="Assets\AppIcon.png" BackgroundColor="transparent">
+        <uap:DefaultTile Wide310x150Logo="Assets\WideLogo.png"  Square71x71Logo="Assets\SmallTile.png" ShortName="CardCheckAssistant" Square310x310Logo="Assets\WinUILogo.png">
           <uap:ShowNameOnTiles>
             <uap:ShowOn Tile="square150x150Logo"/>
             <uap:ShowOn Tile="wide310x150Logo"/>
@@ -49,5 +49,8 @@
 
   <Capabilities>
     <rescap:Capability Name="runFullTrust" />
+    <Capability Name="privateNetworkClientServer"/>
+    <uap3:Capability Name="remoteSystem"/>
+    <uap:Capability Name="removableStorage"/>
   </Capabilities>
 </Package>

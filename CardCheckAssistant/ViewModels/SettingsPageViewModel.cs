@@ -1,26 +1,13 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
-using Microsoft.UI.Xaml;
-using System.Diagnostics;
-using System.Threading.Tasks;
-using System.Windows.Input;
-using CardCheckAssistant.Models;
-using CardCheckAssistant.Services;
-using System.Collections.ObjectModel;
-using System;
-using System.Linq;
-using CardCheckAssistant.Views;
-using Microsoft.UI.Xaml.Controls;
-using Newtonsoft.Json.Linq;
-using Windows.Storage.Pickers;
-using System.Reflection;
+﻿using System.Collections.ObjectModel;
 using System.Security.Cryptography;
-using System.Text;
-using System.IO;
-using System.ComponentModel;
-using CardCheckAssistant.DataAccessLayer;
+using System.Windows.Input;
+using CardCheckAssistant.Services;
+using CardCheckAssistant.Views;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using Log4CSharp;
-using System.Xml;
+using Microsoft.UI.Xaml;
+using Windows.Storage.Pickers;
 
 namespace CardCheckAssistant.ViewModels;
 

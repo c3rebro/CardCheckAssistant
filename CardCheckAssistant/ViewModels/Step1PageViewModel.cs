@@ -216,11 +216,14 @@ public class Step1PageViewModel : ObservableObject, IDisposable
     /// 
     /// </summary>
     /// <returns></returns>
-    private void NavigateNextStepCommand_Executed()
+    private async void NavigateNextStepCommand_Executed()
     {
         try
         {
+            NextStepCanExecute = false;
+
             scanChipTimer.Stop();
+            await Task.Delay(2000);
 
             var window = (Application.Current as App)?.Window as MainWindow ?? new MainWindow();
             var navigation = window.Navigation;
@@ -237,11 +240,12 @@ public class Step1PageViewModel : ObservableObject, IDisposable
     /// <summary>
     /// 
     /// </summary>
-    private void NavigateBackCommand_Executed()
+    private async void NavigateBackCommand_Executed()
     {
         try
         {
             scanChipTimer.Stop();
+            await Task.Delay(2000);
 
             var window = (Application.Current as App)?.Window as MainWindow ?? new MainWindow();
             var navigation = window.Navigation;

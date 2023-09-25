@@ -1,17 +1,8 @@
-﻿using GemBox.Pdf;
-
-using Log4CSharp;
-
-using Microsoft.UI.Xaml;
-
-using System;
-using System.Collections.ObjectModel;
-using System.Collections.Generic;
-using System.IO;
+﻿using System.Collections.ObjectModel;
 using System.Reflection;
 using System.Xml;
-
-using Newtonsoft.Json.Linq;
+using GemBox.Pdf;
+using Log4CSharp;
 
 namespace CardCheckAssistant.Services;
 
@@ -158,7 +149,7 @@ public class ReportReaderWriterService : IDisposable
         {
             if (!String.IsNullOrWhiteSpace(ReportOutputPath))
             {
-                using (var pdfDoc = PdfDocument.Load(ReportTemplatePath)) // (new PdfReader(ReportTemplatePath), new PdfWriter(ReportOutputPath)))
+                using (var pdfDoc = PdfDocument.Load(ReportTemplatePath))
                 {
                     try
                     {

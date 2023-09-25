@@ -1,19 +1,9 @@
-﻿using System.Collections.Generic;
-using System;
+﻿using System.Diagnostics;
+using CardCheckAssistant.AppNotification;
 using Microsoft.UI.Xaml;
+using Microsoft.Windows.AppNotifications;
 using WinUICommunity.Common.Helpers;
 
-using CardCheckAssistant.Services;
-using CardCheckAssistant.Views;
-using CardCheckAssistant.AppNotification;
-
-using Microsoft.Windows.AppNotifications;
-using WinUICommunity.Common.Tools;
-using System.IO;
-using System.Diagnostics;
-using Microsoft.UI.Windowing;
-using Microsoft.UI;
-using WinRT.Interop;
 
 namespace CardCheckAssistant;
 
