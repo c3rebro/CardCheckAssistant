@@ -3,11 +3,16 @@ using CommunityToolkit.Mvvm.Input;
 
 using Microsoft.UI.Xaml;
 
-using System.Windows.Input;
 using CardCheckAssistant.Services;
-using System.Collections.ObjectModel;
 using CardCheckAssistant.Views;
+
 using Log4CSharp;
+
+using System.Diagnostics;
+using System.Windows.Input;
+using System.Collections.ObjectModel;
+
+
 
 namespace CardCheckAssistant.ViewModels;
 
@@ -26,9 +31,25 @@ public class Step1PageViewModel : ObservableObject, IDisposable
     /// </summary>
     public Step1PageViewModel()
     {
+        try
+        {
+            Process[] processlist = Process.GetProcesses();
+
+            foreach (Process p in processlist)
+            {
+                Console.WriteLine("Process: {0} ID: {1}", p.ProcessName, p.Id);
+            }
+        }
+        catch (Exception ex)
+        {
+
+        }
+
         scanChipTimer = new DispatcherTimer();
-        scanChipTimer.Tick += ScanChipEvent;
-        scanChipTimer.Interval = new TimeSpan(0,0,0,0,3000);
+        scanChipTimer.Interval = new TimeSpan(0,0,0,0,1000);
+        scanChipTimer.Stop();
+
+        WaitForNextStep = false;
 
         Languages = new ObservableCollection<string>
         {
@@ -40,9 +61,6 @@ public class Step1PageViewModel : ObservableObject, IDisposable
         NextStepCanExecute = false;
         GoBackCanExecute = true;
         HasTwoReadersInfoBarIsVisible = false;
-
-        ScanChipEvent(this, null);
-        scanChipTimer.Start();
     }
 
     #region ObservableObjects
@@ -54,6 +72,26 @@ public class Step1PageViewModel : ObservableObject, IDisposable
     {
         get; set;
     }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public bool ReaderAccessDenied
+    {
+        get => _readerAccessDenied;
+        set => SetProperty(ref _readerAccessDenied, value);
+    }
+    private bool _readerAccessDenied;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public bool WaitForNextStep
+    {
+        get => waitForNextStep;
+        set => SetProperty(ref waitForNextStep, value);
+    }
+    private bool waitForNextStep;
 
     /// <summary>
     /// 
@@ -125,18 +163,23 @@ public class Step1PageViewModel : ObservableObject, IDisposable
     /// </summary>
     public string SelectedReportLaguage
     {
-        get => _selectedReportLaguage;
+        get => _selectedReportLaguage ?? "Deutsch";
         set
         {
             CheckProcessService.CurrentCardCheckProcess.ReportLanguage = value;
             SetProperty(ref _selectedReportLaguage, value);
         }
     }
-    private string _selectedReportLaguage;
+    private string? _selectedReportLaguage;
 
-    #endregion 
+    #endregion
 
     #region Commands
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public ICommand PostPageLoadedCommand => new AsyncRelayCommand(PostPageLoadedCommand_Executed);
 
     /// <summary>
     /// 
@@ -155,17 +198,43 @@ public class Step1PageViewModel : ObservableObject, IDisposable
     /// <summary>
     /// 
     /// </summary>
+    /// <returns></returns>
+    private async Task PostPageLoadedCommand_Executed()
+    {
+        try
+        {
+            scanChipTimer.Tick += ScanChipEvent;
+            scanChipTimer.Start();
+        }
+        catch (Exception e)
+        {
+            LogWriter.CreateLogEntry(e);
+        }
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
     /// <param name="sender"></param>
     /// <param name="e"></param>
     private async void ScanChipEvent(object? _, object? e)
     {
         try
         {
+            scanChipTimer.Stop();
+
             using (ReaderService readerService = new ReaderService())
             {
-                await readerService.ReadChipPublic();
+                // ReadChipPublic != 0  is an Error
+                ReaderAccessDenied = await readerService.ReadChipPublic() < 0;
 
-                if (readerService.MoreThanOneReaderFound)
+                if (ReaderAccessDenied)
+                {
+                    NextStepCanExecute = false;
+                    scanChipTimer.Start();
+                }
+
+                else if (readerService.MoreThanOneReaderFound)
                 {
                     HasTwoReadersInfoBarIsVisible = true;
                     ChipDetectedInfoBarIsVisible = false;
@@ -173,6 +242,7 @@ public class Step1PageViewModel : ObservableObject, IDisposable
 
                     NextStepCanExecute = false;
                 }
+
                 else
                 {
                     HasTwoReadersInfoBarIsVisible = false;
@@ -203,6 +273,7 @@ public class Step1PageViewModel : ObservableObject, IDisposable
 
 
             }
+            scanChipTimer.Start();
         }
         catch(Exception ex)
         {
@@ -220,10 +291,15 @@ public class Step1PageViewModel : ObservableObject, IDisposable
     {
         try
         {
+            using ReaderService readerService = new ReaderService();
+
             NextStepCanExecute = false;
+            WaitForNextStep = true;
 
             scanChipTimer.Stop();
-            await Task.Delay(2000);
+            scanChipTimer.Tick -= ScanChipEvent;
+
+            await Task.Delay(1000);
 
             var window = (Application.Current as App)?.Window as MainWindow ?? new MainWindow();
             var navigation = window.Navigation;
@@ -240,12 +316,12 @@ public class Step1PageViewModel : ObservableObject, IDisposable
     /// <summary>
     /// 
     /// </summary>
-    private async void NavigateBackCommand_Executed()
+    private void NavigateBackCommand_Executed()
     {
         try
         {
             scanChipTimer.Stop();
-            await Task.Delay(2000);
+            scanChipTimer.Tick -= ScanChipEvent;
 
             var window = (Application.Current as App)?.Window as MainWindow ?? new MainWindow();
             var navigation = window.Navigation;

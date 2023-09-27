@@ -14,4 +14,9 @@ public sealed partial class Step1Page : Page
     }
 
     public Step1PageViewModel ViewModel => DataContext as Step1PageViewModel;
+
+    private void Page_Loaded(object sender, RoutedEventArgs e)
+    {
+        ViewModel.PostPageLoadedCommand.Execute(null);
+    }
 }

@@ -37,13 +37,13 @@ public class SettingsPageViewModel : ObservableObject
             SelectedDBServerPort = settings.DefaultSettings.SelectedDBServerPort;
             SelectedDBUsername = settings.DefaultSettings.SelectedDBUsername;
             CardCheckUseSQLLite = settings.DefaultSettings.CardCheckUseMSSQL;
-            
+            CreateSubdirectoryIsEnabled = settings.DefaultSettings.CreateSubdirectoryIsEnabled;
 
             SelectedDBUserPwd = enc.Decrypt(settings.DefaultSettings.SelectedDBUserPwd);
         }
         catch (Exception ex)
         {
-            Log4CSharp.LogWriter.CreateLogEntry(ex);
+            LogWriter.CreateLogEntry(ex);
         }
     }
 
@@ -166,6 +166,20 @@ public class SettingsPageViewModel : ObservableObject
         }
     }
     private string? _selectedRFIDGearPath;
+
+    public bool? CreateSubdirectoryIsEnabled
+    {
+        get => _createSubdirectoryIsEnabled;
+        set
+        {
+            SetProperty(ref _createSubdirectoryIsEnabled, value);
+            using SettingsReaderWriter settings = new SettingsReaderWriter();
+
+            settings.DefaultSettings.CreateSubdirectoryIsEnabled = value;
+            settings.SaveSettings();
+        }
+    }
+    private bool? _createSubdirectoryIsEnabled;
 
     public string? SelectedTheme
     {

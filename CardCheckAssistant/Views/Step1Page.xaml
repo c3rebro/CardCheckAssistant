@@ -6,6 +6,7 @@
       xmlns:ctWinUIConv="using:CommunityToolkit.WinUI.UI.Converters"
       xmlns:viewmodels="using:CardCheckAssistant.ViewModels"
       mc:Ignorable="d"
+      Loaded="Page_Loaded"
       Background="Transparent">
     
     <Page.Resources>
@@ -91,6 +92,18 @@
             Severity="Error"
             Visibility="{Binding HasTwoReadersInfoBarIsVisible, Converter={StaticResource boolean}, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
             Message="Es ist mehr als ein Leser gleichzeitig angeschlossen. Bitte entferne den für die Prüfung nicht benötigten Leser."/>
+        <InfoBar
+            Grid.Column="0"
+            Grid.Row="1"
+            Grid.ColumnSpan="5"
+            Margin="15"
+            IsOpen="True"
+            IsIconVisible="True"
+            IsClosable="False"
+            Title="Leserstatus:"
+            Severity="Error"
+            Visibility="{Binding ReaderAccessDenied, Converter={StaticResource boolean}, Mode=OneWay}"
+            Message="Fehler: Der COM Port des Lesers wird von einer anderen Anwendung belegt."/>
         <InfoBar
             Grid.Column="0"
             Grid.Row="1"
@@ -210,5 +223,21 @@
                 </ResourceDictionary>
             </Button.Resources>
         </Button>
+
+        <ProgressRing 
+            Grid.Column="0"
+            Grid.Row="0"
+            Grid.ColumnSpan="4"
+            Grid.RowSpan="8"
+            Width="auto"
+            Height="auto"
+            MaxWidth="250"
+            MaxHeight="250"
+            Margin="10"
+            VerticalContentAlignment="Stretch"
+            HorizontalContentAlignment="Stretch"
+            Visibility="{Binding WaitForNextStep, Converter={StaticResource boolean}, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}">
+        </ProgressRing>
+        
     </Grid>
 </Page>

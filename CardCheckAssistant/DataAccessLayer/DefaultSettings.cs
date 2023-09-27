@@ -171,6 +171,15 @@ public class DefaultSettings : IDisposable
     }
     private string? _lastUsedProjectPath;
 
+    /// <summary>
+    ///
+    /// </summary>
+    public bool? CreateSubdirectoryIsEnabled
+    {
+        get => _createSubdirectoryIsEnabled;
+        set => _createSubdirectoryIsEnabled = value;
+    }
+    private bool? _createSubdirectoryIsEnabled;
 
     /// <summary>
     ///

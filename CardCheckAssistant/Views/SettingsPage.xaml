@@ -11,89 +11,6 @@
     <controls:SettingsPageControl Margin="10 -100 0 32">
         <controls:SettingsPageControl.ModuleContent>
             <StackPanel Orientation="Vertical">
-                
-                <!--
-                <controls:SettingsGroup Margin="0,-32,0,0"
-                                        Header="Version">
-                    <controls:Setting Header="v1.0.15"
-                                      Icon="&#xE117;">
-                        <controls:Setting.Description>
-                            <StackPanel Orientation="Vertical">
-                                <TextBlock Style="{StaticResource SecondaryTextStyle}">
-                                    
-                                    <Run Text="Last Checked" />
-                                    <Run Text="2021/09/10" />
-
-                                </TextBlock>
-                                <HyperlinkButton Margin="0,2,0,0"
-                                                 Content="Release notes"
-                                                 NavigateUri="https://github.com/c3rebro/cardcheckassistant/releases" />
-                            </StackPanel>
-                        </controls:Setting.Description>
-
-                        <controls:Setting.ActionContent>
-                            <StackPanel VerticalAlignment="Center"
-                                        Orientation="Horizontal"
-                                        Spacing="18">
-                                <ProgressRing Width="24"
-                                              Height="24" />
-                                <TextBlock VerticalAlignment="Center"
-                                           FontWeight="SemiBold"
-                                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                           Text="Checking For Updates" />
-                                <Button HorizontalAlignment="Right"
-                                        Content="Check For Updates" />
-                            </StackPanel>
-                        </controls:Setting.ActionContent>
-
-                    </controls:Setting>
-
-                    <InfoBar Title="Up To Date"
-                             IsClosable="False"
-                             IsOpen="True"
-                             Severity="Success" />
-
-                    <controls:Setting Margin="0,-6,0,0"
-                                      Description="Except on metered conections"
-                                      Header="Download updates automatically">
-                        <ToggleSwitch />
-                    </controls:Setting>
-                </controls:SettingsGroup>
-                -->
-                <!--
-                <controls:SettingsGroup Header="Administrator mode">
-                    <controls:SettingExpander IsExpanded="True">
-                        <controls:SettingExpander.Header>
-                            <controls:Setting Description="Running as user"
-                                              Header="Administrator mode"
-                                              Icon="&#xE1A7;"
-                                              Style="{StaticResource ExpanderHeaderSettingStyle}">
-                                <controls:Setting.ActionContent>
-                                    <Button Content="Restart Demo as administrator" />
-                                </controls:Setting.ActionContent>
-                            </controls:Setting>
-                        </controls:SettingExpander.Header>
-                        <controls:SettingExpander.Content>
-                            <StackPanel Orientation="Vertical">
-                                <controls:Setting Header="Always run as administrator"
-                                                  IsEnabled="False"
-                                                  Style="{StaticResource ExpanderContentSettingStyle}">
-                                    <controls:Setting.Description>
-                                        <HyperlinkButton Content="Learn more about administrator mode"
-                                                         NavigateUri="https://aka.ms/powertoysDetectedElevatedHelp" />
-                                    </controls:Setting.Description>
-
-                                </controls:Setting>
-                                <InfoBar Title="You need to run as administrator to use this setting."
-                                         IsClosable="False"
-                                         IsOpen="True"
-                                         Severity="Warning" />
-                            </StackPanel>
-                        </controls:SettingExpander.Content>
-                    </controls:SettingExpander>
-                </controls:SettingsGroup>
-                -->
-
                 <controls:SettingsGroup Header="Pfadeinstellungen">
                     <controls:SettingExpander IsExpanded="False">
                         <controls:SettingExpander.Header>
@@ -133,7 +50,7 @@
                         </controls:SettingExpander.Header>
                         <controls:SettingExpander.Content>
                             <StackPanel Orientation="Vertical">
-                                <InfoBar Title="Unterhalb dieses Ordners werden alle Prüfberichte in jeweiligen Unterordnern angelegt."
+                                <InfoBar Title="Unterhalb dieses Ordners werden alle Prüfberichte angelegt."
                                          IsClosable="False"
                                          IsOpen="True"
                                          Severity="Informational" />
@@ -169,7 +86,16 @@
                             </StackPanel>
                         </controls:SettingExpander.Content>
                     </controls:SettingExpander>
-                    
+                    <controls:Setting 
+                        Header="Unterverzeichnis für Berichte anlegen"
+                        Description="Legt für jede Jobnummer ein extra Unterverzeichnis unterhalb von &quot;Projekt-Pfad&quot; an"
+                        Icon="&#xE1A5;"
+                        HorizontalContentAlignment="Stretch"
+                        HorizontalAlignment="Stretch">
+                        <controls:Setting.ActionContent>
+                            <ToggleSwitch IsOn="{Binding CreateSubdirectoryIsEnabled, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
+                        </controls:Setting.ActionContent>
+                    </controls:Setting>
                 </controls:SettingsGroup>
 
                 <controls:SettingsGroup Header="RFiDGear Optionen">
@@ -204,30 +130,30 @@
                     </controls:SettingExpander>
                 </controls:SettingsGroup>
 
-				<controls:SettingsGroup Header="OMNI Anbindung">
-					<controls:SettingExpander IsExpanded="False">
-						<controls:SettingExpander.Header>
+                <controls:SettingsGroup Header="OMNI Anbindung">
+                    <controls:SettingExpander IsExpanded="False">
+                        <controls:SettingExpander.Header>
                             <controls:Setting Description="Servername"
                                               Header="Datenbankoptionen"
                                               Icon="&#xE1A5;"
                                               Style="{StaticResource ExpanderHeaderSettingStyle}">
                             </controls:Setting>
-						</controls:SettingExpander.Header>
-						<controls:SettingExpander.Content>
-							<StackPanel Orientation="Vertical">
-								<StackPanel.Resources>
-									<Style TargetType="Grid">
-										<Setter Property="RowSpacing" Value="20" />
-										<Setter Property="ColumnSpacing" Value="10" />
-										<Setter Property="Padding" Value="10" />
-									</Style>
-								</StackPanel.Resources>
-								<Grid>		            
+                        </controls:SettingExpander.Header>
+                        <controls:SettingExpander.Content>
+                            <StackPanel Orientation="Vertical">
+                                <StackPanel.Resources>
+                                    <Style TargetType="Grid">
+                                        <Setter Property="RowSpacing" Value="20" />
+                                        <Setter Property="ColumnSpacing" Value="10" />
+                                        <Setter Property="Padding" Value="10" />
+                                    </Style>
+                                </StackPanel.Resources>
+                                <Grid>
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="auto"/>
-										<RowDefinition Height="auto"/>
-										<RowDefinition Height="auto"/>
-										<RowDefinition Height="auto"/>
+                                        <RowDefinition Height="auto"/>
+                                        <RowDefinition Height="auto"/>
+                                        <RowDefinition Height="auto"/>
                                         <RowDefinition Height="auto"/>
                                         <RowDefinition Height="auto"/>
                                         <RowDefinition Height="auto"/>
@@ -244,28 +170,17 @@
                                     <PasswordBox Grid.Row="6" Visibility="{Binding IsOn, ElementName=useWinLoginToggleSwitch}" Header="Benutzerpasswort:" Password="{Binding SelectedDBUserPwd, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"  PlaceholderText="12345678"/>
                                     <Button Grid.Row="7" Content="Verbindung Testen" Command="{Binding DBConnectionTest}"/>
                                     <Grid Grid.Row="1">
-										<Grid.ColumnDefinitions>
-											<ColumnDefinition Width="*"/>
-											<ColumnDefinition Width="2*"/>
-										</Grid.ColumnDefinitions>
-										
-										<!-- <controls:InlineAutoCompleteTextBox Grid.Column="0" VerticalAlignment="Top" IsSuggestionCaseSensitive="{x:Bind (x:Boolean)IsCaseSensitive.IsChecked, Mode=OneWay}" PlaceholderText="Enter your text here..." SuggestionPrefix="{x:Bind SuggestionPrefix.Text, Mode=OneWay}" SuggestionSuffix="{x:Bind SuggestionSuffix.Text, Mode=OneWay}" SuggestionsSource="{x:Bind DemoSuggestions, Mode=OneWay}" /> -->
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="2*"/>
+                                        </Grid.ColumnDefinitions>
+                                    </Grid>
+                                </Grid>
+                            </StackPanel>
+                        </controls:SettingExpander.Content>
+                    </controls:SettingExpander>
+                </controls:SettingsGroup>
 
-										<!-- <StackPanel Grid.Column="1" HorizontalAlignment="Stretch" Orientation="Vertical" Spacing="10"> -->
-										<!-- <CheckBox x:Name="IsCaseSensitive" VerticalAlignment="Top" Content="Case Sensitive" IsChecked="False" /> -->
-										<!-- <TextBox x:Name="SuggestionPrefix" Width="300" HorizontalAlignment="Left" Header="Suggestion Prefix" Text="" /> -->
-										<!-- <TextBox x:Name="SuggestionSuffix" Width="300" HorizontalAlignment="Left" Header="Suggestion Suffix" Text=" ? [Press Right]" /> -->
-										<!-- <NumberBox x:Name="RandomDemoSuggestionsCount" Width="300" HorizontalAlignment="Left" Header="Random Demo Suggestions Count" Maximum="100000" Minimum="0" Text="10000" /> -->
-										<!-- <Button x:Name="UpdateDemoSuggestionsButton" Click="UpdateDemoSuggestionsButton_Click" Content="Update Demo Suggestions" /> -->
-										<!-- </StackPanel> -->
-										
-									</Grid>
-								</Grid>
-							</StackPanel>
-						</controls:SettingExpander.Content>
-					</controls:SettingExpander>
-				</controls:SettingsGroup>
-				
                 <controls:SettingsGroup Header="Appearance &amp; behavior">
                     <controls:Setting Header="Choose a mode"
                                       Icon="&#xE771;">
@@ -277,12 +192,6 @@
                                       ItemsSource="{Binding ThemeSource}"
                                       SelectedItem="{Binding SelectedTheme, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}">
                             </ComboBox>
-                        </controls:Setting.ActionContent>
-                    </controls:Setting>
-                    <controls:Setting Description="Demo will launch automatically"
-                                      Header="Run at startUp">
-                        <controls:Setting.ActionContent>
-                            <ToggleSwitch />
                         </controls:Setting.ActionContent>
                     </controls:Setting>
                 </controls:SettingsGroup>
@@ -300,22 +209,5 @@
                 </CheckBox>
             </StackPanel>
         </controls:SettingsPageControl.ModuleContent>
-        <!--
-        <controls:SettingsPageControl.PrimaryLinks>
-            <controls:PageLink Link="https://aka.ms/powertoys"
-                               Text="Documentation" />
-            <controls:PageLink Link="https://aka.ms/powertoys"
-                               Text="GitHub repository" />
-            <controls:PageLink Link="https://aka.ms/powerToysReportBug"
-                               Text="Report a bug" />
-            <controls:PageLink Link="https://aka.ms/powerToysRequestFeature"
-                               Text="Request a feature" />
-        </controls:SettingsPageControl.PrimaryLinks>
-        <controls:SettingsPageControl.SecondaryLinks>
-            <controls:PageLink Link="http://go.microsoft.com/fwlink/?LinkId=521839"
-                               Text="Privacy statement" />
-            <controls:PageLink Link="https://github.com/microsoft/PowerToys/blob/master/NOTICE.md"
-                               Text="Open-source notice" />
-        </controls:SettingsPageControl.SecondaryLinks>-->
     </controls:SettingsPageControl>
 </Page>

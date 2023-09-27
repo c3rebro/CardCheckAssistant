@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using CardCheckAssistant.Views;
 using CardCheckAssistant.Services;
+using CardCheckAssistant.ViewModels;
 
 namespace CardCheckAssistant;
 

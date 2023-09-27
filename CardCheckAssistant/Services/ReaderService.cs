@@ -5,21 +5,25 @@ using Elatec.NET.Model;
 
 using Log4CSharp;
 
+using System;
+using System.Threading;
+using System.Threading.Tasks;
+
 namespace CardCheckAssistant.Services
 {
     internal class ReaderService : IDisposable
     {
-        private readonly TWN4ReaderDevice readerDevice;
+        private readonly TWN4ReaderDevice? readerDevice;
 
-        private ChipModel hfTag;
-        private ChipModel lfTag;
-        private ChipModel legicTag;
+        private ChipModel? hfTag;
+        private ChipModel? lfTag;
+        private ChipModel? legicTag;
 
         public ReaderService()
         {
             try
             {
-                readerDevice = new TWN4ReaderDevice(0);
+                readerDevice = TWN4ReaderDevice.Instance ?? new TWN4ReaderDevice(0);
             }
             catch (Exception e)
             {
@@ -29,7 +33,12 @@ namespace CardCheckAssistant.Services
 
         public bool MoreThanOneReaderFound
         {
-            get { return readerDevice.MoreThanOneReader; }
+            get { return readerDevice?.MoreThanOneReader ?? true; }
+        }
+
+        public bool ReaderPortBusy
+        {
+            get { return readerDevice?.PortAccessDenied ?? true; }
         }
 
         public GenericChipModel? GenericChip
@@ -37,9 +46,11 @@ namespace CardCheckAssistant.Services
             get; private set;
         }
 
-        public Task ReadChipPublic()
+        public async Task<int> ReadChipPublic()
         {
-            return Task.Run(() =>
+            ChipModel tmpTag;
+
+            return await Task.Run(async () => 
             {
                 try
                 {
@@ -52,18 +63,23 @@ namespace CardCheckAssistant.Services
                     {
                         if (!readerDevice.IsConnected)
                         {
-                            readerDevice.Connect();
+                            await readerDevice.ConnectAsync();
+                            if (readerDevice.PortAccessDenied == true)
+                            {
+                                return -1;
+                            }
                         }
-                        var tmpTag = readerDevice.GetSingleChip(true);
+                        tmpTag = await readerDevice.GetSingleChipAsync(true);
+
                         hfTag = new ChipModel(tmpTag.UID, tmpTag.CardType, tmpTag.SAK, tmpTag.RATS, tmpTag.VersionL4);
 
-                        tmpTag = readerDevice.GetSingleChip(true, true);
+                        tmpTag = await readerDevice.GetSingleChipAsync(true, true);
                         legicTag = new ChipModel(tmpTag.UID, tmpTag.CardType);
 
-                        tmpTag = readerDevice.GetSingleChip(false);
+                        tmpTag = await readerDevice.GetSingleChipAsync(false);
                         lfTag = new ChipModel(tmpTag.UID, tmpTag.CardType);
 
-                        readerDevice.GetSingleChip(true);
+                        await readerDevice.GetSingleChipAsync(true);
 
                         if (
                                 !(
@@ -76,8 +92,8 @@ namespace CardCheckAssistant.Services
                             try
                             {
 
-                                readerDevice.GreenLED(true);
-                                readerDevice.RedLED(false);
+                                await readerDevice.GreenLEDAsync(true);
+                                await readerDevice.RedLEDAsync(false);
 
 
                                 GenericChip = new GenericChipModel(hfTag?.UID ?? "",
@@ -120,9 +136,9 @@ namespace CardCheckAssistant.Services
                         }
                         else
                         {
-                            readerDevice.Beep(1, 25, 600, 100);
-                            readerDevice.RedLED(true);
-                            readerDevice.GreenLED(false);
+                            await readerDevice.BeepAsync(1, 25, 600, 100);
+                            await readerDevice.RedLEDAsync(true);
+                            await readerDevice.GreenLEDAsync(false);
                             GenericChip = null;
 
                             return 3;
@@ -146,17 +162,14 @@ namespace CardCheckAssistant.Services
                     return 2;
                 }
             });
-
         }
 
-        protected void Dispose(bool disposing)
+        protected async Task Dispose(bool disposing)
         {
             if (!_disposed)
             {
                 if (disposing)
                 {
-                    readerDevice.GreenLED(false);
-                    readerDevice.RedLED(false);
                 }
 
                 _disposed = true;

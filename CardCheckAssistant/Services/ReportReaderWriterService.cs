@@ -233,17 +233,15 @@ public class ReportReaderWriterService : IDisposable
         {
             var result = "";
 
-            if (!String.IsNullOrWhiteSpace(ReportTemplatePath))
+            if (!String.IsNullOrWhiteSpace(ReportTemplatePath) && File.Exists(ReportTemplatePath))
             {
-                    
-
                 using (var pdfDoc = PdfDocument.Load(ReportTemplatePath))
                 {
                     try
                     {
                         var form = pdfDoc.Form;
 
-                        result = pdfDoc.Form.Fields[_field].Value as string;
+                        result = pdfDoc.Form.Fields[_field]?.Value as string ?? string.Empty;
 
                         pdfDoc.Close();
                     }
@@ -255,14 +253,18 @@ public class ReportReaderWriterService : IDisposable
 
                     
             }
-            return result;
+            return result ?? string.Empty;
         }
         catch (XmlException e)
         {
             LogWriter.CreateLogEntry(e);
-
-            return string.Empty;
         }
+        catch (Exception e2)
+        {
+            LogWriter.CreateLogEntry(e2);
+        }
+
+        return string.Empty;
     }
 
     /// <summary>

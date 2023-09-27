@@ -217,7 +217,7 @@
             Margin="10"
             VerticalContentAlignment="Stretch"
             HorizontalContentAlignment="Stretch"
-            Visibility="{x:Bind Step3PageVM.RunRFiDGearCommand.IsRunning, Converter={StaticResource boolean}, Mode=OneWay}">
+            Visibility="{x:Bind Step3PageVM.PostPageLoadedCommand.IsRunning, Converter={StaticResource boolean}, Mode=OneWay}">
         </ProgressRing>
     </Grid>
 </Page>

@@ -27,15 +27,15 @@ public class Step2PageViewModel : ObservableObject
     /// </summary>
     public Step2PageViewModel()
     {
+        NavigateNextStepCommand = new AsyncRelayCommand(NavigateNextStepCommand_Executed);
+        PostPageLoadedCommand = new AsyncRelayCommand(PostPageLoadedCommand_Executed);
+
         scanChipTimer = new DispatcherTimer();
-        scanChipTimer.Tick += ScanChipEvent;
-        scanChipTimer.Interval = new TimeSpan(0, 0, 0, 0, 3000);
+        scanChipTimer.Interval = new TimeSpan(0, 0, 0, 0, 4000);
         scanChipTimer.Stop();
 
         NextStepCanExecute = false;
         GoBackCanExecute = true;
-
-        NavigateNextStepCommand = new AsyncRelayCommand(NavigateNextStepCommand_Executed);
 
         TextBlockCheckFinishedAndResultIsSuppOnlyIsVisible = false;
         TextBlockCheckFinishedAndResultIsSuppAndProgIsVisible = false;
@@ -380,7 +380,7 @@ public class Step2PageViewModel : ObservableObject
     /// <summary>
     /// 
     /// </summary>
-    public ICommand PostPageLoadedCommand => new AsyncRelayCommand(PostPageLoadedCommand_Executed);
+    public IAsyncRelayCommand PostPageLoadedCommand { get;  }
 
     /// <summary>
     /// 
@@ -400,6 +400,10 @@ public class Step2PageViewModel : ObservableObject
     {
         try
         {
+            NextStepCanExecute = false;
+
+            await Task.Delay(1000);
+
             int amountOfFreeMemory = 0;
             string freeMemField = "N/A";
             TextBlockFreeMem = freeMemField;
@@ -414,9 +418,20 @@ public class Step2PageViewModel : ObservableObject
             using ReportReaderWriterService reportReader = new ReportReaderWriterService();
             using SettingsReaderWriter settings = new SettingsReaderWriter();
 
-            await Task.Delay(1000);
-
             settings.ReadSettings();
+
+            if(settings?.DefaultSettings.CreateSubdirectoryIsEnabled == true)
+            {
+                if(!Directory.Exists(
+                    settings.DefaultSettings.DefaultProjectOutputPath + "\\"
+                    + (CheckProcessService.CurrentCardCheckProcess.JobNr + "\\" ))
+                    )
+                {
+                    Directory.CreateDirectory(
+                        settings.DefaultSettings.DefaultProjectOutputPath + "\\"
+                    + (CheckProcessService.CurrentCardCheckProcess.JobNr + "\\"));
+                }
+            }
 
             var p = new Process();
 
@@ -429,7 +444,11 @@ public class Step2PageViewModel : ObservableObject
                     "$JOBNUMBER=" + "\"" + "{1}" + "\" " +
                     "$CHIPNUMBER=" + "\"" + "{2}" + "\" " +
                     "{3}",
-                    settings.DefaultSettings.DefaultProjectOutputPath + "\\" + CheckProcessService.CurrentCardCheckProcess.JobNr + "-" + CheckProcessService.CurrentCardCheckProcess.ChipNumber + ".pdf",
+                    settings.DefaultSettings.DefaultProjectOutputPath + "\\"
+                    + (settings.DefaultSettings.CreateSubdirectoryIsEnabled == true ? CheckProcessService.CurrentCardCheckProcess.JobNr + "\\" : string.Empty) 
+                    + CheckProcessService.CurrentCardCheckProcess.JobNr + "-" 
+                    + CheckProcessService.CurrentCardCheckProcess.ChipNumber 
+                    + ".pdf",
                     CheckProcessService.CurrentCardCheckProcess.JobNr,
                     CheckProcessService.CurrentCardCheckProcess.ChipNumber,
                     (settings.DefaultSettings.AutoLoadProjectOnStart ?? false) ? "AUTORUN=1" : "AUTORUN=0"),
@@ -442,7 +461,11 @@ public class Step2PageViewModel : ObservableObject
 
             p.Exited += (sender, eventArgs) =>
             {
-                reportReader.ReportTemplatePath = settings.DefaultSettings.DefaultProjectOutputPath + "\\" + CheckProcessService.CurrentCardCheckProcess.JobNr + "-" + CheckProcessService.CurrentCardCheckProcess.ChipNumber + ".pdf";
+                reportReader.ReportTemplatePath = settings.DefaultSettings.DefaultProjectOutputPath + "\\"
+                + (settings.DefaultSettings.CreateSubdirectoryIsEnabled == true ? CheckProcessService.CurrentCardCheckProcess.JobNr + "\\" : string.Empty) 
+                + CheckProcessService.CurrentCardCheckProcess.JobNr + "-" 
+                + CheckProcessService.CurrentCardCheckProcess.ChipNumber 
+                + ".pdf";
 
                 supported = reportReader.GetReportField("CheckBox_isChipSuppYes") != null && reportReader.GetReportField("CheckBox_isChipSuppYes") == "Yes";
                 programmable = reportReader.GetReportField("CheckBox_ChipCanUseYes") != null && reportReader.GetReportField("CheckBox_ChipCanUseYes") == "Yes";
@@ -544,7 +567,7 @@ public class Step2PageViewModel : ObservableObject
                 HyperlinkButtonReportIsVisible = true;
 
                 NextStepCanExecute = false;
-                scanChipTimer.Start();
+
             }
         }
 
@@ -552,14 +575,16 @@ public class Step2PageViewModel : ObservableObject
         {
             LogWriter.CreateLogEntry(e);
 
-            scanChipTimer.Stop();
+            scanChipTimer.Stop(); 
+            scanChipTimer.Tick -= ScanChipEvent;
+
+            NextStepCanExecute = false;
 
             await App.MainRoot.MessageDialogAsync(
                 "Fehler beim starten von RFIDGear.\n",
                 string.Format("Bitte melde den folgenden Fehler an mich:\n{0}",e.Message));
 
-            NextStepCanExecute = false;
-            return;
+            throw new InvalidOperationException(e.Message);
         }
     }
 
@@ -574,14 +599,26 @@ public class Step2PageViewModel : ObservableObject
         {
             scanChipTimer.Stop();
 
-            await readerService.ReadChipPublic();
+            await Task.Delay(1000);
 
-            while (readerService.GenericChip != null)
+            if (await readerService.ReadChipPublic() >= 0)
             {
-                await readerService.ReadChipPublic();
+                while (readerService.GenericChip != null)
+                {
+                    await readerService.ReadChipPublic();
+                    if (readerService.GenericChip == null)
+                    {
+                        continue;
+                    }
+                    else
+                    {
+                        await Task.Delay(1500);
+                    }
+                }
             }
 
             scanChipTimer.Start();
+
         } 
         
         catch (Exception e)
@@ -601,12 +638,24 @@ public class Step2PageViewModel : ObservableObject
         {
             scanChipTimer.Stop();
 
+            await Task.Delay(100);
             await readerService.ReadChipPublic();
 
-            while (readerService.GenericChip == null)
+            while (readerService.GenericChip == null && !NextStepCanExecute)
             {
                 await readerService.ReadChipPublic();
+
+                if (readerService.GenericChip != null)
+                {
+                    continue;
+                }
+                else
+                {
+                    await Task.Delay(1500);
+                }
             }
+
+            NextStepCanExecute = true;
 
             scanChipTimer.Start();
         }
@@ -614,6 +663,7 @@ public class Step2PageViewModel : ObservableObject
         catch (Exception e)
         {
             LogWriter.CreateLogEntry(e);
+            scanChipTimer.Tick -= ScanChipEvent;
         }
     }
 
@@ -626,9 +676,14 @@ public class Step2PageViewModel : ObservableObject
     {
         try
         {
+            scanChipTimer.Stop();
+
             using (ReaderService readerService = new ReaderService())
             {
-                await readerService.ReadChipPublic();
+                if(!NavigateNextStepCommand.IsRunning)
+                {
+                    await readerService.ReadChipPublic();
+                }
 
                 if (readerService.MoreThanOneReaderFound)
                 {
@@ -637,7 +692,7 @@ public class Step2PageViewModel : ObservableObject
 
                 else
                 {
-                    if (readerService.GenericChip != null && !NextStepCanExecute)
+                    if (readerService.GenericChip != null && !NextStepCanExecute && !NavigateNextStepCommand.IsRunning)
                     {
                         await ChipIsRemoved(readerService);
 
@@ -655,7 +710,7 @@ public class Step2PageViewModel : ObservableObject
                         NextStepCanExecute = true;
                     }
 
-                    if (readerService.GenericChip != null && NextStepCanExecute)
+                    if (readerService.GenericChip != null && NextStepCanExecute && !NavigateNextStepCommand.IsRunning)
                     {
 
                         ReaderHasNoChipInfoBarIsVisible = false;
@@ -670,13 +725,15 @@ public class Step2PageViewModel : ObservableObject
                         NextStepCanExecute = true;
                     }
 
-                    else
+                    else if (readerService.GenericChip == null && !NavigateNextStepCommand.IsRunning)
                     {
                         NextStepCanExecute = true;
                         ReaderHasNoChipInfoBarIsVisible = true;
                     }
                 }
             }
+
+            scanChipTimer.Start();
         }
         catch(Exception ex)
         {
@@ -692,9 +749,15 @@ public class Step2PageViewModel : ObservableObject
     {
         try
         {
+            using ReaderService readerService = new ReaderService();
+
             scanChipTimer.Stop();
+            scanChipTimer.Tick -= ScanChipEvent;
 
             await ExecuteRFIDGearCommand();
+
+            scanChipTimer.Tick += ScanChipEvent;
+            scanChipTimer.Start();
         }
         catch(Exception e)
         {
@@ -716,7 +779,11 @@ public class Step2PageViewModel : ObservableObject
 
             var info = new ProcessStartInfo
             {
-                FileName = settings.DefaultSettings.DefaultProjectOutputPath + "\\" + CheckProcessService.CurrentCardCheckProcess.JobNr + "-" + CheckProcessService.CurrentCardCheckProcess.ChipNumber + ".pdf",
+                FileName = settings.DefaultSettings.DefaultProjectOutputPath + "\\"
+                + (settings.DefaultSettings.CreateSubdirectoryIsEnabled == true ? CheckProcessService.CurrentCardCheckProcess.JobNr + "\\" : string.Empty)
+                + CheckProcessService.CurrentCardCheckProcess.JobNr + "-" 
+                + CheckProcessService.CurrentCardCheckProcess.ChipNumber 
+                + ".pdf",
                 Verb = "",     
                 UseShellExecute = true
             };
@@ -745,7 +812,8 @@ public class Step2PageViewModel : ObservableObject
 
             var info = new ProcessStartInfo
             {
-                FileName = settings.DefaultSettings.DefaultProjectOutputPath + "\\",
+                FileName = settings.DefaultSettings.DefaultProjectOutputPath + "\\"
+                + (settings.DefaultSettings.CreateSubdirectoryIsEnabled == true ? CheckProcessService.CurrentCardCheckProcess.JobNr + "\\" : string.Empty),
                 Verb = "",
                 UseShellExecute = true
             };
@@ -770,16 +838,36 @@ public class Step2PageViewModel : ObservableObject
     {
         try
         {
+            using ReaderService readerService = new ReaderService();
+
+            scanChipTimer.Stop();
+            scanChipTimer.Tick -= ScanChipEvent;
+
             using SettingsReaderWriter settings = new SettingsReaderWriter();
             settings.ReadSettings();
 
-            string finalPath = settings.DefaultSettings.DefaultProjectOutputPath + "\\" + CheckProcessService.CurrentCardCheckProcess.JobNr + "-" + CheckProcessService.CurrentCardCheckProcess.ChipNumber + "_final.pdf";
-            string semiFinalPath = settings.DefaultSettings.DefaultProjectOutputPath + "\\" + CheckProcessService.CurrentCardCheckProcess.JobNr + "-" + CheckProcessService.CurrentCardCheckProcess.ChipNumber + "_.pdf";
-            string preFinalPath = settings.DefaultSettings.DefaultProjectOutputPath + "\\" + CheckProcessService.CurrentCardCheckProcess.JobNr + "-" + CheckProcessService.CurrentCardCheckProcess.ChipNumber + ".pdf";
+            string finalPath = 
+                settings.DefaultSettings.DefaultProjectOutputPath + "\\" 
+                + (settings.DefaultSettings.CreateSubdirectoryIsEnabled == true ? CheckProcessService.CurrentCardCheckProcess.JobNr + "\\" : string.Empty)
+                + CheckProcessService.CurrentCardCheckProcess.JobNr + "-" 
+                + CheckProcessService.CurrentCardCheckProcess.ChipNumber 
+                + "_final.pdf";
+
+            string semiFinalPath = 
+                settings.DefaultSettings.DefaultProjectOutputPath + "\\"
+                + (settings.DefaultSettings.CreateSubdirectoryIsEnabled == true ? CheckProcessService.CurrentCardCheckProcess.JobNr + "\\" : string.Empty) 
+                + CheckProcessService.CurrentCardCheckProcess.JobNr + "-" 
+                + CheckProcessService.CurrentCardCheckProcess.ChipNumber 
+                + "_.pdf";
+
+            string preFinalPath = 
+                settings.DefaultSettings.DefaultProjectOutputPath + "\\"
+                + (settings.DefaultSettings.CreateSubdirectoryIsEnabled == true ? CheckProcessService.CurrentCardCheckProcess.JobNr + "\\" : string.Empty) 
+                + CheckProcessService.CurrentCardCheckProcess.JobNr + "-" 
+                + CheckProcessService.CurrentCardCheckProcess.ChipNumber 
+                + ".pdf";
 
             using ReportReaderWriterService reportReader = new ReportReaderWriterService();
-
-            scanChipTimer.Stop();
 
             var window = (Application.Current as App)?.Window as MainWindow ?? new MainWindow();
             var navigation = window.Navigation;
@@ -884,11 +972,15 @@ public class Step2PageViewModel : ObservableObject
     /// <summary>
     /// 
     /// </summary>
-    private void NavigateBackCommand_Executed()
+    private async void NavigateBackCommand_Executed()
     {
         try
         {
+            using ReaderService readerService = new ReaderService();
+
             scanChipTimer.Stop();
+            scanChipTimer.Tick -= ScanChipEvent;
+
             var window = (Application.Current as App)?.Window as MainWindow ?? new MainWindow();
             var navigation = window.Navigation;
             var step1Page = navigation.GetNavigationViewItems(typeof(Step1Page)).First();

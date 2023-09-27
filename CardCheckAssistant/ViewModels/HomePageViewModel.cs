@@ -34,7 +34,6 @@ public class HomePageViewModel : ObservableObject, IDisposable
     /// </summary>
     public HomePageViewModel()
     {
-
         OpenSelectedReportCommand = new AsyncRelayCommand(OpenSelectedReportCommand_Executed);
 
         if (this != null)
@@ -99,7 +98,7 @@ public class HomePageViewModel : ObservableObject, IDisposable
             }
             catch { }
 
-            return string.Format("CardCheckAssistant                  Version: {0}", packageVersion == string.Empty ? fvi.FileVersion : packageVersion); }
+            return string.Format("CardCheckAssistant                  Version: {0}", fvi.FileVersion); }
     }
 
     /// <summary>
@@ -505,6 +504,8 @@ public class HomePageViewModel : ObservableObject, IDisposable
         "Fehler in der Verbindung",
         "Es konnte keine Verbindung mit der Datenabnk hergestellt werden.\n" +
         "Bitte die Einstellungen überprüfen.");
+
+        scanDBTimer.Stop();
     }
     #endregion
 
@@ -515,6 +516,8 @@ public class HomePageViewModel : ObservableObject, IDisposable
     {
         if(SelectedCardCheckProcess != null)
         {
+            scanDBTimer.Stop();
+
             SelectedCardCheckProcess.Status = OrderStatus.InProgress;
 
             var window = (Application.Current as App)?.Window as MainWindow ?? new MainWindow();
@@ -535,7 +538,7 @@ public class HomePageViewModel : ObservableObject, IDisposable
         var window = (Application.Current as App)?.Window as MainWindow ?? new MainWindow();
         var navigation = window.Navigation;
         NavigationViewItem page = navigation.GetNavigationViewItems(typeof(Step1Page)).First();
-
+        
         if (SelectedCardCheckProcess != null)
         {
             switch (SelectedCardCheckProcess.CurrentProcessNumber)

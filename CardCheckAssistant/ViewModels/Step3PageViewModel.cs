@@ -27,6 +27,10 @@ public class Step3PageViewModel : ObservableObject
     /// </summary>
     public Step3PageViewModel()
     {
+        RunRFiDGearCommand = new AsyncRelayCommand(ExecuteRFIDGearCommand);
+        NavigateNextStepCommand = new AsyncRelayCommand(NavigateNextStepCommand_Executed);
+        PostPageLoadedCommand = new AsyncRelayCommand(PostPageLoadedCommand_Executed);
+
         NextStepCanExecute = false;
         GoBackCanExecute = true;
 
@@ -36,10 +40,9 @@ public class Step3PageViewModel : ObservableObject
         TextBlockCheckFinishedIsVisible = false;
         HyperlinkButtonReportIsVisible = false;
 
-        NextStepButtonContent = "Weiter";
+        ChipCount = new ObservableCollection<string>();
 
-        NavigateNextStepCommand = new AsyncRelayCommand(NavigateNextStepCommand_Executed);
-        RunRFiDGearCommand = new AsyncRelayCommand(ExecuteRFIDGearCommand);
+        NextStepButtonContent = "Weiter";
     }
 
     #region ObservableProperties
@@ -49,10 +52,10 @@ public class Step3PageViewModel : ObservableObject
     /// </summary>
     public string NextStepButtonContent
     {
-        get => _nextStepButtonContent;
+        get => _nextStepButtonContent ?? "";
         set => SetProperty(ref _nextStepButtonContent, value);
     }
-    private string _nextStepButtonContent;
+    private string? _nextStepButtonContent;
 
     /// <summary>
     /// 
@@ -161,7 +164,7 @@ public class Step3PageViewModel : ObservableObject
     /// <summary>
     /// 
     /// </summary>
-    public ICommand PostPageLoadedCommand => new AsyncRelayCommand(PostPageLoadedCommand_Executed);
+    public IAsyncRelayCommand PostPageLoadedCommand { get; }
 
     /// <summary>
     /// 
@@ -182,12 +185,24 @@ public class Step3PageViewModel : ObservableObject
         try
         {
             using SettingsReaderWriter settings = new SettingsReaderWriter();
+            using ReportReaderWriterService reportReader = new ReportReaderWriterService();
             settings.ReadSettings();
 
-            using ReportReaderWriterService reportReader = new ReportReaderWriterService();
+            await Task.Delay(1000);
 
-            string finalPath = settings.DefaultSettings.DefaultProjectOutputPath + "\\" + CheckProcessService.CurrentCardCheckProcess.JobNr + "-" + CheckProcessService.CurrentCardCheckProcess.ChipNumber + "_final.pdf";
-            string semiFinalPath = settings.DefaultSettings.DefaultProjectOutputPath + "\\" + CheckProcessService.CurrentCardCheckProcess.JobNr + "-" + CheckProcessService.CurrentCardCheckProcess.ChipNumber + "_.pdf";
+            string finalPath =
+                settings.DefaultSettings.DefaultProjectOutputPath + "\\"
+                + (settings.DefaultSettings.CreateSubdirectoryIsEnabled == true ? CheckProcessService.CurrentCardCheckProcess.JobNr + "\\" : string.Empty)
+                + CheckProcessService.CurrentCardCheckProcess.JobNr + "-"
+                + CheckProcessService.CurrentCardCheckProcess.ChipNumber
+                + "_final.pdf";
+
+            string semiFinalPath =
+                settings.DefaultSettings.DefaultProjectOutputPath + "\\"
+                + (settings.DefaultSettings.CreateSubdirectoryIsEnabled == true ? CheckProcessService.CurrentCardCheckProcess.JobNr + "\\" : string.Empty)
+                + CheckProcessService.CurrentCardCheckProcess.JobNr + "-"
+                + CheckProcessService.CurrentCardCheckProcess.ChipNumber
+                + "_.pdf";
 
             var p = new Process();
 
@@ -282,7 +297,9 @@ public class Step3PageViewModel : ObservableObject
     {
         try
         {
-            await RunRFiDGearCommand.ExecuteAsync(null);
+            await Task.Delay(100);
+
+            await ExecuteRFIDGearCommand();
             NextStepCanExecute = true;
         }
         catch (Exception e)
@@ -305,7 +322,11 @@ public class Step3PageViewModel : ObservableObject
 
             var info = new ProcessStartInfo()
             {
-                FileName = settings.DefaultSettings.DefaultProjectOutputPath + "\\" + CheckProcessService.CurrentCardCheckProcess.JobNr + "-" + CheckProcessService.CurrentCardCheckProcess.ChipNumber + "_final.pdf",
+                FileName = settings.DefaultSettings.DefaultProjectOutputPath + "\\"
+                + (settings.DefaultSettings.CreateSubdirectoryIsEnabled == true ? CheckProcessService.CurrentCardCheckProcess.JobNr + "\\" : string.Empty) 
+                + CheckProcessService.CurrentCardCheckProcess.JobNr + "-" 
+                + CheckProcessService.CurrentCardCheckProcess.ChipNumber 
+                + "_final.pdf",
                 Verb = "",
                 UseShellExecute = true
             };
@@ -334,7 +355,8 @@ public class Step3PageViewModel : ObservableObject
 
             var info = new ProcessStartInfo()
             {
-                FileName = settings.DefaultSettings.DefaultProjectOutputPath + "\\",
+                FileName = settings.DefaultSettings.DefaultProjectOutputPath + "\\"
+                +(settings.DefaultSettings.CreateSubdirectoryIsEnabled == true ? CheckProcessService.CurrentCardCheckProcess.JobNr + "\\" : string.Empty),
                 Verb = "",
                 UseShellExecute = true
             };
@@ -365,9 +387,26 @@ public class Step3PageViewModel : ObservableObject
 
             settings.ReadSettings();
 
-            string finalPath = settings.DefaultSettings.DefaultProjectOutputPath + "\\" + CheckProcessService.CurrentCardCheckProcess.JobNr + "-" + CheckProcessService.CurrentCardCheckProcess.ChipNumber + "_final.pdf";
-            string semiFinalPath = settings.DefaultSettings.DefaultProjectOutputPath + "\\" + CheckProcessService.CurrentCardCheckProcess.JobNr + "-" + CheckProcessService.CurrentCardCheckProcess.ChipNumber + "_.pdf";
-            string preFinalPath = settings.DefaultSettings.DefaultProjectOutputPath + "\\" + CheckProcessService.CurrentCardCheckProcess.JobNr + "-" + CheckProcessService.CurrentCardCheckProcess.ChipNumber + ".pdf";
+            string finalPath =
+                settings.DefaultSettings.DefaultProjectOutputPath + "\\"
+                + (settings.DefaultSettings.CreateSubdirectoryIsEnabled == true ? CheckProcessService.CurrentCardCheckProcess.JobNr + "\\" : string.Empty)
+                + CheckProcessService.CurrentCardCheckProcess.JobNr + "-"
+                + CheckProcessService.CurrentCardCheckProcess.ChipNumber
+                + "_final.pdf";
+
+            string semiFinalPath =
+                settings.DefaultSettings.DefaultProjectOutputPath + "\\"
+                + (settings.DefaultSettings.CreateSubdirectoryIsEnabled == true ? CheckProcessService.CurrentCardCheckProcess.JobNr + "\\" : string.Empty)
+                + CheckProcessService.CurrentCardCheckProcess.JobNr + "-"
+                + CheckProcessService.CurrentCardCheckProcess.ChipNumber
+                + "_.pdf";
+
+            string preFinalPath =
+                settings.DefaultSettings.DefaultProjectOutputPath + "\\"
+                + (settings.DefaultSettings.CreateSubdirectoryIsEnabled == true ? CheckProcessService.CurrentCardCheckProcess.JobNr + "\\" : string.Empty)
+                + CheckProcessService.CurrentCardCheckProcess.JobNr + "-"
+                + CheckProcessService.CurrentCardCheckProcess.ChipNumber
+                + ".pdf";
 
             var window = (Application.Current as App)?.Window as MainWindow ?? new MainWindow();
             var navigation = window.Navigation;
@@ -387,6 +426,7 @@ public class Step3PageViewModel : ObservableObject
 
             navigation.SetCurrentNavigationViewItem(nextpage);
             nextpage.IsEnabled = true;
+            
         }
         catch (Exception e)
         {
