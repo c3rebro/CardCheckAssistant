@@ -16,8 +16,8 @@
     <AppxPackageSigningEnabled>True</AppxPackageSigningEnabled>
     <PackageCertificateThumbprint>17473166A3D5B4DDF7BEC28DA037402A7C1601F8</PackageCertificateThumbprint>
     <AppxPackageSigningTimestampDigestAlgorithm>SHA256</AppxPackageSigningTimestampDigestAlgorithm>
-    <AppxAutoIncrementPackageRevision>True</AppxAutoIncrementPackageRevision>
-    <AppxSymbolPackageEnabled>False</AppxSymbolPackageEnabled>
+    <AppxAutoIncrementPackageRevision>False</AppxAutoIncrementPackageRevision>
+    <AppxSymbolPackageEnabled>True</AppxSymbolPackageEnabled>
     <GenerateTestArtifacts>True</GenerateTestArtifacts>
     <AppxBundle>Never</AppxBundle>
     <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
@@ -45,13 +45,14 @@ v1.0.20
     <Title>CardCheckAssistant</Title>
     <Company>Messgeraetetechnik Hansen</Company>
     <Authors>Steven Hansen</Authors>
-    <AssemblyVersion>1.0.28</AssemblyVersion>
+    <AssemblyVersion>1.0.30</AssemblyVersion>
     <FileVersion>$(AssemblyVersion)</FileVersion>
-    <AppInstallerUri>https://github.com/c3rebro/CardCheckAssistant/releases/latest/download/CardCheckAssistant.msix</AppInstallerUri>
+    <AppInstallerUri>https://github.com/c3rebro/CardCheckAssistant/releases/latest/download</AppInstallerUri>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <Description>Description</Description>
     <AppxPackageDir>C:\Temp\Seafile\CardCheckAssistant\CardCheckAssistant\bin\AppPackages\</AppxPackageDir>
+    <AppxBundlePlatforms>x64</AppxBundlePlatforms>
   </PropertyGroup>
   <ItemGroup>
     <Compile Remove="App.xaml.Settings.cs" />

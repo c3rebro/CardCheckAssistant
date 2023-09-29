@@ -8,9 +8,9 @@
   IgnorableNamespaces="uap rescap uap3">
 
   <Identity
-    Name="a7309bff-a402-4e9a-a499-6f394b1a770a"
+    Name="CardCheckAssistant"
     Publisher="CN=Steven Hansen"
-    Version="1.0.28.0" />
+    Version="1.0.30.0" />
 
   <Properties>
     <DisplayName>CardCheckAssistant</DisplayName>

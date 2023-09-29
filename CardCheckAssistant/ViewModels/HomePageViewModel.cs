@@ -1,8 +1,4 @@
-﻿using System.Collections.ObjectModel;
-using System.Diagnostics;
-using System.Reflection;
-using System.Windows.Input;
-using CardCheckAssistant.AppNotification;
+﻿using CardCheckAssistant.AppNotification;
 using CardCheckAssistant.Models;
 using CardCheckAssistant.Services;
 using CardCheckAssistant.Views;
@@ -12,12 +8,19 @@ using CommunityToolkit.WinUI.Helpers;
 using Log4CSharp;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Windows.ApplicationModel;
+using Windows.Management.Deployment;
+using System.Collections.ObjectModel;
+using System.Diagnostics;
+using System.Reflection;
+using System.Windows.Threading;
+using System.Windows.Input;
 
 namespace CardCheckAssistant.ViewModels;
 
 public class HomePageViewModel : ObservableObject, IDisposable
 {
-    private readonly DispatcherTimer scanDBTimer;
+    private readonly Microsoft.UI.Xaml.DispatcherTimer scanDBTimer;
     private SQLDBService dbService;
 
     private FilterOptions currentFilter;
@@ -40,7 +43,7 @@ public class HomePageViewModel : ObservableObject, IDisposable
         {
 
         }
-        scanDBTimer = new DispatcherTimer();
+        scanDBTimer = new Microsoft.UI.Xaml.DispatcherTimer();
         scanDBTimer.Tick += OnTimedEvent;
         scanDBTimer.Interval = new TimeSpan(0,0,10);
         scanDBTimer.Stop();
@@ -412,6 +415,8 @@ public class HomePageViewModel : ObservableObject, IDisposable
     {
         try
         {
+            await CheckForUpdates();
+
             using SettingsReaderWriter settings = new SettingsReaderWriter();
             dbService = new SQLDBService(
                 settings.DefaultSettings.SelectedDBServerName,
@@ -666,6 +671,68 @@ public class HomePageViewModel : ObservableObject, IDisposable
 
         }
     }
+
+    public async Task CheckForUpdates()
+    {
+        try
+        {
+            PackageManager package = new PackageManager();
+            Package currentPackage = package.FindPackageForUser(string.Empty, Package.Current.Id.FullName);
+            PackageUpdateAvailabilityResult result = await currentPackage.CheckUpdateAvailabilityAsync();
+
+            switch (result.Availability)
+            {
+                case PackageUpdateAvailability.Available:
+                    await App.MainRoot.MessageDialogAsync(
+                        "Update wird installiert.\n",
+                        "Es ist eine neue Version von CardCheckassistant verfügbar.\nSie wird nun heruntergalden und installiert...");
+
+                    await InstallUpdate();
+                    break;
+                case PackageUpdateAvailability.Required:
+                case PackageUpdateAvailability.NoUpdates:
+                case PackageUpdateAvailability.Unknown:
+                default:
+                    break;
+            }
+        }
+        catch (Exception e)
+        {
+            LogWriter.CreateLogEntry(e);
+        }
+
+    }
+
+    private async Task InstallUpdate()
+    {
+        try
+        {
+            var pm = new PackageManager();
+            Package currentPackage = pm.FindPackageForUser(string.Empty, Package.Current.Id.FullName);
+            var deploymentTask = await pm.UpdatePackageAsync(new Uri("https://github.com/c3rebro/CardCheckAssistant/releases/latest/download/CardCheckAssistant_x64.appinstaller"), null, DeploymentOptions.None);
+
+            if (deploymentTask.ErrorText != null)
+            {
+                await App.MainRoot.MessageDialogAsync(
+                    "Updatefehler\n",
+                    string.Format("Bitte melde den folgenden Fehler an mich:\n{0}\n{1}", deploymentTask.ErrorText,deploymentTask.ExtendedErrorCode));
+            }
+            else
+            {
+                await App.MainRoot.MessageDialogAsync(
+                    "Update Erfolgreich\n","Bitte beende Deine Arbeit und starte die Anwendung neu.");
+            }
+        }
+        catch
+        {
+            await App.MainRoot.MessageDialogAsync(
+                "Fehler:\n",
+                string.Format("Die Anwendung konnte nicht automatisch neu gestartet werden.\nBitte starte sie manuell neu."));
+        }
+
+    }
+
+
 
     protected void Dispose(bool disposing)
     {
