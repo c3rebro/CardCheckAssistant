@@ -203,7 +203,7 @@ public class SQLDBService : IDisposable
                                         EditorName = await sql_datareader.IsDBNullAsync(6) ? "" : sql_datareader.GetString(5),
                                         SalesName = await sql_datareader.IsDBNullAsync(8) ? "" : sql_datareader.GetString(8),
                                         DateModified = await sql_datareader.IsDBNullAsync(9) ? "" : sql_datareader.GetString(9),
-                                        Status = (OrderStatus)Enum.Parse(typeof(OrderStatus), await sql_datareader.IsDBNullAsync(6) ? "NA" : sql_datareader.GetString(6))
+                                        Status = await sql_datareader.IsDBNullAsync(6) ? "NA" : sql_datareader.GetString(6)
                                         
                                     };
                                     CardChecks.Add(cardCheckProcess);
@@ -263,7 +263,7 @@ public class SQLDBService : IDisposable
                                     JobNr = sqlite_datareader.GetString(1),
                                     EditorName = sqlite_datareader.GetString(8),
                                     //NumberOfChipsToCheck = sqlite_datareader.GetInt32(3),
-                                    Status = (OrderStatus)Enum.Parse(typeof(OrderStatus), sqlite_datareader.GetString(6)),
+                                    Status = sqlite_datareader.GetString(6),
                                     DateCreated = sqlite_datareader.GetString(3),
                                 };
 

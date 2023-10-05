@@ -11,6 +11,7 @@ using CardCheckAssistant.Services;
 using ctWinUI = CommunityToolkit.WinUI.UI.Controls;
 using Microsoft.UI.Xaml.Input;
 using CardCheckAssistant.Models;
+using System.Collections.ObjectModel;
 
 namespace CardCheckAssistant.Views
 {
@@ -26,27 +27,37 @@ namespace CardCheckAssistant.Views
 
         private void FilterStatusInProgress_Click(object sender, RoutedEventArgs e)
         {
-            DataGrid.ItemsSource = ViewModel.FilterData(HomePageViewModel.FilterOptions.InProgress).OrderByDescending(x => x.DateCreated);
-        }
-
-        private void FilterStatusWaitForCustomer_Click(object sender, RoutedEventArgs e)
-        {
-            DataGrid.ItemsSource = ViewModel.FilterData(HomePageViewModel.FilterOptions.WaitForCustomer).OrderByDescending(x => x.DateCreated);
+            ViewModel.SelectedFilter = "InProgress";
         }
 
         private void FilterStatusCheckFinished_Click(object sender, RoutedEventArgs e)
         {
-            DataGrid.ItemsSource = ViewModel.FilterData(HomePageViewModel.FilterOptions.CheckFinisched).OrderByDescending(x => x.DateCreated);
+            ViewModel.SelectedFilter = "CheckFinished";
         }
 
         private void FilterClear_Click(object sender, RoutedEventArgs e)
         {
-            DataGrid.ItemsSource = ViewModel.FilterData(HomePageViewModel.FilterOptions.All).OrderByDescending(x => x.DateCreated);
+            ViewModel.SelectedFilter = "All";
+        }
+
+        private void SortJobNumberAscending_Click(object sender, RoutedEventArgs e)
+        {
+            ViewModel.SelectedSort = "JobNumber";
+        }
+
+        private void SortCreatedAscending_Click(object sender, RoutedEventArgs e)
+        {
+            ViewModel.SelectedSort = "Created";
+        }
+
+        private void SortStatusAscending_Click(object sender, RoutedEventArgs e)
+        {
+            ViewModel.SelectedSort = "Status";
         }
 
         private void SearchQuery_Submitted(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)
         {
-            DataGrid.ItemsSource = ViewModel.SearchData(args.QueryText).OrderByDescending(x => x.DateCreated);
+            DataGrid.ItemsSource = ViewModel.SearchData(args.QueryText);
         }
 
         private void OpenPDFButton_PointerEntered(object sender, PointerRoutedEventArgs e)
@@ -54,7 +65,7 @@ namespace CardCheckAssistant.Views
             var root = sender as Grid;
             var dataObject = root.DataContext as CardCheckProcess;
 
-            if(dataObject != null && (dataObject.Status == OrderStatus.WaitForCustomer || dataObject.Status == OrderStatus.CheckFinished))
+            if(dataObject != null && (dataObject.Status == "CheckFinished"))
             {
                 DataGrid.SelectedItem = dataObject;
                 dataObject.IsSelected = true;

@@ -175,13 +175,11 @@
                                     Width="80">
                                     <AppBarButton.Flyout>
                                         <MenuFlyout>
-                                            <RadioMenuFlyoutItem Text="Zeige: InProgress"
+                                            <RadioMenuFlyoutItem GroupName="filterData" Text="Zeige: InProgress"
                                                    Click="FilterStatusInProgress_Click" />
-                                            <RadioMenuFlyoutItem Text="Zeige: Completed"
+                                            <RadioMenuFlyoutItem GroupName="filterData" Text="Zeige: Completed"
                                                    Click="FilterStatusCheckFinished_Click" />
-                                            <RadioMenuFlyoutItem Text="Zeige: WaitForCustomer"
-                                                   Click="FilterStatusWaitForCustomer_Click" />
-                                            <RadioMenuFlyoutItem Text="Zeige: Alle"
+                                            <RadioMenuFlyoutItem GroupName="filterData" Text="Zeige: Alle" IsChecked="True"
                                                    Click="FilterClear_Click" />
                                         </MenuFlyout>
                                     </AppBarButton.Flyout>
@@ -197,6 +195,41 @@
                                 </AppBarElementContainer>
                             </CommandBar>
 
+                            <CommandBar 
+                                DefaultLabelPosition="Right"
+                                Background="Transparent"
+                                VerticalAlignment="Center">
+                                <AppBarButton 
+                                    Icon="List"
+                                    Label="Sortiere nach"
+                                    Width="120">
+                                    <AppBarButton.Flyout>
+                                        <MenuFlyout>
+                                            <RadioMenuFlyoutItem GroupName="sortData" Text="Jobnummer"
+                                                                 Click="SortJobNumberAscending_Click" IsChecked="true"/>
+                                            <RadioMenuFlyoutItem GroupName="sortData" Text="Erstellt"
+                                                                 Click="SortCreatedAscending_Click" />
+                                            <RadioMenuFlyoutItem GroupName="sortData" Text="Status" 
+                                                                 Click="SortStatusAscending_Click" />
+                                            <MenuFlyoutSeparator/>
+                                            <ToggleMenuFlyoutItem Text="Aufsteigend"
+                                                                  IsChecked="{Binding SetSortAscending, 
+                                                UpdateSourceTrigger=PropertyChanged, 
+                                                Mode=TwoWay}"/>
+                                        </MenuFlyout>
+                                    </AppBarButton.Flyout>
+                                </AppBarButton>
+                                <AppBarElementContainer
+                                Visibility="Collapsed"
+                                Margin="-16 0 0 0">
+                                    <FontIcon 
+                                        Glyph="&#xE73E;"
+                                        FontSize="12"
+                                        Foreground="Coral"
+                                        VerticalAlignment="Top" />
+                                </AppBarElementContainer>
+                            </CommandBar>
+                            
                             <AutoSuggestBox
                                 QueryIcon="Find"
                                 MinWidth="280"
@@ -223,23 +256,23 @@
 
             <ctWinUI:DataGrid 
                 x:Name="DataGrid"
-            Margin="0,8,0,0"
-            Grid.Row="2"
-            Grid.Column="0"
-            Grid.ColumnSpan="2"
-            HorizontalAlignment="Stretch"
-            VerticalAlignment="Stretch"
-            HorizontalContentAlignment="Center"
-            VerticalContentAlignment="Center"
-            AutoGenerateColumns="False"
-            Background="Transparent"
-            IsReadOnly="True"
-            Opacity="1"
-            CanUserReorderColumns="True"
-            CanUserSortColumns="True"
-            SelectionMode="Single"
-            ItemsSource="{Binding DataGridItemCollection, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
-            SelectedItem="{Binding SelectedCardCheckProcess, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}">
+                Margin="0,8,0,0"
+                Grid.Row="2"
+                Grid.Column="0"
+                Grid.ColumnSpan="2"
+                HorizontalAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                HorizontalContentAlignment="Center"
+                VerticalContentAlignment="Center"
+                AutoGenerateColumns="False"
+                Background="Transparent"
+                IsReadOnly="True"
+                Opacity="1"
+                CanUserReorderColumns="True"
+                CanUserSortColumns="True"
+                SelectionMode="Single"
+                ItemsSource="{Binding DataGridItemCollection, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}"
+                SelectedItem="{Binding SelectedCardCheckProcess, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}">
                 <ctWinUI:DataGrid.Resources>
                     <ctWinUIConv:BoolToObjectConverter x:Key="boolean" />
                     <SolidColorBrush x:Key="DataGridColumnHeaderBackgroundBrush" Opacity=".5" />

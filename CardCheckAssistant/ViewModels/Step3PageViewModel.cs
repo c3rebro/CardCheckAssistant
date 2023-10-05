@@ -279,8 +279,6 @@ public class Step3PageViewModel : ObservableObject
                 TextBlockCheckFinishedAndResultIsSuppAndProgIsVisible = true;
 
             }
-
-            reportReader.SetReadOnlyOnAllFields(true);
         }
 
         catch (Exception e)
@@ -384,6 +382,7 @@ public class Step3PageViewModel : ObservableObject
         try
         {
             using SettingsReaderWriter settings = new SettingsReaderWriter();
+            using ReportReaderWriterService reportReader = new ReportReaderWriterService();
 
             settings.ReadSettings();
 
@@ -408,6 +407,10 @@ public class Step3PageViewModel : ObservableObject
                 + CheckProcessService.CurrentCardCheckProcess.ChipNumber
                 + ".pdf";
 
+            reportReader.ReportTemplatePath = semiFinalPath;
+            reportReader.ReportOutputPath = finalPath;
+            reportReader.SetReadOnlyOnAllFields(true);
+
             var window = (Application.Current as App)?.Window as MainWindow ?? new MainWindow();
             var navigation = window.Navigation;
             NavigationViewItem nextpage;
@@ -415,6 +418,7 @@ public class Step3PageViewModel : ObservableObject
 
             var fileName = finalPath;
             var fileStream = File.Open(fileName, FileMode.Open);
+
 
             await SQLDBService.Instance.InsertData(CheckProcessService.CurrentCardCheckProcess.ID, fileStream);
             await SQLDBService.Instance.InsertData(CheckProcessService.CurrentCardCheckProcess.ID, OrderStatus.CheckFinished.ToString());

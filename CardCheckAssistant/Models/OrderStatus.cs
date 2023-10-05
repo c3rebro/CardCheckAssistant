@@ -17,7 +17,6 @@ public enum OrderStatus
     ExportReady,
     InProgress,
     RequestCustomerFeedback,
-    WaitForCustomer,
     CheckFinished,
     SendMail,
     ReadyForShipping,

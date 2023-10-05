@@ -17,5 +17,5 @@ public class Customer
     public string EditorName { get; set; }
     public string SalesName { get; set; }
     public bool IsMember { get; set; }
-    public OrderStatus Status { get; set; }
+    public string Status { get; set; }
 }

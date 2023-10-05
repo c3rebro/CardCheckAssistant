@@ -22,7 +22,7 @@ public class CardCheckProcess : Customer
     {
         get
         {
-            return (Status == OrderStatus.CheckFinished || Status == OrderStatus.WaitForCustomer) ? "Visible" : "Collapsed";
+            return (Status == "CheckFinished") ? "Visible" : "Collapsed";
         }
     }
 
