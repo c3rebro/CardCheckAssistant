@@ -16,7 +16,7 @@
     <AppxPackageSigningEnabled>True</AppxPackageSigningEnabled>
     <PackageCertificateThumbprint>17473166A3D5B4DDF7BEC28DA037402A7C1601F8</PackageCertificateThumbprint>
     <AppxPackageSigningTimestampDigestAlgorithm>SHA256</AppxPackageSigningTimestampDigestAlgorithm>
-    <AppxAutoIncrementPackageRevision>False</AppxAutoIncrementPackageRevision>
+    <AppxAutoIncrementPackageRevision>True</AppxAutoIncrementPackageRevision>
     <AppxSymbolPackageEnabled>True</AppxSymbolPackageEnabled>
     <GenerateTestArtifacts>True</GenerateTestArtifacts>
     <AppxBundle>Never</AppxBundle>
@@ -27,17 +27,40 @@
     <ApplicationIcon>Assets\AppIco.ico</ApplicationIcon>
     <PackageIcon>Assets\StoreLogo.scale-400.png</PackageIcon>
     <RepositoryUrl>https://github.com/c3rebro/CardCheckAssistant</RepositoryUrl>
-    <PackageReleaseNotes>v1.0.25
-------------------------------------------------------
-+ gefixt, trennen der Eventverknüpfung -= ScanChipEvent; vor dem Schrittwechsel.
+    <PackageReleaseNotes>Version 1.0.32
+-----------------------------------------------------------------
+Hintergrundfunktionen:
++ Fehlerbehebung: Endlos - "ToastMessage" bei neuen Aufträgen...
++ Erste Einträge auf der "Hilfeseite"
+
+Version 1.0.31
+-----------------------------------------------------------------
+Hintergrundfunktionen:
++ Sortieroptionen: Sortieren nach Jobnummer erfolgt jetzt anhand der ID um die Chipnummer zu berücksichtigen
++ Sortieroptionen: Aufsteigend / Absteigend
++ "SetReadOnly" verschoben: Der Bericht wird jetzt nicht mehr direkt nach dem RFiDGear Aufruf in Schritt3 abgeschlossen sondern erst mit dem Klick auf "Fertigstellen"
+
+Version 1.0.30
+-----------------------------------------------------------------
+Hintergrundfunktionen:
++ Automatisches Update aktiviert
+
+Version 1.0.29
+-----------------------------------------------------------------
+Benutzeroberfläche:
++ Verbesserung: InfoBar: Leseranschluss Belegt
++ Neue Funktion: Unterverzeichnis für CardChecks
+
+Hintergrundfunktionen
++ Fehlerbehebung 1.0.21 / Verbesserung: Trennung der TimerEvents zwischen Schrittwechsel um belegte Ports zu verhindern
 
 v1.0.21
 ------------------------------------------------------
-+ 2 Sek. Wartezeit zwischen Schritt 1 und 2
++ 2 Sek. Wartezeit zwischen Schritt 1 und 2 soll belegte Ports verhindern
 
 v1.0.20
 ------------------------------------------------------
-+ Abfrage der LSM Programmieroptionen: Wie wurde programmiert?
++ Neue Funktionen: Abfrage der LSM Programmieroptionen: Wie wurde programmiert?
    Dies kann jetzt direkt eingegeben werden ohne das PDF öffnen zu müssen.
 + Mifare Classic wird während der Prüfung anders behandelt (z.B. Angabe verwendeter Sektoren)
 + Händler und ADM als neue Spalten.</PackageReleaseNotes>
@@ -45,7 +68,7 @@ v1.0.20
     <Title>CardCheckAssistant</Title>
     <Company>Messgeraetetechnik Hansen</Company>
     <Authors>Steven Hansen</Authors>
-    <AssemblyVersion>1.0.30</AssemblyVersion>
+    <AssemblyVersion>1.0.32</AssemblyVersion>
     <FileVersion>$(AssemblyVersion)</FileVersion>
     <AppInstallerUri>https://github.com/c3rebro/CardCheckAssistant/releases/latest/download</AppInstallerUri>
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -53,6 +76,7 @@ v1.0.20
     <Description>Description</Description>
     <AppxPackageDir>C:\Temp\Seafile\CardCheckAssistant\CardCheckAssistant\bin\AppPackages\</AppxPackageDir>
     <AppxBundlePlatforms>x64</AppxBundlePlatforms>
+    <SupportedOSPlatformVersion>10.0.19041.0</SupportedOSPlatformVersion>
   </PropertyGroup>
   <ItemGroup>
     <Compile Remove="App.xaml.Settings.cs" />
@@ -384,6 +408,12 @@ v1.0.20
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Update="Assets\BadgeLogo.scale-400.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Update="Assets\doc\AuftraegeLaden.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Update="Assets\doc\AuftraegeSortieren.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Update="Assets\fluent-ui-microsoft.png">
