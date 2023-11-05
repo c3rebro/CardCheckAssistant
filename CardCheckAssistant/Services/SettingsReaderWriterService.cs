@@ -59,9 +59,9 @@ public class SettingsReaderWriter : IDisposable
     {
         try
         {
-            appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+            appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) ?? "";
 
-            appDataPath = Path.Combine(appDataPath, "CardCheckAssistant");
+            appDataPath = Path.Combine(appDataPath ?? "", "CardCheckAssistant");
 
             if (!Directory.Exists(appDataPath))
             {
@@ -74,7 +74,7 @@ public class SettingsReaderWriter : IDisposable
             xmlWriter = XmlWriter.Create(Path.Combine(appDataPath, _updateConfigFileFileName), xmlSettings);
             xmlWriter.WriteStartDocument();
             xmlWriter.WriteStartElement("Manifest");
-            xmlWriter.WriteAttributeString("version", string.Format("{0}.{1}.{2}", Version.Major, Version.Minor, Version.Build));
+            xmlWriter.WriteAttributeString("version", string.Format("{0}.{1}.{2}", Version?.Major, Version?.Minor, Version?.Build));
 
             xmlWriter.WriteEndElement();
             xmlWriter.Close();
@@ -91,12 +91,12 @@ public class SettingsReaderWriter : IDisposable
                 var PayLoadElem = doc.CreateElement("Payload");
                 var InfoTextElem = doc.CreateElement("VersionInfoText");
 
-                doc.DocumentElement.AppendChild(CheckIntervalElem);
-                doc.DocumentElement.AppendChild(RemoteConfigUriElem);
-                doc.DocumentElement.AppendChild(SecurityTokenElem);
-                doc.DocumentElement.AppendChild(BaseUriElem);
-                doc.DocumentElement.AppendChild(PayLoadElem);
-                doc.DocumentElement.AppendChild(InfoTextElem);
+                doc?.DocumentElement?.AppendChild(CheckIntervalElem);
+                doc?.DocumentElement?.AppendChild(RemoteConfigUriElem);
+                doc?.DocumentElement?.AppendChild(SecurityTokenElem);
+                doc?.DocumentElement?.AppendChild(BaseUriElem);
+                doc?.DocumentElement?.AppendChild(PayLoadElem);
+                doc?.DocumentElement?.AppendChild(InfoTextElem);
 
                 CheckIntervalElem.InnerText = _updateInterval.ToString(CultureInfo.CurrentCulture);
                 RemoteConfigUriElem.InnerText = _updateURL;
@@ -105,7 +105,7 @@ public class SettingsReaderWriter : IDisposable
                 PayLoadElem.InnerText = _payload;
                 InfoTextElem.InnerText = _infoText;
 
-                doc.Save(Path.Combine(appDataPath, _updateConfigFileFileName));
+                doc?.Save(Path.Combine(appDataPath ?? "", _updateConfigFileFileName));
             }
         }
         catch (Exception ex)
@@ -113,7 +113,7 @@ public class SettingsReaderWriter : IDisposable
             LogWriter.CreateLogEntry(ex);
         }
 
-        if (!File.Exists(Path.Combine(appDataPath, _settingsFileFileName)))
+        if (!File.Exists(Path.Combine(appDataPath ?? "", _settingsFileFileName)))
         {
             try
             {
@@ -121,7 +121,7 @@ public class SettingsReaderWriter : IDisposable
 
                 var serializer = new XmlSerializer(defaultSettings.GetType());
 
-                var txtWriter = new StreamWriter(Path.Combine(appDataPath, _settingsFileFileName));
+                var txtWriter = new StreamWriter(Path.Combine(appDataPath ?? "", _settingsFileFileName));
 
                 serializer.Serialize(txtWriter, defaultSettings);
 

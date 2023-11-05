@@ -25,6 +25,11 @@ namespace CardCheckAssistant.Views
 
         public HomePageViewModel ViewModel => DataContext as HomePageViewModel;
 
+        private void OpenReportWritable_Click(object sender, RoutedEventArgs e)
+        {
+            ViewModel.OpenReportWritableCommand.Execute(null);
+        }
+
         private void FilterStatusInProgress_Click(object sender, RoutedEventArgs e)
         {
             ViewModel.SelectedFilter = "InProgress";

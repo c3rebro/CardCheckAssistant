@@ -1,7 +1,7 @@
 ﻿<Page x:Class="CardCheckAssistant.Views.AboutPage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
       mc:Ignorable="d"
       Background="Transparent">
@@ -9,16 +9,157 @@
     <Grid Margin="40 40 20 80"
           ColumnSpacing="0"
           RowSpacing="0">
-        <TextBlock FontSize="20" TextWrapping="Wrap">
-            <Run Text="SimonsVoss Kartenprüfassistent" />
-            <LineBreak />
-            <Run>Geführte Prüfung von Kundenkarten</Run><LineBreak />
-            <LineBreak />
-            <Run>Benutzung:</Run><LineBreak />
-            <Run>Beim Start des Assistenten wird automatisch auf neue Aufträge geprüft.
-                Mit der Schaltfläche "Prüfvorgang starten" wird der erste Schritt gestartet.
-                Bitte befolge alle weiteren Schritte nach der Anweisung durch das Programm.</Run><LineBreak/>
-            <Run></Run><LineBreak />            
-        </TextBlock>
+        <ScrollViewer>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="950"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="10"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <TextBlock 
+                    FontSize="20" 
+                    TextWrapping="Wrap"
+                    HorizontalTextAlignment="Center"
+                    Grid.Row="0"
+                    Grid.Column="0">
+                    <Run FontWeight="Bold" FontSize="22" Text="SimonsVoss Kartenprüfassistent" />
+                    <LineBreak/>
+                    
+                    <Run FontSize="16" Text="Geführte Kartenprüfungen für SV Mitarbeiter"/><LineBreak />
+                    <LineBreak />
+                </TextBlock>
+
+                <Image 
+                    Grid.Column="0"
+                    Grid.Row="0"
+                    Width="150"
+                    HorizontalAlignment="Center"
+                    Source="/Assets/LogoNeu2.png"/>
+                
+                <TextBlock 
+                    FontSize="14" 
+                    TextWrapping="Wrap"
+                    HorizontalTextAlignment="Right"
+                    Grid.Row="0"
+                    Grid.Column="0">
+                    <Run FontWeight="Bold" Text="Systemvoraussetzungen:&#xa;"/>
+                    <Run Text="&#x2022; Windows 10 64bit&#xa;"/>
+                    <Run Text="&#x2022; RFiDGear 1.6 oder höher&#xa;"/>
+                    <Run Text="&#x2022; RFiDGear PDF Vorlage&#xa;"/>
+                    <Run Text="&#x2022; RFiDGear Projektdatei(en)&#xa;"/>
+                    <Run Text="&#x2022; Zugriff auf das Intranet&#xa;(OmniTracker)&#xa;"/>
+                    <Run Text="&#x2022; Leser: Elatec TWN4 Legic&#xa;"/>
+                    <Run Foreground="Crimson" FontStyle="Italic" Text="&#xa;Achtung: Es darf nur ein Leser&#xa;
+                         der Fa. Elatec angeschlossen sein.&#xa;
+                         Eventuell angeschlossene Zweitleser&#xa;
+                         z.B. von der Fa. MADA müssen vor der&#xa;
+                         Prüfung abgesteckt werden.&#xa;
+                         &#xa;
+                         Auch die dazugehörige Fremdanwendung&#xa;
+                         (z.B. UniC10_Read.exe) muss vorher geschlossen werden.&#xa;&#xa;"/>
+                </TextBlock>
+
+                <TextBlock                  
+                    FontSize="20" 
+                    TextWrapping="Wrap"
+                    HorizontalTextAlignment="Left"
+                    Grid.Row="1"
+                    Grid.Column="0">
+                    <Run FontWeight="Bold" Text="Ablauf einer Kartenprüfung (Grob):&#xa;"/>
+                    <Run Text="1. Kunde meldet sich im OMNI-Onlineportal zur Kartenprüfung an.&#xa;"/>
+                    <Run Text="2. Kunde druckt das per Mail zugesandte Anschreiben aus und sendet seine Karten an SimonsVoss.&#xa;"/>
+                    <Run Text="3. Prüfer erhält die Sendung per Post und trägt die notwendigen Daten im OMNI-Onlineportal ein.&#xa;"/>
+                    <Run Text="    &#x2022; Einsender (auf diese Rückanschrift wird der fertige Bericht ausgestellt)&#xa;"/>
+                    <Run Text="    &#x2022; Anzahl der eingesendeten Karten&#xa;"/>
+                    <Run Text="    &#x2022; Status (Die Prüfung wird gestartet wenn der Status auf &quot;An CC übergeben&quot; gesetzt wurde &#xa;"/>
+                    <Run Text="4. Prüfer startet den Prüfvorgang samt ggf. Programmierung in der LSM/AXM und dem Test der Karte an den programmierten Schließungen. Eventuelle manuelle Änderungen am Bericht werden jetzt eingepflegt.&#xa;"/>
+                    <Run Text="5. Prüfer ???&#xa;"/>
+                </TextBlock>
+
+                <TextBlock                  
+                    FontSize="20" 
+                    TextWrapping="Wrap"
+                    HorizontalTextAlignment="Center"
+                    Grid.Row="2"
+                    Grid.Column="0">
+                    <Run FontWeight="Bold" Text="Bedienung:&#xa;"/>
+                    <Run Text="Beim Start des Assistenten wird automatisch auf neue Aufträge geprüft. Diese Erscheinen erst, wenn die zu prüfenden Karten im Omnitracker einem Ansprechpartner (Endkunde und ADM; Optional: Fachhandelspartner) zugeordnet worden sind.&#xa;"/>
+                </TextBlock>
+                
+                <HyperlinkButton 
+                    Margin="8,8,0,8" 
+                    HorizontalAlignment="Center"
+                    FontSize="25"
+                    Grid.Column="0" 
+                    Grid.Row="3" 
+                    Content="OmniTracker jetzt im Browser starten..." 
+                    NavigateUri="https://service.simons-voss.com/OTWG20/#/login?guestlogin=24"/>
+                <Image 
+                    Grid.Column="0"
+                    Grid.Row="4"
+                    HorizontalAlignment="Left"
+                    Width="900"
+                    Source="/Assets/doc/AuftraegeLaden.jpg"/>
+
+                <TextBlock                  
+                    FontSize="20" 
+                    TextWrapping="Wrap"
+                    HorizontalTextAlignment="Center"
+                    Grid.Row="5"
+                    Grid.Column="0">
+                    <Run Text="&#xa;Sind mehrere Aufträge vorhanden, kann mit der Sortier, Such und Filterfunktion die Ergebnisansicht bearbeitet bzw eingeschränkt werden."/>
+                </TextBlock>
+
+                <TextBlock                  
+                    FontSize="20" 
+                    TextWrapping="Wrap"
+                    HorizontalTextAlignment="Left"
+                    Grid.Row="6"
+                    Grid.Column="0">
+                    <Run Text="&#xa;Filteroptionen:&#xa;"/>
+                    <Run Text="&#x2022; &quot;Zeige: Alle&quot; Es werden sowohl Abgeschlossene als auch noch nicht abgeschlossene Aufträge aufgelistet.&#xa;"/>
+                    <Run Text="&#x2022; &quot;Zeige: InProgress&quot; Zeigt alle im Omnitracker vorbereiteten, noch nicht abgeschlossenen Aufgaben an.&#xa;"/>
+                    <Run Text="&#x2022; &quot;Zeige: Completed&quot; Zeigt nur Abgeschlossene Kartenprüfungen an. Z.B. um einen alten Bericht zu Öffnen.&#xa;"/>
+                    <Run Text="&#xa;Sortieroptionen&#xa;"/>
+                    <Run Text="Sortiere Auf- oder Absteigend nach:&#xa;"/>
+                    <Run Text="&#x2022; Jobnummer&#xa;"/>
+                    <Run Text="&#x2022; &quot;Created&quot; = Datum bei der Erstellung des Auftrags im OmniTracker&#xa;"/>
+                    <Run Text="&#x2022; &quot;Status&quot; = Nicht Abgeschlossene Aufträge noch oben (oder unten)&#xa;"/>
+                    <Run></Run><LineBreak />
+                </TextBlock>
+                
+                <Image 
+                    Grid.Column="0"
+                    Grid.Row="7"
+                    HorizontalAlignment="Left"
+                    Width="900"
+                    Source="/Assets/doc/AuftraegeSortieren.jpg"/>
+
+                <TextBlock                  
+                    FontSize="20" 
+                    TextWrapping="Wrap"
+                    HorizontalTextAlignment="Center"
+                    Grid.Row="8"
+                    Grid.Column="0">
+                    <Run Text="&#xa;Mit der Schaltfläche &quot;Prüfvorgang starten&quot; wird der erste Schritt gestartet.  Bitte befolge alle weiteren Schritte nach der Anweisung durch das Programm.&#xa;"/>
+                    <Run></Run><LineBreak />
+                </TextBlock>
+            </Grid>
+        </ScrollViewer>
+
     </Grid>
 </Page>

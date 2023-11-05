@@ -62,12 +62,12 @@
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="30" />
-                            <RowDefinition Height="28" />
-                            <RowDefinition Height="28" />
-                            <RowDefinition Height="28" />
-                            <RowDefinition Height="28" />
-                            <RowDefinition Height="28" />
-                            <RowDefinition Height="28" />
+                            <RowDefinition Height="auto" />
+                            <RowDefinition Height="auto" />
+                            <RowDefinition Height="auto" />
+                            <RowDefinition Height="auto" />
+                            <RowDefinition Height="auto" />
+                            <RowDefinition Height="auto" />
                             <RowDefinition Height="*" />
                         </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
@@ -229,7 +229,7 @@
                                         VerticalAlignment="Top" />
                                 </AppBarElementContainer>
                             </CommandBar>
-                            
+
                             <AutoSuggestBox
                                 QueryIcon="Find"
                                 MinWidth="280"
@@ -239,6 +239,27 @@
                                 QuerySubmitted="SearchQuery_Submitted"/>
                         </StackPanel>
 
+                        <StackPanel                            
+                            Orientation="Horizontal"
+                            HorizontalAlignment="Stretch"
+                            Grid.Column="1"
+                            Grid.ColumnSpan="3"
+                            Grid.Row="3"
+                            Grid.RowSpan="2"
+                            Margin="0 0 0 16"
+                            CornerRadius="4"
+                            Height="52">
+
+                            <!--
+                            <HyperlinkButton 
+                                Margin="8,8,0,8" 
+                                HorizontalAlignment="Left"
+                                FontSize="20"
+                                Content="Hilfe anzeigen" 
+                                Command="{Binding NavigateToAboutCommand}"/>
+                            -->
+
+                        </StackPanel>
                         <TextBlock
                             Grid.Row="8"
                             Grid.Column="3"
@@ -284,6 +305,15 @@
                 <ctWinUI:DataGrid.RowStyle>
                     <Style TargetType="ctWinUI:DataGridRow">
                         <Setter Property="Visibility" Value="{Binding IsVisible}"/>
+                        <Setter Property="ctWinUI:DataGridRow.ContextFlyout">
+                            <Setter.Value>
+                                <MenuFlyout>
+                                    <MenuFlyoutItem x:Name="MyMenuItem"
+                                    Click="OpenReportWritable_Click"
+                                    Text="Bericht editieren" />
+                                </MenuFlyout>
+                            </Setter.Value>
+                        </Setter>
                     </Style>
                 </ctWinUI:DataGrid.RowStyle>
                 <ctWinUI:DataGrid.Columns>
