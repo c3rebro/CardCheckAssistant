@@ -11,8 +11,7 @@ using Log4CSharp;
 using System.Diagnostics;
 using System.Windows.Input;
 using System.Collections.ObjectModel;
-
-
+using Microsoft.UI.Xaml.Documents;
 
 namespace CardCheckAssistant.ViewModels;
 
@@ -291,7 +290,50 @@ public class Step1PageViewModel : ObservableObject, IDisposable
     {
         try
         {
-            using ReaderService readerService = new ReaderService();
+            using SettingsReaderWriter settings = new SettingsReaderWriter();
+
+            settings.ReadSettings();
+
+            FileInfo fi = new FileInfo(settings.DefaultSettings.DefaultProjectOutputPath + "\\"
+                + (settings.DefaultSettings.CreateSubdirectoryIsEnabled == true ? CheckProcessService.CurrentCardCheckProcess.JobNr + "\\" : string.Empty)
+                + CheckProcessService.CurrentCardCheckProcess.JobNr + "-"
+                + CheckProcessService.CurrentCardCheckProcess.ChipNumber
+                + ".pdf");
+
+            if (fi.Exists)
+            {
+                if (await App.MainRoot.ConfirmationDialogAsync(
+                        "Warnung",
+                        string.Format("Die Datei die erstellt werden soll existiert bereits.\n" +
+                        "Soll sie überschrieben werden?"),
+                        "Ja", "Nein") == true)
+                {
+                    try
+                    {
+                        // try to overwrite the file
+                        FileStream fs = fi.Open(FileMode.Create);
+                        fs.Close();
+                        fi.Delete();
+                    }
+                    catch (IOException ioex)
+                    {
+                        await App.MainRoot.MessageDialogAsync(
+                        "Fehler",
+                        string.Format("Windows Fehlertext: {0}\n\n" +
+                        "Bitte beende die Anwendung die auf diese Datei zugreift und versuche es im Anschluss erneut.",ioex.Message),
+                        "OK");
+
+                        return;
+                    }
+                    finally {
+                        LogWriter.CreateLogEntry("ioex");
+                    }
+                }
+                else
+                {
+                    return;
+                }
+            }
 
             NextStepCanExecute = false;
             WaitForNextStep = true;
@@ -307,7 +349,8 @@ public class Step1PageViewModel : ObservableObject, IDisposable
             navigation.SetCurrentNavigationViewItem(step2Page);
             step2Page.IsEnabled = true;
         }
-        catch(Exception e)
+
+        catch (Exception e)
         {
             LogWriter.CreateLogEntry(e);
         }

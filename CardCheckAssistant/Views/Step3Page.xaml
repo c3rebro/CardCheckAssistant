@@ -18,7 +18,7 @@
         <viewmodels:Step3PageViewModel />
     </Page.DataContext>
 
-    <Grid Margin="0 0 0 80">
+    <Grid Margin="0 0 0 8">
         <!-- Beef -->
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="auto"/>

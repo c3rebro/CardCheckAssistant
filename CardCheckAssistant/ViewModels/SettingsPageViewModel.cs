@@ -38,8 +38,9 @@ public class SettingsPageViewModel : ObservableObject
             SelectedDBUsername = settings.DefaultSettings.SelectedDBUsername;
             CardCheckUseSQLLite = settings.DefaultSettings.CardCheckUseMSSQL;
             CreateSubdirectoryIsEnabled = settings.DefaultSettings.CreateSubdirectoryIsEnabled;
+            RemoveTemporaryReportsIsEnabled = settings.DefaultSettings.RemoveTemporaryReportsIsEnabled;
 
-            SelectedDBUserPwd = enc.Decrypt(settings.DefaultSettings.SelectedDBUserPwd);
+            SelectedDBUserPwd = enc.Decrypt(settings?.DefaultSettings?.SelectedDBUserPwd ?? "NoPWD");
         }
         catch (Exception ex)
         {
@@ -166,6 +167,20 @@ public class SettingsPageViewModel : ObservableObject
         }
     }
     private string? _selectedRFIDGearPath;
+
+    public bool? RemoveTemporaryReportsIsEnabled
+    {
+        get => _removeTemporaryReportsIsEnabled;
+        set
+        {
+            SetProperty(ref _removeTemporaryReportsIsEnabled, value);
+            using SettingsReaderWriter settings = new SettingsReaderWriter();
+
+            settings.DefaultSettings.RemoveTemporaryReportsIsEnabled = value;
+            settings.SaveSettings();
+        }
+    }
+    private bool? _removeTemporaryReportsIsEnabled;
 
     public bool? CreateSubdirectoryIsEnabled
     {
@@ -337,9 +352,9 @@ public class SettingsPageViewModel : ObservableObject
     {
         var window = (Application.Current as App)?.Window as MainWindow ?? new MainWindow();
         var navigation = window.Navigation;
-        var step1Page = navigation.GetNavigationViewItems(typeof(Step1Page)).First();
-        navigation.SetCurrentNavigationViewItem(step1Page);
-        step1Page.IsEnabled = true;
+        var homePage = navigation.GetNavigationViewItems(typeof(HomePage)).First();
+        navigation.SetCurrentNavigationViewItem(homePage);
+        homePage.IsEnabled = true;
     }
 
     private class RijndaelEnc : IDisposable

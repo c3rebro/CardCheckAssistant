@@ -174,6 +174,16 @@ public class DefaultSettings : IDisposable
     /// <summary>
     ///
     /// </summary>
+    public bool? RemoveTemporaryReportsIsEnabled
+    {
+        get => _removeTemporaryReportsIsEnabled;
+        set => _removeTemporaryReportsIsEnabled = value;
+    }
+    private bool? _removeTemporaryReportsIsEnabled;
+
+    /// <summary>
+    ///
+    /// </summary>
     public bool? CreateSubdirectoryIsEnabled
     {
         get => _createSubdirectoryIsEnabled;

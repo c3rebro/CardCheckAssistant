@@ -21,12 +21,12 @@
         <viewmodels:Step2PageViewModel />
     </Page.DataContext>
 
-    <Grid Margin="0 0 0 80">
+    <Grid Margin="0 0 0 8">
         <!-- Beef -->
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="250"/>
             <ColumnDefinition Width="0.3*"/>
-            <ColumnDefinition Width="0.3*"/>
+            <ColumnDefinition Width="0.4*"/>
             <ColumnDefinition Width="auto"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
@@ -269,6 +269,7 @@
             Grid.ColumnSpan="1" 
             Grid.Column="2" 
             VerticalAlignment="Center" 
+            HorizontalAlignment="Left"
             Content="Nein"
             Grid.Row="2"
             Visibility="{Binding TextBlockCheckFinishedAndResultIsSuppAndProgIsVisible, Converter={StaticResource boolean}, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
@@ -285,6 +286,19 @@
             <Run Text="Funktionstest an der Schließung: "></Run>
         </TextBlock>
 
+        <TextBox 
+            Margin="8,0,8,40"
+            TextWrapping="Wrap"
+            Grid.ColumnSpan="3"
+            Grid.Column="3"
+            Grid.Row="4"
+            Grid.RowSpan="6"
+            VerticalAlignment="Stretch" 
+            AcceptsReturn="True"
+            Text="{Binding TextBoxAdditionalHints, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+            Visibility="{Binding CheckBoxTestOnLockLimitedYes, Converter={StaticResource boolean}, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}">
+        </TextBox>
+        
         <CheckBox
             Margin="8,0,0,8" 
             Grid.ColumnSpan="1" 
@@ -299,6 +313,7 @@
             Margin="8,0,0,8" 
             Grid.ColumnSpan="1" 
             Grid.Column="2" 
+            HorizontalAlignment="Left"
             VerticalAlignment="Center" 
             Content="Fehlgeschlagen"
             Grid.Row="3"
@@ -308,7 +323,7 @@
         <TextBlock 
             Margin="8,0,0,8" 
             TextWrapping="Wrap" 
-            Grid.ColumnSpan="5" 
+            Grid.ColumnSpan="1" 
             Grid.Column="0" 
             Grid.Row="4"
             VerticalAlignment="Center" 
@@ -363,8 +378,8 @@
             Margin="8,0,0,8" 
             TextWrapping="Wrap" 
             Grid.ColumnSpan="1" 
-            Grid.Column="3" 
-            Grid.Row="5"
+            Grid.Column="0" 
+            Grid.Row="6"
             VerticalAlignment="Center" 
             Visibility="{Binding IsSupportedAndIsClassicChip, Converter={StaticResource boolean}, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}">
             <Run Text="Verwendete Sektoren:"></Run>
@@ -373,9 +388,9 @@
         <TextBox 
             Margin="8,0,8,8"
             TextWrapping="Wrap"
-            Grid.ColumnSpan="3"
-            Grid.Column="4"
-            Grid.Row="5"
+            Grid.ColumnSpan="2"
+            Grid.Column="1"
+            Grid.Row="6"
             VerticalAlignment="Center" 
             Text="{Binding TextBoxSectorsUsed, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
             Visibility="{Binding IsSupportedAndIsClassicChip, Converter={StaticResource boolean}, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}">
@@ -384,7 +399,7 @@
         <HyperlinkButton 
             Margin="8,0" 
             Grid.Column="0" 
-            Grid.Row="6" 
+            Grid.Row="7" 
             Content="Bericht aufrufen" 
             Command="{Binding OpenReportCommand}"
             Visibility="{Binding HyperlinkButtonReportIsVisible, Converter={StaticResource boolean}, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
@@ -392,7 +407,7 @@
         <HyperlinkButton 
             Margin="8,0,0,10" 
             Grid.Column="0" 
-            Grid.Row="7" 
+            Grid.Row="8" 
             Content="Speicherpfad anzeigen" 
             Command="{Binding OpenReportPathCommand}"
             Visibility="{Binding HyperlinkButtonReportIsVisible, Converter={StaticResource boolean}, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
@@ -400,7 +415,7 @@
         <TextBlock 
             Margin="8,8,0,0" 
             TextWrapping="Wrap" 
-            Grid.ColumnSpan="5" 
+            Grid.ColumnSpan="3" 
             Grid.Column="0" 
             Grid.Row="9"
             Visibility="{Binding TextBlockCheckFinishedAndResultIsSuppAndProgIsVisible, Converter={StaticResource boolean}, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}">
@@ -441,6 +456,20 @@
         </TextBlock>
 
         <InfoBar
+            Grid.Column="0"
+            Grid.Row="8"
+            Grid.ColumnSpan="5"
+            Margin="8,0"
+            HorizontalAlignment="Stretch"
+            IsOpen="True"
+            IsIconVisible="True"
+            IsClosable="False"
+            Title="Bitte den geöffneten Bericht vor dem Fortfahren wieder schließen."
+            Visibility="{Binding IsReportOpen, Converter={StaticResource boolean}, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+            Severity="Warning"
+            />
+        
+        <InfoBar
             Grid.Column="4"
             Grid.Row="1"
             Grid.ColumnSpan="1"
@@ -458,7 +487,7 @@
         <InfoBar
             Grid.Column="0"
             Grid.Row="8"
-            Grid.ColumnSpan="5"
+            Grid.ColumnSpan="3"
             Margin="15"
             IsOpen="True"
             IsIconVisible="True"

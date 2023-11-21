@@ -47,7 +47,7 @@ public class HomePageViewModel : ObservableObject, IDisposable
         scanDBTimer.Interval = new TimeSpan(0,0,10);
         scanDBTimer.Stop();
 
-        SelectedFilter = "All";
+        SelectedFilter = "InProgress";
         SelectedSort = "JobNumber";
 
         ButtonStartCheckContent = ResourceLoaderService.GetResource("buttonContentStartCheck");
@@ -59,7 +59,7 @@ public class HomePageViewModel : ObservableObject, IDisposable
 
 #endif
 
-        // Select First "InProgress" Job if any
+        // Select First "InProgress" Job... if any
         if (DataGridItemCollection != null && _dataGridItemCollection.Any())
         {
             if (DataGridItemCollection.Any(x => x.Status == "InProgress"))
@@ -502,7 +502,11 @@ public class HomePageViewModel : ObservableObject, IDisposable
 
                 if (cardCheckProcessesFromCache != null)
                 {
-                    DataGridItemCollection = cardCheckProcessesFromCache;
+                    DataGridItemCollection = FilterData(cardCheckProcessesFromCache, SelectedFilter);
+                }
+                else
+                {
+                    return;
                 }
 
                 ModalView.Dialogs.Where(x => x.Name == "connectWaitMsgDlg").Single().Hide();

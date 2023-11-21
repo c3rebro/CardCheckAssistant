@@ -4,16 +4,57 @@
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
       mc:Ignorable="d"
+      xmlns:viewmodels="using:CardCheckAssistant.ViewModels"
       Background="Transparent">
 
-    <Grid Margin="40 40 20 80"
+    <Page.DataContext>
+        <viewmodels:AboutPageViewModel />
+    </Page.DataContext>
+    
+    <Grid Margin="40 40 20 20"
           ColumnSpacing="0"
           RowSpacing="0">
-        <ScrollViewer>
+        <Button 
+            Grid.Row="0"
+            Grid.Column="0"
+            Height="36"
+            Margin="8,-88,0,8"
+            VerticalAlignment="Top"
+            HorizontalAlignment="Right"
+            IsEnabled="{Binding GoBackCanExecute, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}"
+            Opacity="1"
+            Command="{Binding NavigateBackCommand}"
+            Content="Zurück zum Start">
+            <Button.Resources>
+                <ResourceDictionary>
+                    <SolidColorBrush x:Key="ButtonBorderBrushDisabled" Opacity="0.6" Color="#BFBFBF" />
+                    <SolidColorBrush x:Key="ButtonBackground" Color="IndianRed" />
+                    <SolidColorBrush x:Key="ButtonBackgroundDisabled" Color="#73726e" />
+                    <SolidColorBrush x:Key="ButtonBackgroundPressed" Color="#f5fa75" />
+                    <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="#c4c736" />
+
+                    <SolidColorBrush x:Key="ButtonForegroundDisabled" Color="DarkGray" />
+
+                    <SolidColorBrush x:Key="ButtonForeground" Color="Black" />
+                    <SolidColorBrush x:Key="ButtonForegroundPointerOver" Color="White" />
+
+                    <!--<SolidColorBrush x:Key="ButtonBorderBrush" Color="White" />-->
+                    <!--<SolidColorBrush x:Key="ButtonBorderBrushPointerOver" Color="White" />-->
+                    <!--<SolidColorBrush x:Key="ButtonBorderBrushFocused" Color="#ECF542" />-->
+                    <!--<SolidColorBrush x:Key="ButtonBorderBrushPressed" Color="#ECF542" />-->
+
+                    <SolidColorBrush x:Key="ButtonBackgroundFocused" Color="LightGreen" />
+
+                </ResourceDictionary>
+            </Button.Resources>
+        </Button>
+        
+        <ScrollViewer
+            HorizontalAlignment="Stretch">
             <Grid>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="950"/>
                     <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="auto"/>
                     <ColumnDefinition Width="10"/>
                 </Grid.ColumnDefinitions>
                 <Grid.RowDefinitions>
@@ -81,19 +122,19 @@
                     Grid.Column="0">
                     <Run FontWeight="Bold" Text="Ablauf einer Kartenprüfung (Grob):&#xa;"/>
                     <Run Text="1. Kunde meldet sich im OMNI-Onlineportal zur Kartenprüfung an.&#xa;"/>
-                    <Run Text="2. Kunde druckt das per Mail zugesandte Anschreiben aus und sendet seine Karten an SimonsVoss.&#xa;"/>
-                    <Run Text="3. Prüfer erhält die Sendung per Post und trägt die notwendigen Daten im OMNI-Onlineportal ein.&#xa;"/>
+                    <Run Text="2. Kunde druckt das per Mail an Ihn zugesandte Anschreiben aus und sendet seine Karten an SimonsVoss.&#xa;"/>
+                    <Run Text="3. Prüfer erhält die Sendung per Post und trägt die notwendigen Daten im OMNI-Onlineportal ein:&#xa;"/>
                     <Run Text="    &#x2022; Einsender (auf diese Rückanschrift wird der fertige Bericht ausgestellt)&#xa;"/>
                     <Run Text="    &#x2022; Anzahl der eingesendeten Karten&#xa;"/>
-                    <Run Text="    &#x2022; Status (Die Prüfung wird gestartet wenn der Status auf &quot;An CC übergeben&quot; gesetzt wurde &#xa;"/>
-                    <Run Text="4. Prüfer startet den Prüfvorgang samt ggf. Programmierung in der LSM/AXM und dem Test der Karte an den programmierten Schließungen. Eventuelle manuelle Änderungen am Bericht werden jetzt eingepflegt.&#xa;"/>
-                    <Run Text="5. Prüfer ???&#xa;"/>
+                    <Run Text="    &#x2022; Status (Die Prüfung kann gestartet werden, wenn der Status auf &quot;In Bearbeitung&quot; gesetzt wurde)&#xa;"/>
+                    <Run Text="4. Prüfer startet den Prüfvorgang samt (ggf.) Programmierung in der LSM/AXM und dem Test der Karte an den programmierten Schließungen. Eventuelle manuelle Änderungen am Bericht werden jetzt eingepflegt.&#xa;"/>
+                    <Run Text="5. Prüfer erstellt Dokumente für den Rückversand, wartet auf die Versandfreigabe durch den ADM und schickt die Karten zurück an den hinterlegten Kontakt&#xa;"/>
                 </TextBlock>
 
                 <TextBlock                  
                     FontSize="20" 
                     TextWrapping="Wrap"
-                    HorizontalTextAlignment="Center"
+                    HorizontalTextAlignment="Left"
                     Grid.Row="2"
                     Grid.Column="0">
                     <Run FontWeight="Bold" Text="Bedienung:&#xa;"/>
@@ -111,7 +152,7 @@
                 <Image 
                     Grid.Column="0"
                     Grid.Row="4"
-                    HorizontalAlignment="Left"
+                    HorizontalAlignment="Center"
                     Width="900"
                     Source="/Assets/doc/AuftraegeLaden.jpg"/>
 
@@ -145,7 +186,7 @@
                 <Image 
                     Grid.Column="0"
                     Grid.Row="7"
-                    HorizontalAlignment="Left"
+                    HorizontalAlignment="Center"
                     Width="900"
                     Source="/Assets/doc/AuftraegeSortieren.jpg"/>
 

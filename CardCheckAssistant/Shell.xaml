@@ -23,12 +23,16 @@
                         SelectedItem="{x:Bind ViewModel.Selected, Mode=OneWay}">
             <NavigationView.HeaderTemplate>
                 <DataTemplate>
-                    <TextBlock Text="{Binding}" Margin="-35 -30 0 0"/>
+                    <TextBlock 
+                        Text="{Binding}" 
+                        Margin="-35 -30 0 0" 
+                        Width="auto"/>
                 </DataTemplate>
             </NavigationView.HeaderTemplate>
 
             <NavigationView.MenuItems>
                 <NavigationViewItem Content="Start"
+                                    IsHitTestVisible="False"
                                     Tag="CardCheckAssistant.Views.HomePage"
                                     ToolTipService.ToolTip="Start">
                     <NavigationViewItem.Icon>
@@ -40,6 +44,7 @@
 
                 <NavigationViewItem Content="Schritt 1"
                                     Width="auto"
+                                    IsHitTestVisible="False"
                                     Tag="CardCheckAssistant.Views.Step1Page"
                                     ToolTipService.ToolTip="Schritt 1">
                     <NavigationViewItem.Icon>
@@ -49,6 +54,7 @@
                 </NavigationViewItem>
 
                 <NavigationViewItem Content="Schritt 2"
+                                    IsHitTestVisible="False"
                                     Tag="CardCheckAssistant.Views.Step2Page"
                                     ToolTipService.ToolTip="Schritt 2">
                     <NavigationViewItem.Icon>
@@ -58,6 +64,7 @@
                 </NavigationViewItem>
 
                 <NavigationViewItem Content="Schritt 3"
+                                    IsHitTestVisible="False"
                                     Tag="CardCheckAssistant.Views.Step3Page"
                                     ToolTipService.ToolTip="Schritt 3">
                     <NavigationViewItem.Icon>
@@ -79,7 +86,7 @@
             </NavigationView.FooterMenuItems>
 
             <Frame x:Name="ContentFrame"
-                   Padding="5" Margin="0 -20 0 -70" >
+                   Margin="0 0 0 0" >
                 <Frame.ContentTransitions>
                     <TransitionCollection>
                         <NavigationThemeTransition>

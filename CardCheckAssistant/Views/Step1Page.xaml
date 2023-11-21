@@ -18,7 +18,7 @@
         <viewmodels:Step1PageViewModel />
     </Page.DataContext>
 
-    <Grid Margin="0 0 0 80">
+    <Grid Margin="0 0 0 8">
         <!-- Beef -->
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="auto"/>
@@ -134,7 +134,7 @@
             Grid.Column="0" 
             Grid.Row="2" 
             VerticalAlignment="Center" >
-            <Run Text="Beantworte dann noch die Frage und klicke anschließend auf Weiter. Der Prüfvorgang startet im nächsten Schritt automatisch."/>
+            <Run Text="Im Folgenden kann die Sprache des Berichtes verändert werden. Die Standardeinstellung wird aus Omni übernommen."/>
             <LineBreak/>
         </TextBlock>
         <TextBlock 
@@ -143,7 +143,7 @@
             Grid.Column="0" 
             Grid.Row="3" 
             VerticalAlignment="Center" >
-            <Run Text="Frage: In welcher Sprache soll der Bericht erstellt werden?"/>
+            <Run Text="Der Bericht wird in folgender Sprache erstellt werden:"/>
         </TextBlock>
         <ComboBox 
             Grid.ColumnSpan="1" 

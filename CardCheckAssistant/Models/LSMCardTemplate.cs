@@ -36,6 +36,37 @@ public class LSMCardTemplate
     /// <summary>
     /// 
     /// </summary>
+    /// <param name="templateText"></param>
+    /// <param name="templateToolTip"></param>
+    /// <param name="freeBytes"></param>
+    /// <param name="freeSectors"></param>
+    public LSMCardTemplate(string templateText, string templateToolTip, int freeBytes, int freeSectors)
+    {
+        TemplateText = templateText;
+        TemplateToolTip = templateToolTip;
+        SizeInBytes = freeBytes;
+        SizeInFreeSectorsCount = freeSectors;
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public int SizeInBytes
+    {
+        get; set;
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public int SizeInFreeSectorsCount
+    {
+        get; set;
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
     public string TemplateText
     { 
         get; set; 

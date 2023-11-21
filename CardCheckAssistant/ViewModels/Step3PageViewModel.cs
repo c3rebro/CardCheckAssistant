@@ -281,9 +281,13 @@ public class Step3PageViewModel : ObservableObject
             }
         }
 
-        catch (Exception e)
+        catch (Exception ex)
         {
-            LogWriter.CreateLogEntry(e);
+            await App.MainRoot.MessageDialogAsync(
+                "Fehler",
+                string.Format("Bitte melde den folgenden Fehler an mich:\n{0}", ex.Message));
+
+            LogWriter.CreateLogEntry(ex);
         }
     }
 
@@ -300,16 +304,20 @@ public class Step3PageViewModel : ObservableObject
             await ExecuteRFIDGearCommand();
             NextStepCanExecute = true;
         }
-        catch (Exception e)
+        catch (Exception ex)
         {
-            LogWriter.CreateLogEntry(e);
+            await App.MainRoot.MessageDialogAsync(
+                "Fehler",
+                string.Format("Bitte melde den folgenden Fehler an mich:\n{0}", ex.Message));
+
+            LogWriter.CreateLogEntry(ex);
         }
     }
 
     /// <summary>
     /// 
     /// </summary>
-    private void OpenReportCommand_Executed()
+    private async void OpenReportCommand_Executed()
     {
         try
         {
@@ -333,16 +341,20 @@ public class Step3PageViewModel : ObservableObject
 
             p.Start();
         }
-        catch (Exception e)
+        catch (Exception ex)
         {
-            LogWriter.CreateLogEntry(e);
+            await App.MainRoot.MessageDialogAsync(
+                "Fehler",
+                string.Format("Bitte melde den folgenden Fehler an mich:\n{0}", ex.Message));
+
+            LogWriter.CreateLogEntry(ex);
         }
     }
 
     /// <summary>
     /// 
     /// </summary>
-    private void OpenReportPathCommand_Executed()
+    private async void OpenReportPathCommand_Executed()
     {
         try
         {
@@ -363,9 +375,13 @@ public class Step3PageViewModel : ObservableObject
 
             p.Start();
         }
-        catch (Exception e)
+        catch (Exception ex)
         {
-            LogWriter.CreateLogEntry(e);
+            await App.MainRoot.MessageDialogAsync(
+                "Fehler",
+                string.Format("Bitte melde den folgenden Fehler an mich:\n{0}", ex.Message));
+
+            LogWriter.CreateLogEntry(ex);
         }
     }
 
@@ -425,16 +441,34 @@ public class Step3PageViewModel : ObservableObject
 
             fileStream.Close();
 
-            File.Delete(preFinalPath);
-            File.Delete(semiFinalPath);
+            try
+            {
+                if(settings.DefaultSettings.RemoveTemporaryReportsIsEnabled == true)
+                {
+                    File.Delete(preFinalPath);
+                    File.Delete(semiFinalPath);
+                }
+            }
+            catch (Exception ex)
+            {
+                await App.MainRoot.MessageDialogAsync(
+                    "Fehler",
+                    string.Format("Bitte melde den folgenden Fehler an mich:\n{0}", ex.Message));
+
+                return;
+            }
 
             navigation.SetCurrentNavigationViewItem(nextpage);
             nextpage.IsEnabled = true;
             
         }
-        catch (Exception e)
+        catch (Exception ex)
         {
-            LogWriter.CreateLogEntry(e);
+            await App.MainRoot.MessageDialogAsync(
+                "Fehler",
+                string.Format("Bitte melde den folgenden Fehler an mich:\n{0}", ex.Message));
+
+            LogWriter.CreateLogEntry(ex);
         }
     }
 

@@ -1,5 +1,7 @@
 ﻿using System.Collections.ObjectModel;
+using System.Data.Entity.Core.Metadata.Edm;
 using System.Diagnostics;
+using System.Linq;
 using System.Windows.Input;
 using CardCheckAssistant.Models;
 using CardCheckAssistant.Services;
@@ -14,7 +16,12 @@ namespace CardCheckAssistant.ViewModels;
 
 public class Step2PageViewModel : ObservableObject
 {
+    // Define the cancellation token.
+    CancellationTokenSource source = new CancellationTokenSource();
+    CancellationToken token;
+
     private readonly DispatcherTimer scanChipTimer;
+    private bool isCancelled;
 
 #if DEBUG
     private const string DBNAME = "OT_CardCheck_Test";
@@ -27,6 +34,9 @@ public class Step2PageViewModel : ObservableObject
     /// </summary>
     public Step2PageViewModel()
     {
+        token = source.Token;
+        isCancelled = false;
+
         NavigateNextStepCommand = new AsyncRelayCommand(NavigateNextStepCommand_Executed);
         PostPageLoadedCommand = new AsyncRelayCommand(PostPageLoadedCommand_Executed);
 
@@ -35,6 +45,7 @@ public class Step2PageViewModel : ObservableObject
         scanChipTimer.Stop();
 
         NextStepCanExecute = false;
+        IsReportOpen = false;
         GoBackCanExecute = true;
 
         TextBlockCheckFinishedAndResultIsSuppOnlyIsVisible = false;
@@ -52,20 +63,20 @@ public class Step2PageViewModel : ObservableObject
 
         CardTemplates = new List<LSMCardTemplate>()
         {
-            new ("N/A", "Keine Auswahl"),
-            new ("MCBasic (Speicherbedarf: 1 Sektor)", string.Empty),
-            new ("MC1200L (Speicherbedarf: 4 Sektoren)", string.Empty),
-            new ("MC3800L (Speicherbedarf: 11 Sektoren)", string.Empty),
-            new ("MC1000L_AV (Speicherbedarf: 11 Sektoren)", string.Empty),
-            new ("MC2400L_AV (Speicherbedarf: 19 Sektoren)", string.Empty),
-            new ("MC8000L_AV (Speicherbedarf: 43 Sektoren / 32 + 3)", string.Empty),
-            new ("MDBasic (Speicherbedarf: 48 + 176 = 224 Bytes)", string.Empty),
-            new ("MD1200L (Speicherbedarf: 192 + 160 = 352 Bytes)", string.Empty),
-            new ("MD3800L (Speicherbedarf: 528 + 176 = 704 Bytes)", string.Empty),
-            new ("MD2500L_AV (Speicherbedarf: 1024 + 160 = 1184 Bytes)", string.Empty),
-            new ("MD4000L_AV (Speicherbedarf: 1600 + 160 = 1760 Bytes)", string.Empty),
-            new ("MD10000L_AV (Speicherbedarf: 3048 + 184 = 3232 Bytes)", string.Empty),
-            new ("MD32000L_AV (Speicherbedarf: 7000 + 168 = 7168 Bytes)", string.Empty) 
+            new ("N/A", "Keine Auswahl", 0, 0),
+            new ("MCBasic (Speicherbedarf: 1 Sektor)", string.Empty, 0, 1),
+            new ("MC1200L (Speicherbedarf: 4 Sektoren)", string.Empty, 0, 4),
+            new ("MC3800L (Speicherbedarf: 11 Sektoren)", string.Empty, 0 , 11),
+            new ("MC1000L_AV (Speicherbedarf: 11 Sektoren)", string.Empty, 0 , 11),
+            new ("MC2400L_AV (Speicherbedarf: 19 Sektoren)", string.Empty, 0, 19),
+            new ("MC8000L_AV (Speicherbedarf: 43 Sektoren / 32 + 3)", string.Empty, 0, 43),
+            new ("MDBasic (Speicherbedarf: 48 + 176 = 224 Bytes)", string.Empty, 224, 0),
+            new ("MD1200L (Speicherbedarf: 192 + 160 = 352 Bytes)", string.Empty, 352, 0),
+            new ("MD3800L (Speicherbedarf: 528 + 176 = 704 Bytes)", string.Empty, 704, 0),
+            new ("MD2500L_AV (Speicherbedarf: 1024 + 160 = 1184 Bytes)", string.Empty, 1184, 0),
+            new ("MD4000L_AV (Speicherbedarf: 1600 + 160 = 1760 Bytes)", string.Empty, 1760, 0),
+            new ("MD10000L_AV (Speicherbedarf: 3048 + 184 = 3232 Bytes)", string.Empty, 1760, 0),
+            new ("MD32000L_AV (Speicherbedarf: 7000 + 168 = 7168 Bytes)", string.Empty, 7168, 0) 
         };
 
         SelectedCustomerRequestTemplate = CustomerRequestTemplate.NA;
@@ -106,6 +117,43 @@ public class Step2PageViewModel : ObservableObject
         set => SetProperty(ref _infoBarSupportedChipType, value);
     }
     private string _infoBarSupportedChipType;
+    
+    /// <summary>
+    /// 
+    /// </summary>
+    public string InfoBarReportOpen
+    {
+        get => _infoBarReportOpen;
+        set => SetProperty(ref _infoBarReportOpen, value);
+    }
+    private string _infoBarReportOpen;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public string TextBoxAdditionalHints
+    {
+        get => _textBoxAdditionalHints;
+        set 
+        {
+            SetProperty(ref _textBoxAdditionalHints, value);
+        }
+    }
+    private string _textBoxAdditionalHints;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public bool IsReportOpen
+    {
+        get => _isReportOpen;
+        set
+        {
+            SetProperty(ref _isReportOpen, value);
+            NextStepCanExecute = !value;
+        }
+    }
+    private bool _isReportOpen;
 
     /// <summary>
     /// 
@@ -116,7 +164,10 @@ public class Step2PageViewModel : ObservableObject
         set
         {
             SetProperty(ref _checkBoxChipProgrammableYes, value);
-            CheckBoxChipProgrammableNo = !value;
+            if(_checkBoxChipProgrammableNo)
+            {
+                CheckBoxChipProgrammableNo = !value;
+            }
         }
     }
     private bool _checkBoxChipProgrammableYes;
@@ -127,7 +178,14 @@ public class Step2PageViewModel : ObservableObject
     public bool CheckBoxChipProgrammableNo
     {
         get => _checkBoxChipProgrammableNo;
-        set => SetProperty(ref _checkBoxChipProgrammableNo, value);
+        set 
+        {
+            SetProperty(ref _checkBoxChipProgrammableNo, value);
+            if (_checkBoxChipProgrammableYes)
+            {
+                CheckBoxChipProgrammableYes = !value;
+            }
+        } 
     }
     private bool _checkBoxChipProgrammableNo;
 
@@ -137,7 +195,14 @@ public class Step2PageViewModel : ObservableObject
     public bool CheckBoxTestOnLockSuccess
     {
         get => _checkBoxTestOnLockSuccess;
-        set => SetProperty(ref _checkBoxTestOnLockSuccess, value);
+        set 
+        {
+            SetProperty(ref _checkBoxTestOnLockSuccess, value);
+            if (_checkBoxTestOnLockFailed)
+            {
+                CheckBoxTestOnLockFailed = !value;
+            }
+        } 
     }
     private bool _checkBoxTestOnLockSuccess;
 
@@ -147,7 +212,14 @@ public class Step2PageViewModel : ObservableObject
     public bool CheckBoxTestOnLockFailed
     {
         get => _checkBoxTestOnLockFailed;
-        set => SetProperty(ref _checkBoxTestOnLockFailed, value);
+        set 
+        {
+            SetProperty(ref _checkBoxTestOnLockFailed, value);
+            if (_checkBoxTestOnLockSuccess)
+            {
+                CheckBoxTestOnLockSuccess = !value;
+            }
+        } 
     }
     private bool _checkBoxTestOnLockFailed;
 
@@ -157,7 +229,14 @@ public class Step2PageViewModel : ObservableObject
     public bool CheckBoxTestOnLockLimitedYes
     {
         get => _checkBoxTestOnLockLimitedYes;
-        set => SetProperty(ref _checkBoxTestOnLockLimitedYes, value);
+        set 
+        {
+            SetProperty(ref _checkBoxTestOnLockLimitedYes, value);
+            if (_checkBoxTestOnLockLimitedNo)
+            {
+                CheckBoxTestOnLockLimitedNo = !value;
+            }
+        } 
     }
     private bool _checkBoxTestOnLockLimitedYes;
 
@@ -170,7 +249,10 @@ public class Step2PageViewModel : ObservableObject
         set
         {
             SetProperty(ref _checkBoxTestOnLockLimitedNo, value);
-            SetProperty(ref _checkBoxTestOnLockLimitedYes, !value);
+            if(_checkBoxTestOnLockLimitedYes)
+            {
+                CheckBoxTestOnLockLimitedYes = !value;
+            }           
         }
     }
     private bool _checkBoxTestOnLockLimitedNo;
@@ -375,7 +457,7 @@ public class Step2PageViewModel : ObservableObject
     /// <summary>
     /// 
     /// </summary>
-    public ICommand NavigateBackCommand => new RelayCommand(NavigateBackCommand_Executed);
+    public ICommand NavigateBackCommand => new AsyncRelayCommand(NavigateBackCommand_Executed);
 
     /// <summary>
     /// 
@@ -385,12 +467,12 @@ public class Step2PageViewModel : ObservableObject
     /// <summary>
     /// 
     /// </summary>
-    public ICommand OpenReportCommand => new RelayCommand(OpenReportCommand_Executed);
+    public ICommand OpenReportCommand => new AsyncRelayCommand(OpenReportCommand_Executed);
 
     /// <summary>
     /// 
     /// </summary>
-    public ICommand OpenReportPathCommand => new RelayCommand(OpenReportPathCommand_Executed);
+    public ICommand OpenReportPathCommand => new AsyncRelayCommand(OpenReportPathCommand_Executed);
 
     /// <summary>
     /// 
@@ -414,6 +496,7 @@ public class Step2PageViewModel : ObservableObject
             bool notEnoughFreeMemory = true;
             bool supported = false;
             bool programmable = false;
+            string addHintsText = "";
 
             using ReportReaderWriterService reportReader = new ReportReaderWriterService();
             using SettingsReaderWriter settings = new SettingsReaderWriter();
@@ -471,21 +554,31 @@ public class Step2PageViewModel : ObservableObject
                 programmable = reportReader.GetReportField("CheckBox_ChipCanUseYes") != null && reportReader.GetReportField("CheckBox_ChipCanUseYes") == "Yes";
                 freeMemField = reportReader.GetReportField("TextBox_Detail_FreeMem_1") ?? "NA";
                 chipType = reportReader.GetReportField("TextBox_ChipType") ?? "NA";
+                addHintsText = reportReader.GetReportField("TextBox_Hints") ?? "NA";
+                
             };
 
             p.Start();
 
             await p.WaitForExitAsync();
 
+            TextBoxAdditionalHints = addHintsText;
+
             if (freeMemField != null)
             {
                 if (int.TryParse(freeMemField.Split(' ')[0], out amountOfFreeMemory))
                 {
+                    //seem's to be a desfire
                     TextBlockFreeMem = freeMemField;
 
                     if (amountOfFreeMemory >= 225) 
                     { 
                         notEnoughFreeMemory = false;
+
+                        //show only usable templates on desfire
+                        CardTemplates = new List<LSMCardTemplate>(
+                            CardTemplates.Where(x => x.TemplateText.Contains("MD"))
+                            .Where(x => x.SizeInBytes <= amountOfFreeMemory));
                     }
                     else
                     {
@@ -502,6 +595,10 @@ public class Step2PageViewModel : ObservableObject
                     if (sectors.Length >= 1)
                     {
                         notEnoughFreeMemory = false;
+
+                        CardTemplates = new List<LSMCardTemplate>(
+                            CardTemplates.Where(x => x.TemplateText.Contains("MC"))
+                            .Where(x => x.SizeInFreeSectorsCount <= sectors.Length));
                     }
                     else
                     {
@@ -515,6 +612,15 @@ public class Step2PageViewModel : ObservableObject
             } 
 
             TextBlockCheckNotYetFinishedIsVisible = false;
+            // Select "MD4000L_AV" Template... if any. OR Select "MC1000L_AV" if any.
+            // Select first item if no MD4000L_AV nor MC1000L_AV is available
+            SelectedLSMCardTemplate = CardTemplates.Any(
+                x => x.TemplateText.Contains("MD4000L_AV")) 
+                ? CardTemplates.FirstOrDefault(y => y.TemplateText.Contains("MD4000L_AV")) ?? new LSMCardTemplate() 
+                : CardTemplates.Any(x => x.TemplateText.Contains("MC1000L_AV")) 
+                    ? CardTemplates.FirstOrDefault(y => y.TemplateText.Contains("MC1000L_AV")) ?? new LSMCardTemplate()
+                    : CardTemplates.FirstOrDefault() ?? new LSMCardTemplate();
+
 
             if (!supported)
             {
@@ -599,20 +705,20 @@ public class Step2PageViewModel : ObservableObject
         {
             scanChipTimer.Stop();
 
-            await Task.Delay(1000);
+            await Task.Delay(1000).WaitAsync(token);
 
-            if (await readerService.ReadChipPublic() >= 0)
+            if (await readerService.ReadChipPublic().WaitAsync(token) >= 0)
             {
-                while (readerService.GenericChip != null)
+                while (readerService.GenericChip != null && !isCancelled)
                 {
-                    await readerService.ReadChipPublic();
+                    await readerService.ReadChipPublic().WaitAsync(token);
                     if (readerService.GenericChip == null)
                     {
                         continue;
                     }
                     else
                     {
-                        await Task.Delay(1500);
+                        await Task.Delay(1500).WaitAsync(token);
                     }
                 }
             }
@@ -638,12 +744,17 @@ public class Step2PageViewModel : ObservableObject
         {
             scanChipTimer.Stop();
 
-            await Task.Delay(100);
-            await readerService.ReadChipPublic();
+            await Task.Delay(100).WaitAsync(token);
+            await readerService.ReadChipPublic().WaitAsync(token);
 
             while (readerService.GenericChip == null && !NextStepCanExecute)
             {
-                await readerService.ReadChipPublic();
+                if(isCancelled)
+                { 
+                    return; 
+                }
+
+                await readerService.ReadChipPublic().WaitAsync(token);
 
                 if (readerService.GenericChip != null)
                 {
@@ -651,7 +762,7 @@ public class Step2PageViewModel : ObservableObject
                 }
                 else
                 {
-                    await Task.Delay(1500);
+                    await Task.Delay(1500).WaitAsync(token);
                 }
             }
 
@@ -674,71 +785,87 @@ public class Step2PageViewModel : ObservableObject
     /// <param name="e"></param>
     private async void ScanChipEvent(object? sender, object e)
     {
-        try
+        if(!isCancelled)
         {
-            scanChipTimer.Stop();
-
-            using (ReaderService readerService = new ReaderService())
+            try
             {
-                if(!NavigateNextStepCommand.IsRunning)
-                {
-                    await readerService.ReadChipPublic();
-                }
+                scanChipTimer.Stop();
 
-                if (readerService.MoreThanOneReaderFound)
+                using (ReaderService readerService = new ReaderService())
                 {
-                    NextStepCanExecute = false;
-                }
-
-                else
-                {
-                    if (readerService.GenericChip != null && !NextStepCanExecute && !NavigateNextStepCommand.IsRunning)
+                    if(!NavigateNextStepCommand.IsRunning)
                     {
-                        await ChipIsRemoved(readerService);
+                        await readerService.ReadChipPublic();
+                    }
 
-                        ReaderHasNoChipInfoBarIsVisible = true;
+                    if (readerService.MoreThanOneReaderFound)
+                    {
+                        NextStepCanExecute = false;
+                    }
 
-                        await ChipIsPlacedAgain(readerService);
-
-                        var ChipInfoMessage = string.Format("Es wurde ein Chip erkannt:\nErkannt 1: {0}", readerService.GenericChip.CardType.ToString());
-
-                        if (readerService.GenericChip.Child != null)
+                    else
+                    {
+                        if (readerService.GenericChip != null && !NextStepCanExecute && !NavigateNextStepCommand.IsRunning)
                         {
-                            ChipInfoMessage = ChipInfoMessage + string.Format("\nErkannt 2: {0}", readerService.GenericChip.Child.CardType);
+                            try
+                            {
+                                await ChipIsRemoved(readerService).WaitAsync(token);
+
+                                ReaderHasNoChipInfoBarIsVisible = true;
+
+                                await ChipIsPlacedAgain(readerService).WaitAsync(token);
+
+                                var ChipInfoMessage = string.Format("Es wurde ein Chip erkannt:\nErkannt 1: {0}", readerService.GenericChip?.CardType.ToString() ?? "");
+
+                                if (!isCancelled && readerService.GenericChip?.Child != null)
+                                {
+                                    ChipInfoMessage = ChipInfoMessage + string.Format("\nErkannt 2: {0}", readerService.GenericChip.Child.CardType);
+                                }
+
+                                NextStepCanExecute = true;
+                            }
+                            catch (Exception ae)
+                            {
+                                //readerService.Close();
+                            }
                         }
 
-                        NextStepCanExecute = true;
-                    }
-
-                    if (readerService.GenericChip != null && NextStepCanExecute && !NavigateNextStepCommand.IsRunning)
-                    {
-
-                        ReaderHasNoChipInfoBarIsVisible = false;
-
-                        var ChipInfoMessage = string.Format("Es wurde ein Chip erkannt:\nErkannt 1: {0}", readerService.GenericChip.CardType.ToString());
-
-                        if (readerService.GenericChip.Child != null)
+                        if (!isCancelled && readerService.GenericChip != null && NextStepCanExecute && !NavigateNextStepCommand.IsRunning)
                         {
-                            ChipInfoMessage = ChipInfoMessage + string.Format("\nErkannt 2: {0}", readerService.GenericChip.Child.CardType);
+
+                            ReaderHasNoChipInfoBarIsVisible = false;
+
+                            var ChipInfoMessage = string.Format("Es wurde ein Chip erkannt:\nErkannt 1: {0}", readerService.GenericChip.CardType.ToString());
+
+                            if (readerService.GenericChip?.Child != null)
+                            {
+                                ChipInfoMessage = ChipInfoMessage + string.Format("\nErkannt 2: {0}", readerService.GenericChip.Child.CardType);
+                            }
+
+                            NextStepCanExecute = true;
                         }
 
-                        NextStepCanExecute = true;
-                    }
-
-                    else if (readerService.GenericChip == null && !NavigateNextStepCommand.IsRunning)
-                    {
-                        NextStepCanExecute = true;
-                        ReaderHasNoChipInfoBarIsVisible = true;
+                        else if (!isCancelled && readerService.GenericChip == null && !NavigateNextStepCommand.IsRunning)
+                        {
+                            NextStepCanExecute = true;
+                            ReaderHasNoChipInfoBarIsVisible = true;
+                        }
                     }
                 }
+
+                scanChipTimer.Start();
             }
 
-            scanChipTimer.Start();
+            catch (Exception ex)
+            {
+                await App.MainRoot.MessageDialogAsync(
+                    "Fehler",
+                    string.Format("Bitte melde den folgenden Fehler an mich:\n{0}", ex.Message));
+
+                LogWriter.CreateLogEntry(ex);
+            }
         }
-        catch(Exception ex)
-        {
-            LogWriter.CreateLogEntry(ex);
-        }
+
     }
 
     /// <summary>
@@ -749,8 +876,6 @@ public class Step2PageViewModel : ObservableObject
     {
         try
         {
-            using ReaderService readerService = new ReaderService();
-
             scanChipTimer.Stop();
             scanChipTimer.Tick -= ScanChipEvent;
 
@@ -759,20 +884,24 @@ public class Step2PageViewModel : ObservableObject
             scanChipTimer.Tick += ScanChipEvent;
             scanChipTimer.Start();
         }
-        catch(Exception e)
+        catch(Exception ex)
         {
-            LogWriter.CreateLogEntry(e);
+            await App.MainRoot.MessageDialogAsync(
+                "Fehler",
+                string.Format("Bitte melde den folgenden Fehler an mich:\n{0}", ex.Message));
+            LogWriter.CreateLogEntry(ex);
         }
     }
 
     /// <summary>
     /// 
     /// </summary>
-    private void OpenReportCommand_Executed()
+    private async Task OpenReportCommand_Executed()
     {
         try
         {
             using SettingsReaderWriter settings = new SettingsReaderWriter();
+            IsReportOpen = true;
             settings.ReadSettings();
 
             var p = new Process();
@@ -789,19 +918,27 @@ public class Step2PageViewModel : ObservableObject
             };
 
             p.StartInfo = info;
-
             p.Start();
+
+            await p.WaitForExitAsync();
+
+            IsReportOpen = false;
         }
         catch (Exception ex)
         {
+            await App.MainRoot.MessageDialogAsync(
+                "Fehler",
+                string.Format("Bitte melde den folgenden Fehler an mich:\n{0}", ex.Message));
+
             LogWriter.CreateLogEntry(ex);
+            IsReportOpen = false;
         }
     }
 
     /// <summary>
     /// 
     /// </summary>
-    private void OpenReportPathCommand_Executed()
+    private async Task OpenReportPathCommand_Executed()
     {
         try
         {
@@ -819,11 +956,13 @@ public class Step2PageViewModel : ObservableObject
             };
 
             p.StartInfo = info;
-
             p.Start();
         }
         catch (Exception ex)
         {
+            await App.MainRoot.MessageDialogAsync(
+                "Fehler",
+                string.Format("Bitte melde den folgenden Fehler an mich:\n{0}", ex.Message));
             LogWriter.CreateLogEntry(ex);
         }
     }
@@ -909,6 +1048,22 @@ public class Step2PageViewModel : ObservableObject
                 await SQLDBService.Instance.InsertData(CheckProcessService.CurrentCardCheckProcess.ID, OrderStatus.CheckFinished.ToString());
 
                 fileStream.Close();
+
+                if (settings.DefaultSettings.RemoveTemporaryReportsIsEnabled == true)
+                {
+                    try
+                    {
+                        File.Delete(preFinalPath);
+                        File.Delete(semiFinalPath);
+                    }
+                    catch (Exception ex)
+                    {
+                        await App.MainRoot.MessageDialogAsync(
+                            "Fehler",
+                            string.Format("Bitte melde den folgenden Fehler an mich:\n{0}", ex.Message));
+                    } //The Files may be opened
+
+                }
             }
 
             else if (TextBlockCheckFinishedAndResultIsSuppAndProgIsVisible)
@@ -950,6 +1105,8 @@ public class Step2PageViewModel : ObservableObject
                 {
                     reportReader.SetReportField("CheckBox_Detail_Reserved_4_2", "Off");
                     reportReader.SetReportField("CheckBox_Detail_Reserved_4_1", "Yes");
+
+                    reportReader.SetReportField("TextBox_Hints", TextBoxAdditionalHints);
                 }
 
                 reportReader.SetReportField("ComboBox_UsedTemplate",SelectedLSMCardTemplate.TemplateText);
@@ -965,6 +1122,10 @@ public class Step2PageViewModel : ObservableObject
         }
         catch (Exception ex)
         {
+            await App.MainRoot.MessageDialogAsync(
+                "Fehler",
+                string.Format("Bitte melde den folgenden Fehler an mich:\n{0}", ex.Message));
+
             LogWriter.CreateLogEntry(ex);
         }
     }
@@ -972,14 +1133,16 @@ public class Step2PageViewModel : ObservableObject
     /// <summary>
     /// 
     /// </summary>
-    private async void NavigateBackCommand_Executed()
+    private async Task NavigateBackCommand_Executed()
     {
         try
         {
-            using ReaderService readerService = new ReaderService();
-
             scanChipTimer.Stop();
             scanChipTimer.Tick -= ScanChipEvent;
+
+            source.Cancel();
+
+            await Task.Delay(1000);
 
             var window = (Application.Current as App)?.Window as MainWindow ?? new MainWindow();
             var navigation = window.Navigation;
@@ -988,6 +1151,10 @@ public class Step2PageViewModel : ObservableObject
         }
         catch (Exception ex)
         {
+            await App.MainRoot.MessageDialogAsync(
+                "Fehler",
+                string.Format("Bitte melde den folgenden Fehler an mich:\n{0}", ex.Message));
+
             LogWriter.CreateLogEntry(ex);
         }
     }

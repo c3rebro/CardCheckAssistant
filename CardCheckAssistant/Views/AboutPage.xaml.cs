@@ -1,6 +1,4 @@
-﻿using CommunityToolkit.Mvvm.Input;
-using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
+﻿using Microsoft.UI.Xaml.Controls;
 
 namespace CardCheckAssistant.Views
 {
@@ -9,11 +7,6 @@ namespace CardCheckAssistant.Views
         public AboutPage()
         {
             InitializeComponent();
-        }
-
-        private void OpenOmniCommand (object sender, RoutedEventArgs args)
-        {
-
         }
     }
 }

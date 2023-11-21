@@ -6,7 +6,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
-    <Grid Name="Root">
+    <Grid Name="Root" Width="auto" Height="auto">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -89,7 +89,7 @@
             </MenuBarItem>
         </MenuBar>
 -->
-        <local:Shell x:Name="RootShell" Margin="0 15 0 0" Grid.Row="2"/>
+        <local:Shell x:Name="RootShell" Width="auto" Height="auto" Margin="0 15 0 0" Grid.Row="2"/>
 
     </Grid>
 </Window>

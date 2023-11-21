@@ -7,17 +7,65 @@
     <Page.DataContext>
         <viewmodels:SettingsPageViewModel />
     </Page.DataContext>
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
 
-    <controls:SettingsPageControl Margin="10 -100 0 32">
-        <controls:SettingsPageControl.ModuleContent>
-            <StackPanel Orientation="Vertical">
+        <Button 
+            Grid.Row="0"
+            Grid.Column="0"
+            Height="36"
+            Margin="8,-60,20,8"
+            Padding="30,8"
+            VerticalAlignment="Top"
+            HorizontalAlignment="Right"
+            IsEnabled="{Binding GoBackCanExecute, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+            Opacity="1"
+            Command="{Binding NavigateBackCommand}"
+            Content="Zurück und Speichern">
+            <Button.Resources>
+                <ResourceDictionary>
+                    <SolidColorBrush x:Key="ButtonBorderBrushDisabled" Opacity="0.6" Color="#BFBFBF" />
+                    <SolidColorBrush x:Key="ButtonBackground" Color="IndianRed" />
+                    <SolidColorBrush x:Key="ButtonBackgroundDisabled" Color="#73726e" />
+                    <SolidColorBrush x:Key="ButtonBackgroundPressed" Color="#f5fa75" />
+                    <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="#c4c736" />
+
+                    <SolidColorBrush x:Key="ButtonForegroundDisabled" Color="DarkGray" />
+
+                    <SolidColorBrush x:Key="ButtonForeground" Color="Black" />
+                    <SolidColorBrush x:Key="ButtonForegroundPointerOver" Color="White" />
+
+                    <!--<SolidColorBrush x:Key="ButtonBorderBrush" Color="White" />-->
+                    <!--<SolidColorBrush x:Key="ButtonBorderBrushPointerOver" Color="White" />-->
+                    <!--<SolidColorBrush x:Key="ButtonBorderBrushFocused" Color="#ECF542" />-->
+                    <!--<SolidColorBrush x:Key="ButtonBorderBrushPressed" Color="#ECF542" />-->
+
+                    <SolidColorBrush x:Key="ButtonBackgroundFocused" Color="LightGreen" />
+
+                </ResourceDictionary>
+            </Button.Resources>
+        </Button>
+
+        <ScrollViewer
+            Margin="0,0,0,20">
+            <StackPanel 
+                Margin="30,30"
+                Padding="0,30"
+                Orientation="Vertical" 
+                VerticalAlignment="Stretch"
+                HorizontalAlignment="Center">
                 <controls:SettingsGroup Header="Pfadeinstellungen">
                     <controls:SettingExpander IsExpanded="False">
                         <controls:SettingExpander.Header>
                             <controls:Setting Description="Pfad zu RFIDGear Prüfprogramm-EXE auswählen"
-                                              Header="RFiDGear Pfad"
-                                              Icon="&#xE1A5;"
-                                              Style="{StaticResource ExpanderHeaderSettingStyle}">
+                                            Header="RFiDGear Pfad"
+                                            Icon="&#xE1A5;"
+                                            Style="{StaticResource ExpanderHeaderSettingStyle}">
                                 <controls:Setting.ActionContent>
                                     <Button Content="Datei öffnen..." Command="{Binding SelectRFIDGearExeCommand}"/>
                                 </controls:Setting.ActionContent>
@@ -26,12 +74,12 @@
                         <controls:SettingExpander.Content>
                             <StackPanel Orientation="Vertical">
                                 <InfoBar Title="Bitte halte deine RFiDGear Version immer aktuell."
-                                         IsClosable="False"
-                                         IsOpen="True"
-                                         Severity="Informational" />
+                                        IsClosable="False"
+                                        IsOpen="True"
+                                        Severity="Informational" />
                                 <controls:Setting Header="Pfad zu RFiDGear:"
-                                                  Content="{Binding SelectedRFIDGearPath, UpdateSourceTrigger=PropertyChanged}"
-                                                  Style="{StaticResource ExpanderContentSettingStyle}">
+                                                Content="{Binding SelectedRFIDGearPath, UpdateSourceTrigger=PropertyChanged}"
+                                                Style="{StaticResource ExpanderContentSettingStyle}">
                                 </controls:Setting>
                             </StackPanel>
                         </controls:SettingExpander.Content>
@@ -40,9 +88,9 @@
                     <controls:SettingExpander IsExpanded="False">
                         <controls:SettingExpander.Header>
                             <controls:Setting Description="Projektpfad für Kartenprüfungen"
-                                              Header="Projekt-Pfad"
-                                              Icon="&#xE197;"
-                                              Style="{StaticResource ExpanderHeaderSettingStyle}">
+                                            Header="Projekt-Pfad"
+                                            Icon="&#xE197;"
+                                            Style="{StaticResource ExpanderHeaderSettingStyle}">
                                 <controls:Setting.ActionContent>
                                     <Button Content="Ordner wählen..." Command="{Binding SelectProjectFolderCommand}"/>
                                 </controls:Setting.ActionContent>
@@ -51,12 +99,12 @@
                         <controls:SettingExpander.Content>
                             <StackPanel Orientation="Vertical">
                                 <InfoBar Title="Unterhalb dieses Ordners werden alle Prüfberichte angelegt."
-                                         IsClosable="False"
-                                         IsOpen="True"
-                                         Severity="Informational" />
+                                        IsClosable="False"
+                                        IsOpen="True"
+                                        Severity="Informational" />
                                 <controls:Setting Header="Standard Projektpfad:"
-                                                  Content="{Binding SelectedProjectFolder, UpdateSourceTrigger=PropertyChanged}"
-                                                  Style="{StaticResource ExpanderContentSettingStyle}">
+                                                Content="{Binding SelectedProjectFolder, UpdateSourceTrigger=PropertyChanged}"
+                                                Style="{StaticResource ExpanderContentSettingStyle}">
                                 </controls:Setting>
                             </StackPanel>
                         </controls:SettingExpander.Content>
@@ -65,9 +113,9 @@
                     <controls:SettingExpander IsExpanded="False">
                         <controls:SettingExpander.Header>
                             <controls:Setting Description="Pfad zu RFIDGear Speicherauslese-Projektdatei"
-                                              Header="RFiDGear *.rfprj Datei"
-                                              Icon="&#xE1A5;"
-                                              Style="{StaticResource ExpanderHeaderSettingStyle}">
+                                            Header="RFiDGear *.rfprj Datei"
+                                            Icon="&#xE1A5;"
+                                            Style="{StaticResource ExpanderHeaderSettingStyle}">
                                 <controls:Setting.ActionContent>
                                     <Button Content="Datei öffnen..." Command="{Binding SelectRFIDGearCustomProjectCommand}"/>
                                 </controls:Setting.ActionContent>
@@ -76,24 +124,34 @@
                         <controls:SettingExpander.Content>
                             <StackPanel Orientation="Vertical">
                                 <InfoBar Title="Mit dieser Projektdatei wird der freie Speicher ausgelesen."
-                                         IsClosable="False"
-                                         IsOpen="True"
-                                         Severity="Informational" />
+                                        IsClosable="False"
+                                        IsOpen="True"
+                                        Severity="Informational" />
                                 <controls:Setting Header="Pfad zu RFiDGear:"
-                                                  Content="{Binding SelectedCustomProjectFolder, UpdateSourceTrigger=PropertyChanged}"
-                                                  Style="{StaticResource ExpanderContentSettingStyle}">
+                                                Content="{Binding SelectedCustomProjectFolder, UpdateSourceTrigger=PropertyChanged}"
+                                                Style="{StaticResource ExpanderContentSettingStyle}">
                                 </controls:Setting>
                             </StackPanel>
                         </controls:SettingExpander.Content>
                     </controls:SettingExpander>
                     <controls:Setting 
-                        Header="Unterverzeichnis für Berichte anlegen"
-                        Description="Legt für jede Jobnummer ein extra Unterverzeichnis unterhalb von &quot;Projekt-Pfad&quot; an"
-                        Icon="&#xE1A5;"
-                        HorizontalContentAlignment="Stretch"
-                        HorizontalAlignment="Stretch">
+                    Header="Unterverzeichnis für Berichte anlegen"
+                    Description="Legt für jede Jobnummer ein extra Unterverzeichnis unterhalb von &quot;Projekt-Pfad&quot; an"
+                    Icon="&#xE1A5;"
+                    HorizontalContentAlignment="Stretch"
+                    HorizontalAlignment="Stretch">
                         <controls:Setting.ActionContent>
                             <ToggleSwitch IsOn="{Binding CreateSubdirectoryIsEnabled, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
+                        </controls:Setting.ActionContent>
+                    </controls:Setting>
+                    <controls:Setting 
+                    Header="Temporäre PDF-Berichte nach der Fertigstellung löschen"
+                    Description="Entfernt alle *_.pdf und *.pdf Dateien aus dem Bericht-Ablageverzeichnis und behält nur die *_final.pdf Dateien bei."
+                    Icon="&#xE1A5;"
+                    HorizontalContentAlignment="Stretch"
+                    HorizontalAlignment="Stretch">
+                        <controls:Setting.ActionContent>
+                            <ToggleSwitch IsOn="{Binding RemoveTemporaryReportsIsEnabled, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
                         </controls:Setting.ActionContent>
                     </controls:Setting>
                 </controls:SettingsGroup>
@@ -102,9 +160,9 @@
                     <controls:SettingExpander IsExpanded="False">
                         <controls:SettingExpander.Header>
                             <controls:Setting Description="Prüfvorgang automatisch Starten"
-                                              Header="RFiDGear Automatisch starten"
-                                              Icon="&#xE1A5;"
-                                              Style="{StaticResource ExpanderHeaderSettingStyle}">
+                                            Header="RFiDGear Automatisch starten"
+                                            Icon="&#xE1A5;"
+                                            Style="{StaticResource ExpanderHeaderSettingStyle}">
                                 <controls:Setting.ActionContent>
                                     <ToggleSwitch IsOn="{Binding RFiDGearIsAutoRunEnabled, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
                                 </controls:Setting.ActionContent>
@@ -113,17 +171,17 @@
                         <controls:SettingExpander.Content>
                             <StackPanel Orientation="Vertical">
                                 <InfoBar Title="Bitte halte deine RFiDGear Version immer aktuell."
-                                         IsClosable="False"
-                                         IsOpen="True"
-                                         Severity="Informational" />
+                                        IsClosable="False"
+                                        IsOpen="True"
+                                        Severity="Informational" />
                                 <controls:Setting Header="Pfad zu RFiDGear:"
-                                                  Content="{Binding SelectedRFIDGearPath, UpdateSourceTrigger=PropertyChanged}"
-                                                  Style="{StaticResource ExpanderContentSettingStyle}">
+                                                Content="{Binding SelectedRFIDGearPath, UpdateSourceTrigger=PropertyChanged}"
+                                                Style="{StaticResource ExpanderContentSettingStyle}">
                                 </controls:Setting>
 
                                 <controls:Setting Header="Pfad zu RFiDGear Speicherauslese-Projektdatei:"
-                                                  Content="{Binding SelectedCustomProjectFolder, UpdateSourceTrigger=PropertyChanged}"
-                                                  Style="{StaticResource ExpanderContentSettingStyle}">
+                                                Content="{Binding SelectedCustomProjectFolder, UpdateSourceTrigger=PropertyChanged}"
+                                                Style="{StaticResource ExpanderContentSettingStyle}">
                                 </controls:Setting>
                             </StackPanel>
                         </controls:SettingExpander.Content>
@@ -134,9 +192,9 @@
                     <controls:SettingExpander IsExpanded="False">
                         <controls:SettingExpander.Header>
                             <controls:Setting Description="Servername"
-                                              Header="Datenbankoptionen"
-                                              Icon="&#xE1A5;"
-                                              Style="{StaticResource ExpanderHeaderSettingStyle}">
+                                            Header="Datenbankoptionen"
+                                            Icon="&#xE1A5;"
+                                            Style="{StaticResource ExpanderHeaderSettingStyle}">
                             </controls:Setting>
                         </controls:SettingExpander.Header>
                         <controls:SettingExpander.Content>
@@ -183,31 +241,33 @@
 
                 <controls:SettingsGroup Header="Appearance &amp; behavior">
                     <controls:Setting Header="Choose a mode"
-                                      Icon="&#xE771;">
+                                    Icon="&#xE771;">
                         <controls:Setting.Description>
                             <HyperlinkButton Content="Windows color settings" />
                         </controls:Setting.Description>
                         <controls:Setting.ActionContent>
                             <ComboBox MinWidth="{StaticResource SettingActionControlMinWidth}"
-                                      ItemsSource="{Binding ThemeSource}"
-                                      SelectedItem="{Binding SelectedTheme, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}">
+                                    ItemsSource="{Binding ThemeSource}"
+                                    SelectedItem="{Binding SelectedTheme, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}">
                             </ComboBox>
                         </controls:Setting.ActionContent>
                     </controls:Setting>
                 </controls:SettingsGroup>
                 <CheckBox Name="check"
-                          Margin="56,0,40,16"
-                          AutomationProperties.Name="{Binding ElementName=IncludeInGlobalResultTitle, Path=Text}">
+                        Margin="56,0,40,16"
+                        AutomationProperties.Name="{Binding ElementName=IncludeInGlobalResultTitle, Path=Text}">
                     <StackPanel Orientation="Vertical">
                         <TextBlock x:Name="IncludeInGlobalResultTitle"
-                                   Margin="0,10,0,0"
-                                   Text="Include in global result" />
+                                Margin="0,10,0,0"
+                                Text="Include in global result" />
                         <controls:IsEnabledTextBlock FontSize="{StaticResource SecondaryTextFontSize}"
-                                                     IsEnabled="{Binding ElementName=check, Path=IsChecked}"
-                                                     Text="Show results on queries without direct activation command" />
+                                                    IsEnabled="{Binding ElementName=check, Path=IsChecked}"
+                                                    Text="Show results on queries without direct activation command" />
                     </StackPanel>
                 </CheckBox>
             </StackPanel>
-        </controls:SettingsPageControl.ModuleContent>
-    </controls:SettingsPageControl>
+        </ScrollViewer>
+
+    </Grid>
+    
 </Page>

@@ -23,7 +23,7 @@
     </Page.Resources>
    
     <Grid 
-        Margin="10 0 10 80">
+        Margin="10 0 10 10">
         <Grid.Background>
             <ImageBrush
                     ImageSource="/Assets/fluent-ui-microsoft.png"
@@ -175,11 +175,11 @@
                                     Width="80">
                                     <AppBarButton.Flyout>
                                         <MenuFlyout>
-                                            <RadioMenuFlyoutItem GroupName="filterData" Text="Zeige: InProgress"
+                                            <RadioMenuFlyoutItem GroupName="filterData" Text="Zeige: InProgress" IsChecked="True"
                                                    Click="FilterStatusInProgress_Click" />
                                             <RadioMenuFlyoutItem GroupName="filterData" Text="Zeige: Completed"
                                                    Click="FilterStatusCheckFinished_Click" />
-                                            <RadioMenuFlyoutItem GroupName="filterData" Text="Zeige: Alle" IsChecked="True"
+                                            <RadioMenuFlyoutItem GroupName="filterData" Text="Zeige: Alle"
                                                    Click="FilterClear_Click" />
                                         </MenuFlyout>
                                     </AppBarButton.Flyout>
@@ -277,7 +277,7 @@
 
             <ctWinUI:DataGrid 
                 x:Name="DataGrid"
-                Margin="0,8,0,0"
+                Margin="8,8,8,8"
                 Grid.Row="2"
                 Grid.Column="0"
                 Grid.ColumnSpan="2"
