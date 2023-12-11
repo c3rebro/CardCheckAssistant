@@ -114,7 +114,7 @@ public partial class Step2PageViewModel : ObservableObject
         get => _selectedCardCheckTextTemplate;
         set
         {
-            TextBoxAdditionalHints = string.Format("{0}\n\n{1}",TextBoxAdditionalHints,value?.TemplateTextContent);
+            TextBoxAdditionalHints = string.Format("{1}{0}",TextBoxAdditionalHints,!string.IsNullOrEmpty(value?.TemplateTextContent) ? value?.TemplateTextContent + "\n\n" : string.Empty);
             SetProperty(ref _selectedCardCheckTextTemplate, value);
         }
     }
@@ -514,7 +514,7 @@ public partial class Step2PageViewModel : ObservableObject
                 programmable = reportReader.GetReportField("CheckBox_ChipCanUseYes") != null && reportReader.GetReportField("CheckBox_ChipCanUseYes") == "Yes";
                 freeMemField = reportReader.GetReportField("TextBox_Detail_FreeMem_1") ?? "NA";
                 chipType = reportReader.GetReportField("TextBox_ChipType") ?? "NA";
-                addHintsText = reportReader.GetReportField("TextBox_Hints") ?? "NA";
+                addHintsText = reportReader.GetReportField("TextBox_Notes_Site_2") ?? "NA";
                 
             };
 
@@ -1073,7 +1073,7 @@ public partial class Step2PageViewModel : ObservableObject
                     reportReader.SetReportField("CheckBox_Detail_Reserved_4_2", "Off");
                     reportReader.SetReportField("CheckBox_Detail_Reserved_4_1", "Yes");
 
-                    reportReader.SetReportField("TextBox_Hints", TextBoxAdditionalHints);
+                    reportReader.SetReportField("TextBox_Notes_Site_2", TextBoxAdditionalHints);
                 }
 
                 reportReader.SetReportField("ComboBox_UsedTemplate",SelectedLSMCardTemplate.TemplateText);
