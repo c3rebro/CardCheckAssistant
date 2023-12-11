@@ -27,7 +27,12 @@
     <ApplicationIcon>Assets\AppIco.ico</ApplicationIcon>
     <PackageIcon>Assets\StoreLogo.scale-400.png</PackageIcon>
     <RepositoryUrl>https://github.com/c3rebro/CardCheckAssistant</RepositoryUrl>
-    <PackageReleaseNotes>Version 1.0.34
+    <PackageReleaseNotes>Version 1.0.35
+-----------------------------------------------------------------
+Benutzeroberfläche:
++ Neue Einstellung: Zusatztexte können hinterlegt und in Schritt 2 ausgewählt werden. Der Text erscheint jetzt auf Seite 2.
+
+Version 1.0.34
 -----------------------------------------------------------------
 Benutzeroberfläche:
 + Neue Einstellung: Zusatztexte können hinterlegt und in Schritt 2 ausgewählt werden.
@@ -87,7 +92,7 @@ v1.0.20
     <Title>CardCheckAssistant</Title>
     <Company>Messgeraetetechnik Hansen</Company>
     <Authors>Steven Hansen</Authors>
-    <AssemblyVersion>1.0.34</AssemblyVersion>
+    <AssemblyVersion>1.0.35</AssemblyVersion>
     <FileVersion>$(AssemblyVersion)</FileVersion>
     <AppInstallerUri>https://github.com/c3rebro/CardCheckAssistant/releases/latest/download</AppInstallerUri>
     <PlatformTarget>AnyCPU</PlatformTarget>
