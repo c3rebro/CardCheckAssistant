@@ -70,12 +70,13 @@ public class HomePageViewModel : ObservableObject, IDisposable
 
         var window = (Application.Current as App)?.Window as MainWindow ?? new MainWindow();
         var navigation = window.Navigation;
-
+        
         // At AppLaunch: Disable all "In between" Steps.
         foreach (NavigationViewItem nVI in navigation.GetNavigationViewItems().Where(x => x.Content.ToString() != "Start").Where(x => x.Content.ToString().Contains("Schritt")))
         {
             nVI.IsEnabled = false;
         }
+        
     }
 
     private void OpenReportWritable_Click(object sender, RoutedEventArgs e)
@@ -510,7 +511,7 @@ public class HomePageViewModel : ObservableObject, IDisposable
                 }
 
                 ModalView.Dialogs.Where(x => x.Name == "connectWaitMsgDlg").Single().Hide();
-                ModalView.Dialogs.Remove(ModalView.Dialogs.Where(x => x.Name == "connectWaitMsgDlg").Single());
+                //ModalView.Dialogs.Remove(ModalView.Dialogs.Where(x => x.Name == "connectWaitMsgDlg").Single());
             }
 
             //I expect the Delay to be not so sufficient on some machines
@@ -606,28 +607,8 @@ public class HomePageViewModel : ObservableObject, IDisposable
         var window = (Application.Current as App)?.Window as MainWindow ?? new MainWindow();
         var navigation = window.Navigation;
         NavigationViewItem page = navigation.GetNavigationViewItems(typeof(Step1Page)).First();
-        
-        if (SelectedCardCheckProcess != null)
-        {
-            switch (SelectedCardCheckProcess.CurrentProcessNumber)
-            {
-                case 1:
-                    page = navigation.GetNavigationViewItems(typeof(Step1Page)).First();
-                    break;
-                case 2:
-                    page = navigation.GetNavigationViewItems(typeof(Step2Page)).First();
-                    break;
-                case 3:
-                    //page = navigation.GetNavigationViewItems(typeof(Step3Page)).First();
-                    break;
-
-                default:
-                    break;
-            }
-        }
-        
-        page.IsEnabled = true;
         navigation.SetCurrentNavigationViewItem(page);
+        page.IsEnabled = true;
     }
 
     /// <summary>
@@ -743,6 +724,12 @@ public class HomePageViewModel : ObservableObject, IDisposable
     {
         try
         {
+            App.MainRoot.MessageDialogAsync(
+                "Prüfe auf Updates",
+                "Bitte warten...","Abbrechen","checkUpdatesWaitDlg");
+
+            await Task.Delay(1000);
+
             PackageManager package = new PackageManager();
             Package currentPackage = package.FindPackageForUser(string.Empty, Package.Current.Id.FullName);
             PackageUpdateAvailabilityResult result = await currentPackage.CheckUpdateAvailabilityAsync();
@@ -750,8 +737,11 @@ public class HomePageViewModel : ObservableObject, IDisposable
             switch (result.Availability)
             {
                 case PackageUpdateAvailability.Available:
+
+                    ModalView.Dialogs.Where(x => x.Name == "checkUpdatesWaitDlg").Single().Hide();
+
                     await App.MainRoot.MessageDialogAsync(
-                        "Update wird installiert.\n",
+                        "Update wird installiert.",
                         "Es ist eine neue Version von CardCheckassistant verfügbar.\nSie wird nun heruntergalden und installiert...");
 
                     await InstallUpdate();
@@ -760,14 +750,20 @@ public class HomePageViewModel : ObservableObject, IDisposable
                 case PackageUpdateAvailability.NoUpdates:
                 case PackageUpdateAvailability.Unknown:
                 default:
+
+                    ModalView.Dialogs.Where(x => x.Name == "checkUpdatesWaitDlg").Single().Hide();
+
                     break;
             }
         }
         catch (Exception e)
         {
+
+            ModalView.Dialogs.Where(x => x.Name == "checkUpdatesWaitDlg").Single().Hide();
+
             LogWriter.CreateLogEntry(e);
         }
-
+        
     }
 
     private async Task InstallUpdate()
@@ -781,19 +777,19 @@ public class HomePageViewModel : ObservableObject, IDisposable
             if (deploymentTask.ErrorText != null)
             {
                 await App.MainRoot.MessageDialogAsync(
-                    "Updatefehler\n",
+                    "Updatefehler",
                     string.Format("Bitte melde den folgenden Fehler an mich:\n{0}\n{1}", deploymentTask.ErrorText,deploymentTask.ExtendedErrorCode));
             }
             else
             {
                 await App.MainRoot.MessageDialogAsync(
-                    "Update Erfolgreich\n","Bitte beende Deine Arbeit und starte die Anwendung neu.");
+                    "Update Erfolgreich","Bitte beende Deine Arbeit und starte die Anwendung neu.");
             }
         }
         catch
         {
             await App.MainRoot.MessageDialogAsync(
-                "Fehler:\n",
+                "Fehler:",
                 string.Format("Die Anwendung konnte nicht automatisch neu gestartet werden.\nBitte starte sie manuell neu."));
         }
 

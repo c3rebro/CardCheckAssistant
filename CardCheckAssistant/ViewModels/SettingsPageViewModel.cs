@@ -1,6 +1,7 @@
 ﻿using System.Collections.ObjectModel;
 using System.Security.Cryptography;
 using System.Windows.Input;
+using CardCheckAssistant.Models;
 using CardCheckAssistant.Services;
 using CardCheckAssistant.Views;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -11,12 +12,15 @@ using Windows.Storage.Pickers;
 
 namespace CardCheckAssistant.ViewModels;
 
-public class SettingsPageViewModel : ObservableObject
+public partial class SettingsPageViewModel : ObservableObject
 {
     public SettingsPageViewModel()
     {
         try
-        {
+        {            
+            using var settings = new SettingsReaderWriter();
+            using var enc = new RijndaelEnc();
+
             ThemeSource = new ObservableCollection<string>
             {
                 "Light",
@@ -24,9 +28,7 @@ public class SettingsPageViewModel : ObservableObject
                 "Default"
             };
 
-            using var settings = new SettingsReaderWriter();
-            using var enc = new RijndaelEnc();
-
+            IsTextBoxCardCheckTextTemplateEnabled = false;
             SelectedTheme = settings.DefaultSettings.DefaultTheme;
             SelectedProjectFolder = settings.DefaultSettings.DefaultProjectOutputPath;
             SelectedCustomProjectFolder = settings.DefaultSettings.LastUsedCustomProjectPath;
@@ -41,6 +43,23 @@ public class SettingsPageViewModel : ObservableObject
             RemoveTemporaryReportsIsEnabled = settings.DefaultSettings.RemoveTemporaryReportsIsEnabled;
 
             SelectedDBUserPwd = enc.Decrypt(settings?.DefaultSettings?.SelectedDBUserPwd ?? "NoPWD");
+
+            if (settings.DefaultSettings.CardCheckTextTemplates != null && settings.DefaultSettings.CardCheckTextTemplates.Any())
+            {
+                TextTemplates = new ObservableCollection<CardCheckTextTemplate>(settings.DefaultSettings.CardCheckTextTemplates);
+                SelectedTextTemplate = TextTemplates?.FirstOrDefault();
+
+                IsTextBoxCardCheckTextTemplateEnabled = true;
+            }
+            else
+            {
+                TextTemplates = new ObservableCollection<CardCheckTextTemplate>
+                {
+                    new ("N/A")
+                };
+
+                SelectedTextTemplate = TextTemplates?.FirstOrDefault();
+            }
         }
         catch (Exception ex)
         {
@@ -196,6 +215,9 @@ public class SettingsPageViewModel : ObservableObject
     }
     private bool? _createSubdirectoryIsEnabled;
 
+    [ObservableProperty]
+    private bool? _isTextBoxCardCheckTextTemplateEnabled;
+    
     public string? SelectedTheme
     {
         get => _selectedTheme;
@@ -237,12 +259,43 @@ public class SettingsPageViewModel : ObservableObject
     }
     private ObservableCollection<string>? _themeSource;
 
+    public string TextTemplateName
+    {
+        get => _textTemplateName;
+        set
+        {
+            SetProperty(ref _textTemplateName, value);
+        }
+    }
+    private string _textTemplateName;
+
+    public ObservableCollection<CardCheckTextTemplate>? TextTemplates
+    {
+        get => _textTemplates;
+        set
+        {
+            SetProperty(ref _textTemplates, value);
+        }
+    }
+    private ObservableCollection<CardCheckTextTemplate>? _textTemplates;
+
+    public CardCheckTextTemplate SelectedTextTemplate
+    {
+        get => _selectedTextTemplate;
+        set
+        {
+            SetProperty(ref _selectedTextTemplate, value);
+        }
+    }
+    private CardCheckTextTemplate _selectedTextTemplate;
     #endregion
 
     #region Commands
     public ICommand DBConnectionTest => new AsyncRelayCommand(DBConnectionTest_Executed);
 
-    public ICommand NavigateNextStepCommand => new RelayCommand(NavigateNextStepCommand_Executed);
+    public ICommand CreateNewTextTemplate => new AsyncRelayCommand(CreateNewTextTemplate_Executed);
+
+    public ICommand DeleteTextTemplate => new AsyncRelayCommand(DeleteTextTemplate_Executed);
 
     public ICommand NavigateBackCommand => new RelayCommand(NavigateBackCommand_Executed);
 
@@ -252,6 +305,63 @@ public class SettingsPageViewModel : ObservableObject
 
     public ICommand SelectRFIDGearCustomProjectCommand => new AsyncRelayCommand(SelectRFIDGearCustomProjectCommand_Executed);
     #endregion
+
+    private async Task CreateNewTextTemplate_Executed()
+    {
+        try
+        {
+            if (TextTemplates.Any(x => x.TemplateTextName == "N/A") && !string.IsNullOrEmpty(TextTemplateName))
+            {
+                TextTemplates.Clear();
+            }
+
+            if (!string.IsNullOrEmpty(TextTemplateName))
+            {
+                var current = new CardCheckTextTemplate(TextTemplateName);
+                TextTemplates.Add(current);
+                TextTemplateName = string.Empty;
+
+                SelectedTextTemplate = current;
+                IsTextBoxCardCheckTextTemplateEnabled = true;
+
+                OnPropertyChanged(nameof(TextTemplates));
+            }
+        }
+        catch (Exception ex)
+        {
+            await App.MainRoot.MessageDialogAsync(
+                "Fehler",
+                string.Format("Bitte melde den folgenden Fehler an mich:\n{0}", ex.Message));
+
+            LogWriter.CreateLogEntry(ex);
+        }
+    }
+
+    private async Task DeleteTextTemplate_Executed()
+    {
+        try
+        {
+            TextTemplates?.Remove(SelectedTextTemplate);
+
+            if(TextTemplates?.FirstOrDefault() != null)
+            {
+                SelectedTextTemplate = TextTemplates?.FirstOrDefault();
+            }
+            else
+            {
+                IsTextBoxCardCheckTextTemplateEnabled = false;
+            }
+        }
+        catch (Exception ex)
+        {
+            await App.MainRoot.MessageDialogAsync(
+                "Fehler",
+                string.Format("Bitte melde den folgenden Fehler an mich:\n{0}", ex.Message));
+
+            LogWriter.CreateLogEntry(ex);
+        }
+
+    }
 
     private async Task DBConnectionTest_Executed()
     {
@@ -339,20 +449,26 @@ public class SettingsPageViewModel : ObservableObject
         }
     }
 
-    private void NavigateNextStepCommand_Executed()
-    {
-        var window = (Application.Current as App)?.Window as MainWindow ?? new MainWindow();
-        var navigation = window.Navigation;
-        var step2Page = navigation.GetNavigationViewItems(typeof(Step2Page)).First();
-        navigation.SetCurrentNavigationViewItem(step2Page);
-        step2Page.IsEnabled = true;
-    }
-
     private void NavigateBackCommand_Executed()
     {
+        try
+        {
+            using (SettingsReaderWriter settings = new SettingsReaderWriter())
+            {
+                settings.DefaultSettings.CardCheckTextTemplates = TextTemplates;
+
+                settings.SaveSettings();
+            }
+        }
+        catch 
+        { 
+        }
+
         var window = (Application.Current as App)?.Window as MainWindow ?? new MainWindow();
         var navigation = window.Navigation;
+        var t = navigation.GetCurrentNavigationViewItem();
         var homePage = navigation.GetNavigationViewItems(typeof(HomePage)).First();
+        
         navigation.SetCurrentNavigationViewItem(homePage);
         homePage.IsEnabled = true;
     }

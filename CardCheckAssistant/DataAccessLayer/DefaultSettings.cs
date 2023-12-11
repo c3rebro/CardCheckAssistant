@@ -5,10 +5,12 @@
  *
  */
 
+using CardCheckAssistant.Models;
 using CardCheckAssistant.Services;
 
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Reflection;
 using System.Xml.Serialization;
 
@@ -41,6 +43,7 @@ public class DefaultSettings : IDisposable
             _defaultTheme = "Light";
             _defaultRFIDGearExePath = "";
             _defaultProjectOutputPath = "";
+            _cardCheckTextTemplates = new ObservableCollection<CardCheckTextTemplate>(new());
 
             _selectedDBName = "db";
             _selectedDBServerName = "localhost";
@@ -52,6 +55,15 @@ public class DefaultSettings : IDisposable
     }
 
     #region Properties
+
+    /// <summary>
+    ///
+    /// </summary>
+    public ObservableCollection<CardCheckTextTemplate>? CardCheckTextTemplates
+    {
+        get; set;
+    }
+    private ObservableCollection<CardCheckTextTemplate>? _cardCheckTextTemplates;
 
     /// <summary>
     ///

@@ -156,6 +156,87 @@
                     </controls:Setting>
                 </controls:SettingsGroup>
 
+                <controls:SettingsGroup Header="Zusatztexte">
+                    <controls:SettingExpander IsExpanded="False">
+                        <controls:SettingExpander.Header>
+                            <controls:Setting Description="Die hier angelegten Zusatztexte sind im Prüfrozess über die Verknüpfung wählbar"
+                                            Header="Zusatztexte anlegen und editieren"
+                                            Icon="&#xE1A5;"
+                                            Style="{StaticResource ExpanderHeaderSettingStyle}">
+                            </controls:Setting>
+                        </controls:SettingExpander.Header>
+                        <controls:SettingExpander.Content>
+                            <StackPanel Orientation="Vertical">
+                                <StackPanel.Resources>
+                                    <Style TargetType="Grid">
+                                        <Setter Property="RowSpacing" Value="20" />
+                                        <Setter Property="ColumnSpacing" Value="10" />
+                                        <Setter Property="Padding" Value="10" />
+                                    </Style>
+                                </StackPanel.Resources>
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="auto"/>
+                                        <RowDefinition Height="auto"/>
+                                        <RowDefinition Height="150"/>
+                                        <RowDefinition Height="auto"/>
+                                    </Grid.RowDefinitions>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBox 
+                                        Grid.Row="0"
+                                        Grid.Column="1"
+                                        Grid.ColumnSpan="2"
+                                        HorizontalAlignment="Stretch" 
+                                        VerticalAlignment="Stretch" 
+                                        TextWrapping="Wrap" 
+                                        AcceptsReturn="True" 
+                                        Header="Neue Zusatztextbezeichnung" 
+                                        Text="{Binding TextTemplateName, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" 
+                                        PlaceholderText="z.B. &quot;Template_1&quot; oder &quot;CompactReaderThematik_1&quot;"/>
+                                    <ComboBox 
+                                        Grid.Row="0"
+                                        Grid.Column="0"
+                                        Header="Zusatztextauswahl" 
+                                        IsEnabled="{Binding IsTextBoxCardCheckTextTemplateEnabled, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}"
+                                        ItemsSource="{Binding TextTemplates, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" 
+                                        SelectedItem="{Binding SelectedTextTemplate, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}">
+                                        <ComboBox.ItemTemplate>
+                                            <DataTemplate>
+                                                <TextBlock ToolTipService.ToolTip="{Binding TemplateToolTip, Mode=OneWay}" Text="{Binding TemplateTextName, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}"/>
+                                            </DataTemplate>
+                                        </ComboBox.ItemTemplate>
+                                    </ComboBox>
+                                    <TextBox 
+                                        Grid.Row="1"
+                                        Grid.RowSpan="2"
+                                        Grid.Column="0"
+                                        Grid.ColumnSpan="2"
+                                        HorizontalAlignment="Stretch" 
+                                        VerticalAlignment="Stretch" 
+                                        TextWrapping="Wrap" 
+                                        AcceptsReturn="True" 
+                                        Header="Zusatztext:" 
+                                        Text="{Binding SelectedTextTemplate.TemplateTextContent, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" 
+                                        IsEnabled="{Binding IsTextBoxCardCheckTextTemplateEnabled, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}"
+                                        PlaceholderText="Textvorlage hier eingeben"/>
+
+                                    <Grid Grid.Row="3">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Button Grid.Row="0" Grid.Column="0" Content="Neuen Eintrag erstellen" Command="{Binding CreateNewTextTemplate}"/>
+                                        <Button Grid.Row="0" Grid.Column="1" Content="Aktuellen Eintrag löschen" Command="{Binding DeleteTextTemplate}"/>
+                                    </Grid>
+                                </Grid>
+                            </StackPanel>
+                        </controls:SettingExpander.Content>
+                    </controls:SettingExpander>
+                </controls:SettingsGroup>
+                
                 <controls:SettingsGroup Header="RFiDGear Optionen">
                     <controls:SettingExpander IsExpanded="False">
                         <controls:SettingExpander.Header>

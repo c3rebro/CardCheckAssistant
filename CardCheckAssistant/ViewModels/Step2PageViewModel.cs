@@ -14,7 +14,7 @@ using Microsoft.UI.Xaml.Controls;
 
 namespace CardCheckAssistant.ViewModels;
 
-public class Step2PageViewModel : ObservableObject
+public partial class Step2PageViewModel : ObservableObject
 {
     // Define the cancellation token.
     CancellationTokenSource source = new CancellationTokenSource();
@@ -22,6 +22,7 @@ public class Step2PageViewModel : ObservableObject
 
     private readonly DispatcherTimer scanChipTimer;
     private bool isCancelled;
+    private bool chipWasRemovedAndPlacedAgain;
 
 #if DEBUG
     private const string DBNAME = "OT_CardCheck_Test";
@@ -34,8 +35,11 @@ public class Step2PageViewModel : ObservableObject
     /// </summary>
     public Step2PageViewModel()
     {
+        using SettingsReaderWriter settings = new SettingsReaderWriter();
+
         token = source.Token;
         isCancelled = false;
+        chipWasRemovedAndPlacedAgain = false;
 
         NavigateNextStepCommand = new AsyncRelayCommand(NavigateNextStepCommand_Executed);
         PostPageLoadedCommand = new AsyncRelayCommand(PostPageLoadedCommand_Executed);
@@ -61,26 +65,28 @@ public class Step2PageViewModel : ObservableObject
 
         ChipCount = new ObservableCollection<string>();
 
-        CardTemplates = new List<LSMCardTemplate>()
+        LsmCardTemplates = new List<LSMCardTemplate>()
         {
-            new ("N/A", "Keine Auswahl", 0, 0),
-            new ("MCBasic (Speicherbedarf: 1 Sektor)", string.Empty, 0, 1),
-            new ("MC1200L (Speicherbedarf: 4 Sektoren)", string.Empty, 0, 4),
-            new ("MC3800L (Speicherbedarf: 11 Sektoren)", string.Empty, 0 , 11),
-            new ("MC1000L_AV (Speicherbedarf: 11 Sektoren)", string.Empty, 0 , 11),
-            new ("MC2400L_AV (Speicherbedarf: 19 Sektoren)", string.Empty, 0, 19),
-            new ("MC8000L_AV (Speicherbedarf: 43 Sektoren / 32 + 3)", string.Empty, 0, 43),
-            new ("MDBasic (Speicherbedarf: 48 + 176 = 224 Bytes)", string.Empty, 224, 0),
-            new ("MD1200L (Speicherbedarf: 192 + 160 = 352 Bytes)", string.Empty, 352, 0),
-            new ("MD3800L (Speicherbedarf: 528 + 176 = 704 Bytes)", string.Empty, 704, 0),
-            new ("MD2500L_AV (Speicherbedarf: 1024 + 160 = 1184 Bytes)", string.Empty, 1184, 0),
-            new ("MD4000L_AV (Speicherbedarf: 1600 + 160 = 1760 Bytes)", string.Empty, 1760, 0),
-            new ("MD10000L_AV (Speicherbedarf: 3048 + 184 = 3232 Bytes)", string.Empty, 1760, 0),
-            new ("MD32000L_AV (Speicherbedarf: 7000 + 168 = 7168 Bytes)", string.Empty, 7168, 0) 
+            new ("N/A", 0, 0),
+            new ("MCBasic (Speicherbedarf: 1 Sektor)", 0, 1),
+            new ("MC1200L (Speicherbedarf: 4 Sektoren)", 0, 4),
+            new ("MC3800L (Speicherbedarf: 11 Sektoren)", 0 , 11),
+            new ("MC1000L_AV (Speicherbedarf: 11 Sektoren)", 0 , 11),
+            new ("MC2400L_AV (Speicherbedarf: 19 Sektoren)", 0, 19),
+            new ("MC8000L_AV (Speicherbedarf: 43 Sektoren / 32 + 3)", 0, 43),
+            new ("MDBasic (Speicherbedarf: 48 + 176 = 224 Bytes)", 224, 0),
+            new ("MD1200L (Speicherbedarf: 192 + 160 = 352 Bytes)", 352, 0),
+            new ("MD3800L (Speicherbedarf: 528 + 176 = 704 Bytes)", 704, 0),
+            new ("MD2500L_AV (Speicherbedarf: 1024 + 160 = 1184 Bytes)", 1184, 0),
+            new ("MD4000L_AV (Speicherbedarf: 1600 + 160 = 1760 Bytes)", 1760, 0),
+            new ("MD10000L_AV (Speicherbedarf: 3048 + 184 = 3232 Bytes)", 1760, 0),
+            new ("MD32000L_AV (Speicherbedarf: 7000 + 168 = 7168 Bytes)", 7168, 0) 
         };
 
+        TextTemplates = settings.DefaultSettings.CardCheckTextTemplates ?? new ObservableCollection<CardCheckTextTemplate>(new());
+
         SelectedCustomerRequestTemplate = CustomerRequestTemplate.NA;
-        SelectedLSMCardTemplate = CardTemplates.Single(x => x.TemplateText == "N/A");
+        SelectedLSMCardTemplate = LsmCardTemplates.Single(x => x.TemplateText == "N/A");
 
         TextBoxSectorsUsed = "2,3,4,5,6,7,8,9,10,11,12";
 
@@ -91,54 +97,51 @@ public class Step2PageViewModel : ObservableObject
     /// <summary>
     /// 
     /// </summary>
-    public List<LSMCardTemplate> CardTemplates
-    {
-        get => _lsmCardTemplate;
-        set => SetProperty(ref _lsmCardTemplate, value);
-    }
-    private List<LSMCardTemplate> _lsmCardTemplate;
+    [ObservableProperty]
+    private List<LSMCardTemplate> _lsmCardTemplates;
 
     /// <summary>
     /// 
     /// </summary>
-    public string TextBoxSectorsUsed
+    [ObservableProperty]
+    private ObservableCollection<CardCheckTextTemplate> _textTemplates;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public CardCheckTextTemplate SelectedCardCheckTextTemplate
     {
-        get => _textBoxSectorsUsed;
-        set => SetProperty(ref _textBoxSectorsUsed, value);
+        get => _selectedCardCheckTextTemplate;
+        set
+        {
+            TextBoxAdditionalHints = string.Format("{0}\n\n{1}",TextBoxAdditionalHints,value?.TemplateTextContent);
+            SetProperty(ref _selectedCardCheckTextTemplate, value);
+        }
     }
+    private CardCheckTextTemplate _selectedCardCheckTextTemplate;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    [ObservableProperty]
     private string _textBoxSectorsUsed;
 
     /// <summary>
     /// 
     /// </summary>
-    public string InfoBarSupportedChipType
-    {
-        get => _infoBarSupportedChipType;
-        set => SetProperty(ref _infoBarSupportedChipType, value);
-    }
+    [ObservableProperty]
     private string _infoBarSupportedChipType;
-    
+
     /// <summary>
     /// 
     /// </summary>
-    public string InfoBarReportOpen
-    {
-        get => _infoBarReportOpen;
-        set => SetProperty(ref _infoBarReportOpen, value);
-    }
+    [ObservableProperty]
     private string _infoBarReportOpen;
 
     /// <summary>
     /// 
     /// </summary>
-    public string TextBoxAdditionalHints
-    {
-        get => _textBoxAdditionalHints;
-        set 
-        {
-            SetProperty(ref _textBoxAdditionalHints, value);
-        }
-    }
+    [ObservableProperty]
     private string _textBoxAdditionalHints;
 
     /// <summary>
@@ -164,7 +167,8 @@ public class Step2PageViewModel : ObservableObject
         set
         {
             SetProperty(ref _checkBoxChipProgrammableYes, value);
-            if(_checkBoxChipProgrammableNo)
+            NextStepCanExecute = true;
+            if (_checkBoxChipProgrammableNo)
             {
                 CheckBoxChipProgrammableNo = !value;
             }
@@ -181,6 +185,7 @@ public class Step2PageViewModel : ObservableObject
         set 
         {
             SetProperty(ref _checkBoxChipProgrammableNo, value);
+            NextStepCanExecute = true;
             if (_checkBoxChipProgrammableYes)
             {
                 CheckBoxChipProgrammableYes = !value;
@@ -198,6 +203,7 @@ public class Step2PageViewModel : ObservableObject
         set 
         {
             SetProperty(ref _checkBoxTestOnLockSuccess, value);
+            NextStepCanExecute = true;
             if (_checkBoxTestOnLockFailed)
             {
                 CheckBoxTestOnLockFailed = !value;
@@ -215,6 +221,7 @@ public class Step2PageViewModel : ObservableObject
         set 
         {
             SetProperty(ref _checkBoxTestOnLockFailed, value);
+            NextStepCanExecute = true;
             if (_checkBoxTestOnLockSuccess)
             {
                 CheckBoxTestOnLockSuccess = !value;
@@ -232,6 +239,7 @@ public class Step2PageViewModel : ObservableObject
         set 
         {
             SetProperty(ref _checkBoxTestOnLockLimitedYes, value);
+            NextStepCanExecute = true;
             if (_checkBoxTestOnLockLimitedNo)
             {
                 CheckBoxTestOnLockLimitedNo = !value;
@@ -249,6 +257,7 @@ public class Step2PageViewModel : ObservableObject
         set
         {
             SetProperty(ref _checkBoxTestOnLockLimitedNo, value);
+            NextStepCanExecute = true;
             if(_checkBoxTestOnLockLimitedYes)
             {
                 CheckBoxTestOnLockLimitedYes = !value;
@@ -260,154 +269,91 @@ public class Step2PageViewModel : ObservableObject
     /// <summary>
     /// 
     /// </summary>
-    public string TextBlockFreeMem
-    {
-        get => _textBlockFreeMem;
-        set
-        {
-            SetProperty(ref _textBlockFreeMem, value);
-        }
-    }
+    [ObservableProperty]
     private string _textBlockFreeMem;
 
     /// <summary>
     /// 
     /// </summary>
-    public LSMCardTemplate SelectedLSMCardTemplate
-    {
-        get => _selectedLSMCardTemplate;
-        set => SetProperty(ref _selectedLSMCardTemplate, value);
-    }
+    [ObservableProperty]
     private LSMCardTemplate _selectedLSMCardTemplate;
 
     /// <summary>
     /// 
     /// </summary>
-    public CustomerRequestTemplate SelectedCustomerRequestTemplate
-    {
-        get => _selectedCustomerRequestTemplate;
-        set => SetProperty(ref _selectedCustomerRequestTemplate, value);
-    }
+    [ObservableProperty]
     private CustomerRequestTemplate _selectedCustomerRequestTemplate;
 
     /// <summary>
     /// 
     /// </summary>
-    public string NextStepButtonContent
-    {
-        get => _nextStepButtonContent;
-        set => SetProperty(ref _nextStepButtonContent, value);
-    }
+    [ObservableProperty]
     private string _nextStepButtonContent;
 
     /// <summary>
     /// 
     /// </summary>
-    public bool IsSupported
-    {
-        get => _isSupported;
-        set => SetProperty(ref _isSupported, value);
-    }
+    [ObservableProperty]
     private bool _isSupported;
 
     /// <summary>
     /// 
     /// </summary>
-    public bool IsSupportedAndIsClassicChip
-    {
-        get => _isSupportedAndIsClassicChip;
-        set => SetProperty(ref _isSupportedAndIsClassicChip, value);
-    }
+    [ObservableProperty]
     private bool _isSupportedAndIsClassicChip;
 
     /// <summary>
     /// 
     /// </summary>
-    public bool ReaderHasNoChipInfoBarIsVisible
-    {
-        get => _readerHasNoChipInfoBarIsVisible;
-        set => SetProperty(ref _readerHasNoChipInfoBarIsVisible, value);
-    }
+    [ObservableProperty]
     private bool _readerHasNoChipInfoBarIsVisible;
 
     /// <summary>
     /// 
     /// </summary>
-    public bool TextBlockCheckFinishedAndResultIsNotEnoughMemoryIsVisible
-    {
-        get => _textBlockCheckFinishedAndResultIsNotEnoughMemoryIsVisible;
-        set => SetProperty(ref _textBlockCheckFinishedAndResultIsNotEnoughMemoryIsVisible, value);
-    }
+    [ObservableProperty]
     private bool _textBlockCheckFinishedAndResultIsNotEnoughMemoryIsVisible;
 
     /// <summary>
     /// 
     /// </summary>
-    public bool TextBlockCheckFinishedAndResultIsMissingPICCKeyIsVisible
-    {
-        get => _textBlockCheckFinishedAndResultIsMissingPICCKeyIsVisible;
-        set => SetProperty(ref _textBlockCheckFinishedAndResultIsMissingPICCKeyIsVisible, value);
-    }
+    [ObservableProperty]
     private bool _textBlockCheckFinishedAndResultIsMissingPICCKeyIsVisible;
 
     /// <summary>
     /// 
     /// </summary>
-    public bool TextBlockCheckFinishedAndResultIsNotSuppIsVisible
-    {
-        get => _textBlockCheckFinishedAndResultIsNotSuppIsVisible;
-        set => SetProperty(ref _textBlockCheckFinishedAndResultIsNotSuppIsVisible, value);
-    }
+    [ObservableProperty]
     private bool _textBlockCheckFinishedAndResultIsNotSuppIsVisible;
 
     /// <summary>
     /// 
     /// </summary>
-    public bool TextBlockCheckFinishedAndResultIsSuppAndProgIsVisible
-    {
-        get => _textBlockCheckFinishedAndResultIsSuppAndProgIsVisible;
-        set => SetProperty(ref _textBlockCheckFinishedAndResultIsSuppAndProgIsVisible, value);
-    }
+    [ObservableProperty]
     private bool _textBlockCheckFinishedAndResultIsSuppAndProgIsVisible;
 
     /// <summary>
     /// 
     /// </summary>
-    public bool HyperlinkButtonReportIsVisible
-    {
-        get => _hyperlinkButtonReportIsVisible;
-        set => SetProperty(ref _hyperlinkButtonReportIsVisible, value);
-    }
+    [ObservableProperty]
     private bool _hyperlinkButtonReportIsVisible;
 
     /// <summary>
     /// 
     /// </summary>
-    public bool TextBlockCheckFinishedIsVisible
-    {
-        get => _textBlockCheckFinishedIsVisible;
-        set => SetProperty(ref _textBlockCheckFinishedIsVisible, value);
-    }
+    [ObservableProperty]
     private bool _textBlockCheckFinishedIsVisible;
 
     /// <summary>
     /// 
     /// </summary>
-    public bool TextBlockCheckNotYetFinishedIsVisible
-    {
-        get => _textBlockCheckNotYetFinishedIsVisible;
-        set => SetProperty(ref _textBlockCheckNotYetFinishedIsVisible, value);
-    }
+    [ObservableProperty]
     private bool _textBlockCheckNotYetFinishedIsVisible;
-    
+
     /// <summary>
     /// 
     /// </summary>
-    public bool TextBlockCheckFinishedAndResultIsSuppOnlyIsVisible
-    {
-        get => _textBlockCheckFinishedAndResultIsSuppOnlyIsVisible;
-        set => SetProperty(ref _textBlockCheckFinishedAndResultIsSuppOnlyIsVisible, value);
-    }
+    [ObservableProperty]
     private bool _textBlockCheckFinishedAndResultIsSuppOnlyIsVisible;
 
     /// <summary>
@@ -416,7 +362,21 @@ public class Step2PageViewModel : ObservableObject
     public bool NextStepCanExecute
     {
         get => _nextStepCanExecute;
-        set => SetProperty(ref _nextStepCanExecute, value);
+        set {
+
+            if ((CheckBoxChipProgrammableNo || CheckBoxChipProgrammableYes) &&
+                (CheckBoxTestOnLockFailed || CheckBoxTestOnLockSuccess) &&
+                (CheckBoxTestOnLockLimitedNo || CheckBoxTestOnLockLimitedYes) && chipWasRemovedAndPlacedAgain)
+            {
+                SetProperty(ref _nextStepCanExecute, value);
+            }
+            else
+            {
+                SetProperty(ref _nextStepCanExecute, false);
+            }
+            
+                
+        }
     }
     private bool _nextStepCanExecute;
 
@@ -576,8 +536,8 @@ public class Step2PageViewModel : ObservableObject
                         notEnoughFreeMemory = false;
 
                         //show only usable templates on desfire
-                        CardTemplates = new List<LSMCardTemplate>(
-                            CardTemplates.Where(x => x.TemplateText.Contains("MD"))
+                        LsmCardTemplates = new List<LSMCardTemplate>(
+                            LsmCardTemplates.Where(x => x.TemplateText.Contains("MD"))
                             .Where(x => x.SizeInBytes <= amountOfFreeMemory));
                     }
                     else
@@ -596,8 +556,8 @@ public class Step2PageViewModel : ObservableObject
                     {
                         notEnoughFreeMemory = false;
 
-                        CardTemplates = new List<LSMCardTemplate>(
-                            CardTemplates.Where(x => x.TemplateText.Contains("MC"))
+                        LsmCardTemplates = new List<LSMCardTemplate>(
+                            LsmCardTemplates.Where(x => x.TemplateText.Contains("MC"))
                             .Where(x => x.SizeInFreeSectorsCount <= sectors.Length));
                     }
                     else
@@ -614,12 +574,12 @@ public class Step2PageViewModel : ObservableObject
             TextBlockCheckNotYetFinishedIsVisible = false;
             // Select "MD4000L_AV" Template... if any. OR Select "MC1000L_AV" if any.
             // Select first item if no MD4000L_AV nor MC1000L_AV is available
-            SelectedLSMCardTemplate = CardTemplates.Any(
+            SelectedLSMCardTemplate = LsmCardTemplates.Any(
                 x => x.TemplateText.Contains("MD4000L_AV")) 
-                ? CardTemplates.FirstOrDefault(y => y.TemplateText.Contains("MD4000L_AV")) ?? new LSMCardTemplate() 
-                : CardTemplates.Any(x => x.TemplateText.Contains("MC1000L_AV")) 
-                    ? CardTemplates.FirstOrDefault(y => y.TemplateText.Contains("MC1000L_AV")) ?? new LSMCardTemplate()
-                    : CardTemplates.FirstOrDefault() ?? new LSMCardTemplate();
+                ? LsmCardTemplates.FirstOrDefault(y => y.TemplateText.Contains("MD4000L_AV")) ?? new LSMCardTemplate() 
+                : LsmCardTemplates.Any(x => x.TemplateText.Contains("MC1000L_AV")) 
+                    ? LsmCardTemplates.FirstOrDefault(y => y.TemplateText.Contains("MC1000L_AV")) ?? new LSMCardTemplate()
+                    : LsmCardTemplates.FirstOrDefault() ?? new LSMCardTemplate();
 
 
             if (!supported)
@@ -687,7 +647,7 @@ public class Step2PageViewModel : ObservableObject
             NextStepCanExecute = false;
 
             await App.MainRoot.MessageDialogAsync(
-                "Fehler beim starten von RFIDGear.\n",
+                "Fehler beim starten von RFIDGear.",
                 string.Format("Bitte melde den folgenden Fehler an mich:\n{0}",e.Message));
 
             throw new InvalidOperationException(e.Message);
@@ -712,6 +672,12 @@ public class Step2PageViewModel : ObservableObject
                 while (readerService.GenericChip != null && !isCancelled)
                 {
                     await readerService.ReadChipPublic().WaitAsync(token);
+                    if(readerService.GenericChip != null && !isCancelled && chipWasRemovedAndPlacedAgain)
+                    {
+                        await Task.Delay(500).WaitAsync(token);
+                        break;
+                    }
+
                     if (readerService.GenericChip == null)
                     {
                         continue;
@@ -766,6 +732,7 @@ public class Step2PageViewModel : ObservableObject
                 }
             }
 
+            chipWasRemovedAndPlacedAgain = true;
             NextStepCanExecute = true;
 
             scanChipTimer.Start();

@@ -12,13 +12,14 @@ using System.Diagnostics;
 using System.Windows.Input;
 using System.Collections.ObjectModel;
 using Microsoft.UI.Xaml.Documents;
+using Elatec.NET;
 
 namespace CardCheckAssistant.ViewModels;
 
 /// <summary>
 /// 
 /// </summary>
-public class Step1PageViewModel : ObservableObject, IDisposable
+public partial class Step1PageViewModel : ObservableObject, IDisposable
 {
     /// <summary>
     /// 
@@ -49,6 +50,8 @@ public class Step1PageViewModel : ObservableObject, IDisposable
         scanChipTimer.Stop();
 
         WaitForNextStep = false;
+        AskClassicKeysIsVisible = false;
+        AskPICCMKIsVisible = false;
 
         Languages = new ObservableCollection<string>
         {
@@ -67,90 +70,73 @@ public class Step1PageViewModel : ObservableObject, IDisposable
     /// <summary>
     /// 
     /// </summary>
-    public ObservableCollection<string> Languages
-    {
-        get; set;
-    }
+    [ObservableProperty]
+    private ObservableCollection<string> _languages;
 
     /// <summary>
     /// 
     /// </summary>
-    public bool ReaderAccessDenied
-    {
-        get => _readerAccessDenied;
-        set => SetProperty(ref _readerAccessDenied, value);
-    }
-    private bool _readerAccessDenied;
+    [ObservableProperty]
+    private bool? _readerAccessDenied;
 
     /// <summary>
     /// 
     /// </summary>
-    public bool WaitForNextStep
-    {
-        get => waitForNextStep;
-        set => SetProperty(ref waitForNextStep, value);
-    }
-    private bool waitForNextStep;
+    [ObservableProperty]
+    private bool? _waitForNextStep;
 
     /// <summary>
     /// 
     /// </summary>
-    public bool HasTwoReadersInfoBarIsVisible
-    {
-        get => hasTwoReadersInfoBarIsVisible;
-        set => SetProperty(ref hasTwoReadersInfoBarIsVisible, value);
-    }
-    private bool hasTwoReadersInfoBarIsVisible;
+    [ObservableProperty]
+    private bool? _askPICCMKIsVisible;
+
+    [ObservableProperty]
+    private bool? _askClassicKeysIsVisible;
 
     /// <summary>
     /// 
     /// </summary>
-    public bool NoChipDetectedInfoBarIsVisible
-    {
-        get => noChipDetectedInfoBarIsVisible;
-        set => SetProperty(ref noChipDetectedInfoBarIsVisible, value);
-    }
-    private bool noChipDetectedInfoBarIsVisible;
+    [ObservableProperty]
+    private bool? _noReaderFound;
 
     /// <summary>
     /// 
     /// </summary>
-    public bool ChipDetectedInfoBarIsVisible
-    {
-        get => chipDetectedInfoBarIsVisible;
-        set => SetProperty(ref chipDetectedInfoBarIsVisible, value);
-    }
-    private bool chipDetectedInfoBarIsVisible;
+    [ObservableProperty]
+    private bool _hasTwoReadersInfoBarIsVisible;
 
     /// <summary>
     /// 
     /// </summary>
-    public string ChipInfoMessage
-    {
-        get => chipInfoMessage;
-        set => SetProperty(ref chipInfoMessage, value);
-    }
-    private string chipInfoMessage;
+    [ObservableProperty]
+    private bool _noChipDetectedInfoBarIsVisible;
 
     /// <summary>
     /// 
     /// </summary>
-    public bool NextStepCanExecute
-    {
-        get => _nextStepCanExecute;
-        set => SetProperty(ref _nextStepCanExecute, value);
-    }
+    [ObservableProperty]
+    private bool _chipDetectedInfoBarIsVisible;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    [ObservableProperty]
+    private string _chipInfoMessage;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    [ObservableProperty] 
     private bool _nextStepCanExecute;
 
     /// <summary>
     /// 
     /// </summary>
-    public bool GoBackCanExecute
-    {
-        get => _goBackCanExecute;
-        set => SetProperty(ref _goBackCanExecute, value);
-    }
+    [ObservableProperty]
     private bool _goBackCanExecute;
+
+
 
     /// <summary>
     /// 
@@ -227,13 +213,18 @@ public class Step1PageViewModel : ObservableObject, IDisposable
                 // ReadChipPublic != 0  is an Error
                 ReaderAccessDenied = await readerService.ReadChipPublic() < 0;
 
-                if (ReaderAccessDenied)
+                if (ReaderAccessDenied == true)
                 {
                     NextStepCanExecute = false;
                     scanChipTimer.Start();
                 }
 
-                else if (readerService.MoreThanOneReaderFound)
+                if (!TWN4ReaderDevice.Instance?.IsConnected == true)
+                {
+                    NoReaderFound = true;
+                }
+
+                else if (readerService?.MoreThanOneReaderFound == true)
                 {
                     HasTwoReadersInfoBarIsVisible = true;
                     ChipDetectedInfoBarIsVisible = false;
@@ -245,11 +236,23 @@ public class Step1PageViewModel : ObservableObject, IDisposable
                 else
                 {
                     HasTwoReadersInfoBarIsVisible = false;
+                    NoReaderFound = false;
 
                     if (readerService.GenericChip != null)
                     {
                         NoChipDetectedInfoBarIsVisible = false;
                         ChipDetectedInfoBarIsVisible = true;
+
+                        if(readerService.GenericChip.CardType.ToString().ToLower().Contains("mifare"))
+                        {
+                            AskClassicKeysIsVisible = true;
+                            AskPICCMKIsVisible = false;
+                        }
+                        else if (readerService.GenericChip.CardType.ToString().ToLower().Contains("desfire"))
+                        {
+                            AskClassicKeysIsVisible = false;
+                            AskPICCMKIsVisible = true;
+                        }
 
                         NextStepCanExecute = true;
 
@@ -265,6 +268,9 @@ public class Step1PageViewModel : ObservableObject, IDisposable
                     {
                         ChipDetectedInfoBarIsVisible = false;
                         NoChipDetectedInfoBarIsVisible = true;
+
+                        AskClassicKeysIsVisible = false;
+                        AskPICCMKIsVisible = false;
 
                         NextStepCanExecute  = true;
                     }
@@ -294,26 +300,49 @@ public class Step1PageViewModel : ObservableObject, IDisposable
 
             settings.ReadSettings();
 
-            FileInfo fi = new FileInfo(settings.DefaultSettings.DefaultProjectOutputPath + "\\"
+            FileInfo finalPath = new FileInfo(
+                settings.DefaultSettings.DefaultProjectOutputPath + "\\" 
+                + (settings.DefaultSettings.CreateSubdirectoryIsEnabled == true ? CheckProcessService.CurrentCardCheckProcess.JobNr + "\\" : string.Empty)
+                + CheckProcessService.CurrentCardCheckProcess.JobNr + "-" 
+                + CheckProcessService.CurrentCardCheckProcess.ChipNumber 
+                + "_final.pdf");
+
+            FileInfo semiFinalPath = new FileInfo(
+                settings.DefaultSettings.DefaultProjectOutputPath + "\\"
+                + (settings.DefaultSettings.CreateSubdirectoryIsEnabled == true ? CheckProcessService.CurrentCardCheckProcess.JobNr + "\\" : string.Empty) 
+                + CheckProcessService.CurrentCardCheckProcess.JobNr + "-" 
+                + CheckProcessService.CurrentCardCheckProcess.ChipNumber 
+                + "_.pdf");
+
+            FileInfo preFinalPath = new FileInfo(
+                settings.DefaultSettings.DefaultProjectOutputPath + "\\"
                 + (settings.DefaultSettings.CreateSubdirectoryIsEnabled == true ? CheckProcessService.CurrentCardCheckProcess.JobNr + "\\" : string.Empty)
                 + CheckProcessService.CurrentCardCheckProcess.JobNr + "-"
                 + CheckProcessService.CurrentCardCheckProcess.ChipNumber
                 + ".pdf");
 
-            if (fi.Exists)
+            if (preFinalPath.Exists || semiFinalPath.Exists || finalPath.Exists)
             {
                 if (await App.MainRoot.ConfirmationDialogAsync(
                         "Warnung",
-                        string.Format("Die Datei die erstellt werden soll existiert bereits.\n" +
+                        string.Format("Die Datei, die erstellt werden soll, existiert bereits.\n" +
                         "Soll sie überschrieben werden?"),
                         "Ja", "Nein") == true)
                 {
                     try
                     {
                         // try to overwrite the file
-                        FileStream fs = fi.Open(FileMode.Create);
+                        FileStream fs = preFinalPath.Open(FileMode.Create);
                         fs.Close();
-                        fi.Delete();
+                        preFinalPath.Delete();
+
+                        fs = semiFinalPath.Open(FileMode.Create);
+                        fs.Close();
+                        semiFinalPath.Delete();
+
+                        fs = finalPath.Open(FileMode.Create);
+                        fs.Close();
+                        finalPath.Delete();
                     }
                     catch (IOException ioex)
                     {

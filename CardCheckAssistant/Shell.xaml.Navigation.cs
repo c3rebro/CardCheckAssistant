@@ -9,7 +9,7 @@ using CardCheckAssistant.ViewModels;
 
 namespace CardCheckAssistant;
 
-public sealed partial class Shell : INavigation
+public partial class Shell : INavigation
 {
     private void NavigationView_Loaded(object sender, RoutedEventArgs e)
     {
@@ -60,6 +60,15 @@ public sealed partial class Shell : INavigation
 
         if (Type.GetType(item.Tag.ToString()) != null)
         {
+            if (item.Tag.ToString() != typeof(HomePage).ToString())
+            {
+                IsSettingsPageEnabled(false);
+            }
+            else
+            {
+                IsSettingsPageEnabled(true);
+            }
+
             ContentFrame.Navigate(Type.GetType(item.Tag.ToString()), item.Content);
             NavigationView.Header = item.Content;
             NavigationView.SelectedItem = item;
@@ -69,6 +78,11 @@ public sealed partial class Shell : INavigation
     public NavigationViewItem GetCurrentNavigationViewItem()
     {
         return NavigationView.SelectedItem as NavigationViewItem;
+    }
+
+    public void IsSettingsPageEnabled(bool enabled)
+    {
+        NavigationView.IsSettingsVisible = enabled;
     }
 
     public void SetCurrentPage(Type type)

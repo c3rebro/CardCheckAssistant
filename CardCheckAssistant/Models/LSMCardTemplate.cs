@@ -19,7 +19,6 @@ public class LSMCardTemplate
     public LSMCardTemplate()
     {
         TemplateText = "";
-        TemplateToolTip = "";
     }
 
     /// <summary>
@@ -27,10 +26,9 @@ public class LSMCardTemplate
     /// </summary>
     /// <param name="templateText"></param>
     /// <param name="templateToolTip"></param>
-    public LSMCardTemplate(string templateText, string templateToolTip)
+    public LSMCardTemplate(string templateText)
     {
         TemplateText = templateText;
-        TemplateToolTip = templateToolTip;
     }
 
     /// <summary>
@@ -40,10 +38,9 @@ public class LSMCardTemplate
     /// <param name="templateToolTip"></param>
     /// <param name="freeBytes"></param>
     /// <param name="freeSectors"></param>
-    public LSMCardTemplate(string templateText, string templateToolTip, int freeBytes, int freeSectors)
+    public LSMCardTemplate(string templateText, int freeBytes, int freeSectors)
     {
         TemplateText = templateText;
-        TemplateToolTip = templateToolTip;
         SizeInBytes = freeBytes;
         SizeInFreeSectorsCount = freeSectors;
     }
@@ -77,7 +74,7 @@ public class LSMCardTemplate
     /// </summary>
     public string TemplateToolTip
     {
-        get; set;
+        get { return TemplateText; }
     }
 }
 

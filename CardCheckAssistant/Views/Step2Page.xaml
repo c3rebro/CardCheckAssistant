@@ -21,7 +21,8 @@
         <viewmodels:Step2PageViewModel />
     </Page.DataContext>
 
-    <Grid Margin="0 0 0 8">
+    <Grid 
+        Margin="10 0 10 10">
         <!-- Beef -->
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="250"/>
@@ -216,7 +217,7 @@
             Visibility="{Binding TextBlockCheckFinishedAndResultIsSuppAndProgIsVisible, Converter={StaticResource boolean}, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
             Text="Verwendetes Template:"/>
 
-        <!--ItemsSource="{ctWinUI:EnumValues Type=models:LSMCardTemplate}" -->
+        <!--ItemsSource="{ctWinUI:EnumValues Type=models:LsmCardTemplates}" -->
         <ComboBox
             Margin="8,8,8,8" 
             Grid.ColumnSpan="2" 
@@ -224,7 +225,7 @@
             Grid.Row="1" 
             VerticalAlignment="Center" 
             HorizontalAlignment="Stretch"
-            ItemsSource="{Binding CardTemplates}"
+            ItemsSource="{Binding LsmCardTemplates}"
             ToolTipService.ToolTip="Auswahl:\nTemplate entsprechend der verfügbaren Sektoren.\n\nHinweis zur Sektorengröße: Die Größe der Sektoren ab Sektor 32 (nur Classic 4K) entsprechen jeweils 4 Sektoren niedriger Nummer.\\Beispiel: Für das Template MC1200L (benötigt 4 Sektoren) ist sowohl auf Sektor 3,4,5,6 als auch auf dem Sektor 32 genug Platz."
             Visibility="{Binding TextBlockCheckFinishedAndResultIsSuppAndProgIsVisible, Converter={StaticResource boolean}, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
             SelectedItem="{Binding SelectedLSMCardTemplate, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}">
@@ -291,13 +292,40 @@
             TextWrapping="Wrap"
             Grid.ColumnSpan="3"
             Grid.Column="3"
-            Grid.Row="4"
-            Grid.RowSpan="6"
+            Grid.Row="5"
+            Grid.RowSpan="5"
             VerticalAlignment="Stretch" 
             AcceptsReturn="True"
             Text="{Binding TextBoxAdditionalHints, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
             Visibility="{Binding CheckBoxTestOnLockLimitedYes, Converter={StaticResource boolean}, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}">
         </TextBox>
+
+        <TextBlock
+            Margin="8,0,0,8" 
+            Grid.Column="3" 
+            Grid.Row="4" 
+            VerticalAlignment="Center" 
+            Visibility="{Binding CheckBoxTestOnLockLimitedYes, Converter={StaticResource boolean}, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+            Text="Zusatztextauswahl:"/>
+        
+        <ComboBox
+            Margin="8,0,8,8" 
+            Grid.ColumnSpan="1" 
+            Grid.Column="4" 
+            Grid.Row="4" 
+            VerticalAlignment="Center" 
+            HorizontalAlignment="Stretch"
+            ItemsSource="{Binding TextTemplates}"
+            PlaceholderText="Zusatztext auswählen..."
+            ToolTipService.ToolTip=""
+            Visibility="{Binding CheckBoxTestOnLockLimitedYes, Converter={StaticResource boolean}, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+            SelectedItem="{Binding SelectedCardCheckTextTemplate, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}">
+            <ComboBox.ItemTemplate>
+                <DataTemplate>
+                    <TextBlock ToolTipService.ToolTip="{Binding TemplateToolTip, Mode=OneTime}" Text="{Binding TemplateTextName}"/>
+                </DataTemplate>
+            </ComboBox.ItemTemplate>
+        </ComboBox>
         
         <CheckBox
             Margin="8,0,0,8" 
@@ -442,7 +470,7 @@
             Grid.Column="0" 
             Grid.Row="9"
             Visibility="{Binding TextBlockCheckFinishedAndResultIsSuppOnlyIsVisible, Converter={StaticResource boolean}, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}">
-            <Run Text="Die Kartenprüfung für diesen Chip ist damit Abgeschlossen. Ein Klick auf &quot;Fertigstellen&quot; führt wieder zur Startseite."></Run>
+            <Run Text="Die Kartenprüfung für diesen Chip ist damit Abgeschlossen. Ein Klick auf &quot;Fertigstellen&quot; Lädt den Bericht in die Datenbank hoch und führt im Anschluss wieder zur Startseite."></Run>
         </TextBlock>
         
         <TextBlock 
@@ -452,7 +480,7 @@
             Grid.Column="0" 
             Grid.Row="9"
             Visibility="{Binding TextBlockCheckFinishedIsVisible, Converter={StaticResource boolean}, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}">
-            <Run Text="Die Kartenprüfung für diesen Chip ist damit Abgeschlossen. Ein Klick auf &quot;Fertigstellen&quot; führt wieder zur Startseite."></Run>
+            <Run Text="Die Kartenprüfung für diesen Chip ist damit Abgeschlossen. Ein Klick auf &quot;Fertigstellen&quot; Lädt den Bericht in die Datenbank hoch und führt im Anschluss wieder zur Startseite."></Run>
         </TextBlock>
 
         <InfoBar
@@ -495,7 +523,7 @@
             Title="Hinweis:"
             Severity="Informational"
             Visibility="{Binding ReaderHasNoChipInfoBarIsVisible, Converter={StaticResource boolean}, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
-            Message="Um mit dem Auslesen der verbleibenden Speicherplatzes nach Programmierung Forfahren zu können, wird der soeben getestete Chip benötigt."
+            Message="Um mit dem Auslesen des verbleibenden Speicherplatzes nach Programmierung Forfahren zu können, wird: &#xa;&#x2022; der soeben getestete Chip benötigt sowie&#xa;&#x2022; das Ergebnis der Programmierung in der LSM (Checkboxen oben)"
             />
         
         <Button 

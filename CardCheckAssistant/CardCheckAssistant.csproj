@@ -16,7 +16,7 @@
     <AppxPackageSigningEnabled>True</AppxPackageSigningEnabled>
     <PackageCertificateThumbprint>17473166A3D5B4DDF7BEC28DA037402A7C1601F8</PackageCertificateThumbprint>
     <AppxPackageSigningTimestampDigestAlgorithm>SHA256</AppxPackageSigningTimestampDigestAlgorithm>
-    <AppxAutoIncrementPackageRevision>True</AppxAutoIncrementPackageRevision>
+    <AppxAutoIncrementPackageRevision>False</AppxAutoIncrementPackageRevision>
     <AppxSymbolPackageEnabled>True</AppxSymbolPackageEnabled>
     <GenerateTestArtifacts>True</GenerateTestArtifacts>
     <AppxBundle>Never</AppxBundle>
@@ -27,7 +27,26 @@
     <ApplicationIcon>Assets\AppIco.ico</ApplicationIcon>
     <PackageIcon>Assets\StoreLogo.scale-400.png</PackageIcon>
     <RepositoryUrl>https://github.com/c3rebro/CardCheckAssistant</RepositoryUrl>
-    <PackageReleaseNotes>Version 1.0.32
+    <PackageReleaseNotes>Version 1.0.34
+-----------------------------------------------------------------
+Benutzeroberfläche:
++ Neue Einstellung: Zusatztexte können hinterlegt und in Schritt 2 ausgewählt werden.
++ Die Einstellungen können ab sofort nur noch aus der Startseite heraus aufgerufen werden. Nicht mehr während der laufenden Prüfung.
++ Änderung Text "Fertigstellen"
+
+Version 1.0.33
+-----------------------------------------------------------------
+Hintergrundfunktionen:
++ Änderung: Text "Sprachauswahl" ist keine Frage mehr. Anpassung der Funktion erfolgt später: Die Sprache soll zwar änderbar sein, jedoch erfolgt die Einstellung aus Omni heraus.
++ Änderung: Es werden Standardmäßig nur Aufträge mit dem Status "In Bearbeitung" angezeigt und nicht mehr alle. Dies kann über die Filterfunktion geändert werden.
++ Neue Funktion: Neue Einstellung: "Temporäre Berichtdateien löschen". Löscht alle editierbaren *_.pdf und *.pdf Dateien aus den Berichtverzeichnissen und behält nur die *_final.pdf* Dateien nach Fertigtellung. Ein Abschalten belässt diese Berichtdateien im Pfad.
++ Neue Funktion: Wird der Typ Unterstützt, werden nur diejenigen Templates für die LSM/AXM angeboten, welche auch Programmeirbar sind. MD4000L_AV bzw. MC1000L_AV ist Standard sofern möglich.
++ Fehlerbehebung: InfoBar: "geöffneten Bericht wieder schließen" und Fortschrittverhinderung wenn dieser noch geöffnet ist. Dies verhindert ein "Steckenbleiben" wegen einer Zugriffsverweigerung auf die geöffnete PDF Datei.
++ Fehlerbehebung: "Schritt-Icon's" im linken Menüband (Häuschen-Icon und 1,2,3 - Icons) sind nicht mehr zur Navigation vorgesehen. Dies verhindert ein Springen zwischen Schritten wenn der Kartenleser noch beschäftigt ist.
++ Fehlerbehebung: Solange ein Bericht geöffnet ist, kann nicht von Schritt 2 auf Schritt 3 gewechselt werden. 
++ Fehlerbehebung: Ein Prüfvorgang kann nicht gestartet werden, wenn der Bericht bereits exitiert und nicht überschrieben werden kann.
+
+Version 1.0.32
 -----------------------------------------------------------------
 Hintergrundfunktionen:
 + Fehlerbehebung: Endlos - "ToastMessage" bei neuen Aufträgen...
@@ -68,7 +87,7 @@ v1.0.20
     <Title>CardCheckAssistant</Title>
     <Company>Messgeraetetechnik Hansen</Company>
     <Authors>Steven Hansen</Authors>
-    <AssemblyVersion>1.0.33</AssemblyVersion>
+    <AssemblyVersion>1.0.34</AssemblyVersion>
     <FileVersion>$(AssemblyVersion)</FileVersion>
     <AppInstallerUri>https://github.com/c3rebro/CardCheckAssistant/releases/latest/download</AppInstallerUri>
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -195,6 +214,7 @@ v1.0.20
     <None Remove="CardCheckAssistant_TemporaryKey.pfx" />
     <None Remove="MainWindow.xaml" />
     <None Remove="Shell.xaml" />
+    <None Remove="StevenHansen.pfx" />
     <None Remove="Views\AboutPage.xaml" />
     <None Remove="Views\CustomContentDialog.xaml" />
     <None Remove="Views\HomePage.xaml" />
@@ -210,15 +230,16 @@ v1.0.20
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.0.0" />
+    <PackageReference Include="CommunityToolkit.Common" Version="7.1.2" />
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.2" />
     <PackageReference Include="CommunityToolkit.WinUI" Version="7.1.2" />
     <PackageReference Include="CommunityToolkit.WinUI.UI" Version="7.1.2" />
     <PackageReference Include="CommunityToolkit.WinUI.UI.Behaviors" Version="7.1.2" />
     <PackageReference Include="CommunityToolkit.WinUI.UI.Controls.DataGrid" Version="7.1.2" />
     <PackageReference Include="GemBox.Pdf" Version="17.0.1300" />
-    <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.2.230118.102" />
-    <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.22621.755" />
-    <PackageReference Include="System.Data.SQLite" Version="1.0.117" />
+    <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.4.231115000" />
+    <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.22621.2428" />
+    <PackageReference Include="System.Data.SQLite" Version="1.0.118" />
     <PackageReference Include="System.IO.Ports" Version="7.0.0" />
     <PackageReference Include="System.Windows.Extensions" Version="7.0.0" />
     <PackageReference Include="WinUICommunity.Common" Version="3.0.4" />
@@ -854,9 +875,6 @@ v1.0.20
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Properties\PublishProfiles\" />
-  </ItemGroup>
-  <ItemGroup>
     <PRIResource Remove="Strings\de-DE\Resources.resw" />
   </ItemGroup>
   <ItemGroup>
@@ -873,5 +891,8 @@ v1.0.20
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Properties\PublishProfiles\" />
   </ItemGroup>
 </Project>

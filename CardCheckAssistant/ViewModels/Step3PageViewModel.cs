@@ -267,13 +267,13 @@ public class Step3PageViewModel : ObservableObject
                 HyperlinkButtonReportIsVisible = true;
 
                 await App.MainRoot.MessageDialogAsync(
-                    "Prüfung erfolgreich abgeschlossen.\n",
+                    "Prüfung erfolgreich abgeschlossen.",
                     string.Format("Die Prüfung ist hiermit abgeschlossen.\n" +
                     "Bitte nimm die Karte vom Leser und bereite sie für den Rückversand vor.\n" +
                     "\n" +
                     "Hinweis: \n" +
-                    "Mit dem Klick auf \"Fertigstellen\" wird das Ergebnis des Berichtes\n" +
-                    "Automatisch an den im Auftrag hinterlegten Ansprechpartner versendet."),
+                    "Mit dem Klick auf \"Fertigstellen\" wird das Ergebnis der Prüfung\n" +
+                    "Automatisch in die Datenbank hochgeladen und an OMNI übertragen."),
                     "OK");
 
                 TextBlockCheckFinishedAndResultIsSuppAndProgIsVisible = true;
