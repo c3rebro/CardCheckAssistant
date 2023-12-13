@@ -114,6 +114,9 @@ public partial class SettingsPageViewModel : ObservableRecipient
     }
     private bool? _cardCheckUseSQLLite;
 
+    /// <summary>
+    /// 
+    /// </summary>
     public string SelectedDBServerName
     {
         get => _selectedDBServerName ?? string.Empty;
@@ -127,6 +130,9 @@ public partial class SettingsPageViewModel : ObservableRecipient
     }
     private string? _selectedDBServerName;
 
+    /// <summary>
+    /// 
+    /// </summary>
     public string SelectedDBServerPort
     {
         get => _selectedDBServerPort ?? string.Empty;
@@ -140,6 +146,9 @@ public partial class SettingsPageViewModel : ObservableRecipient
     }
     private string? _selectedDBServerPort;
 
+    /// <summary>
+    /// 
+    /// </summary>
     public string SelectedDBName
     {
         get => _selectedDBName ?? string.Empty;
@@ -153,6 +162,9 @@ public partial class SettingsPageViewModel : ObservableRecipient
     }
     private string? _selectedDBName;
 
+    /// <summary>
+    /// 
+    /// </summary>
     public string SelectedDBUsername
     {
         get => _selectedDBUsername ?? string.Empty;
@@ -166,6 +178,9 @@ public partial class SettingsPageViewModel : ObservableRecipient
     }
     private string? _selectedDBUsername;
 
+    /// <summary>
+    /// 
+    /// </summary>
     public string SelectedDBUserPwd
     {
         get => _selectedDBUserPwd ?? string.Empty;
@@ -180,6 +195,9 @@ public partial class SettingsPageViewModel : ObservableRecipient
     }
     private string? _selectedDBUserPwd;
 
+    /// <summary>
+    /// 
+    /// </summary>
     public string SelectedCustomProjectFolder
     {
         get => _selectedCustomProjectFolder ?? string.Empty;
@@ -193,6 +211,9 @@ public partial class SettingsPageViewModel : ObservableRecipient
     }
     private string? _selectedCustomProjectFolder;
 
+    /// <summary>
+    /// 
+    /// </summary>
     public string SelectedProjectFolder
     {
         get => _selectedProjectFolder ?? string.Empty;
@@ -206,6 +227,9 @@ public partial class SettingsPageViewModel : ObservableRecipient
     }
     private string? _selectedProjectFolder;
 
+    /// <summary>
+    /// 
+    /// </summary>
     public string SelectedRFIDGearPath
     {
         get => _selectedRFIDGearPath ?? string.Empty;
@@ -219,6 +243,9 @@ public partial class SettingsPageViewModel : ObservableRecipient
     }
     private string? _selectedRFIDGearPath;
 
+    /// <summary>
+    /// 
+    /// </summary>
     public bool RemoveTemporaryReportsIsEnabled
     {
         get => _removeTemporaryReportsIsEnabled ?? false;
@@ -233,6 +260,9 @@ public partial class SettingsPageViewModel : ObservableRecipient
     }
     private bool? _removeTemporaryReportsIsEnabled;
 
+    /// <summary>
+    /// 
+    /// </summary>
     public bool CreateSubdirectoryIsEnabled
     {
         get => _createSubdirectoryIsEnabled;
@@ -247,9 +277,15 @@ public partial class SettingsPageViewModel : ObservableRecipient
     }
     private bool _createSubdirectoryIsEnabled;
 
+    /// <summary>
+    /// 
+    /// </summary>
     [ObservableProperty]
     private bool _isTextBoxCardCheckTextTemplateEnabled;
 
+    /// <summary>
+    /// 
+    /// </summary>
     public bool RFiDGearIsAutoRunEnabled
     {
         get => _rFiDGearIsAutoRunEnabled ?? false;
@@ -264,44 +300,28 @@ public partial class SettingsPageViewModel : ObservableRecipient
     }
     private bool? _rFiDGearIsAutoRunEnabled;
 
-    public ObservableCollection<string> ThemeSource
-    {
-        get => _themeSource;
-        set
-        {
-            SetProperty(ref _themeSource, value);
-        }
-    }
-    private ObservableCollection<string>? _themeSource;
+    /// <summary>
+    /// 
+    /// </summary>
+    [ObservableProperty]
+    private ObservableCollection<string> _themeSource;
 
-    public string TextTemplateName
-    {
-        get => _textTemplateName;
-        set
-        {
-            SetProperty(ref _textTemplateName, value);
-        }
-    }
+    /// <summary>
+    /// 
+    /// </summary>
+    [ObservableProperty]
     private string _textTemplateName;
 
-    public ObservableCollection<CardCheckTextTemplate> TextTemplates
-    {
-        get => _textTemplates;
-        set
-        {
-            SetProperty(ref _textTemplates, value);
-        }
-    }
-    private ObservableCollection<CardCheckTextTemplate>? _textTemplates;
+    /// <summary>
+    /// 
+    /// </summary>
+    [ObservableProperty]
+    private ObservableCollection<CardCheckTextTemplate> _textTemplates;
 
-    public CardCheckTextTemplate SelectedTextTemplate
-    {
-        get => _selectedTextTemplate;
-        set
-        {
-            SetProperty(ref _selectedTextTemplate, value);
-        }
-    }
+    /// <summary>
+    /// 
+    /// </summary>
+    [ObservableProperty]
     private CardCheckTextTemplate _selectedTextTemplate;
     #endregion
 

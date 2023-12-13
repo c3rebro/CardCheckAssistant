@@ -39,7 +39,6 @@ public partial class HomePageViewModel : ObservableRecipient, INavigationAware
     /// </summary>
     public HomePageViewModel()
     {
-        //await _localSettingsService.SaveSettingAsync(SettingsKey, theme.ToString());
         DataGridItemCollection = new ObservableCollection<CardCheckProcess>();
         SetSortAscending = false;
 
