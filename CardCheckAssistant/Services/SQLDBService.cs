@@ -141,12 +141,12 @@ public class SQLDBService : IDisposable
 
             if (!TableExists(sqlConnection, OMNIDBNAME, OMNITABLENAME))
             {
-                //await CreateTableAsync(sqlConnection, OMNITABLENAME, OMNITABLECOLUMNS);
+
             }
 
             if (!TableExists(sqlConnection, OMNIDBNAME, RFIDTABLENAME))
             {
-                //await CreateTableAsync(sqlConnection, RFIDTABLENAME, RFIDTABLECOLUMNS);
+
             }
         }
         catch (Exception ex)

@@ -247,6 +247,9 @@ public partial class HomePageViewModel : ObservableRecipient, INavigationAware
                                                                       orderby item.ID descending
                                                                       select item);
                 }
+
+            default:
+                break;
         }
         return new ObservableCollection<CardCheckProcess>();
     }
