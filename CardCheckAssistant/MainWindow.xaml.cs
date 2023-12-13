@@ -1,55 +1,37 @@
-using System.Runtime.InteropServices;
-using CardCheckAssistant.Services;
-using Microsoft.UI.Xaml;
+﻿using CardCheckAssistant.Helpers;
+
+using Windows.UI.ViewManagement;
 
 namespace CardCheckAssistant;
 
-public sealed partial class MainWindow : Window
+public sealed partial class MainWindow : WindowEx
 {
-    public INavigation Navigation => RootShell;
-    internal static MainWindow Instance { get; private set; }
- 
+    private Microsoft.UI.Dispatching.DispatcherQueue dispatcherQueue;
+
+    private UISettings settings;
+
     public MainWindow()
     {
         InitializeComponent();
 
-        ExtendsContentIntoTitleBar = true;
-        SetTitleBar(AppTitleBar);
+        AppWindow.SetIcon(Path.Combine(AppContext.BaseDirectory, "Assets/WindowIcon.ico"));
+        Content = null;
+        Title = "AppDisplayName".GetLocalized();
+
+        // Theme change code picked from https://github.com/microsoft/WinUI-Gallery/pull/1239
+        dispatcherQueue = Microsoft.UI.Dispatching.DispatcherQueue.GetForCurrentThread();
+        settings = new UISettings();
+        settings.ColorValuesChanged += Settings_ColorValuesChanged; // cannot use FrameworkElement.ActualThemeChanged event
     }
 
-    public string SelectedTheme
+    // this handles updating the caption button colors correctly when indows system theme is changed
+    // while the app is open
+    private void Settings_ColorValuesChanged(UISettings sender, object args)
     {
-        get => _selectedTheme;
-        set
+        // This calls comes off-thread, hence we will need to dispatch it to current app's thread
+        dispatcherQueue.TryEnqueue(() =>
         {
-            if (value == "Light")
-            {
-                RootShell.RequestedTheme = ElementTheme.Light;
-                RootShell.UseLayoutRounding= true;
-                AppTitleBar.RequestedTheme = ElementTheme.Light;
-                AppTitleBar.UseLayoutRounding= true;
-                AppTitleBar.CornerRadius = new Microsoft.UI.Xaml.CornerRadius(20);
-            }
-            else if (value == "Dark")
-            {
-                RootShell.RequestedTheme = ElementTheme.Dark;
-                AppTitleBar.RequestedTheme = ElementTheme.Dark;
-            }
-            _selectedTheme = value;
-        }
+            TitleBarHelper.ApplySystemThemeToCaptionButtons();
+        });
     }
-    private string _selectedTheme;
-
-
-    [StructLayout(LayoutKind.Sequential)]
-    struct MARGINS
-    {
-        public int cxLeftWidth;
-        public int cxRightWidth;
-        public int cyTopHeight;
-        public int cyBottomHeight;
-    }
-
-    [DllImport("dwmapi")]
-    static extern IntPtr DwmExtendFrameIntoClientArea(IntPtr hWnd, ref MARGINS pMarInset);
 }

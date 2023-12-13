@@ -31,6 +31,8 @@ namespace CardCheckAssistant.Services
                 Dialogs.Clear();
             }
 
+            Dialogs ??= new ObservableCollection<ContentDialog>();
+
             var dialog = new ContentDialog
             {
                 Name = name,
@@ -40,11 +42,6 @@ namespace CardCheckAssistant.Services
                 XamlRoot = element.XamlRoot,
                 RequestedTheme = element.ActualTheme
             };
-            
-            if (Dialogs == null)
-            {
-                Dialogs = new ObservableCollection<ContentDialog>();            
-            }
 
             Dialogs.Add(dialog);
 
@@ -65,6 +62,8 @@ namespace CardCheckAssistant.Services
 
         public static async Task<bool?> ConfirmationDialogAsync(this FrameworkElement element, string title, string message, string yesButtonText, string noButtonText, string cancelButtonText)
         {
+            Dialogs ??= new ObservableCollection<ContentDialog> { };
+
             var dialog = new ContentDialog
             {
                 Title = title,
@@ -75,11 +74,6 @@ namespace CardCheckAssistant.Services
                 XamlRoot = element.XamlRoot,
                 RequestedTheme = element.ActualTheme
             };
-
-            if (Dialogs == null)
-            {
-                Dialogs = new ObservableCollection<ContentDialog>();
-            }
 
             Dialogs.Add(dialog);
 
@@ -107,6 +101,8 @@ namespace CardCheckAssistant.Services
 
         public static async Task<string> InputStringDialogAsync(this FrameworkElement element, string title, string defaultText, string okButtonText, string cancelButtonText)
         {
+            Dialogs ??= new ObservableCollection<ContentDialog>();
+
             var inputTextBox = new TextBox
             {
                 AcceptsReturn = false,
@@ -124,8 +120,6 @@ namespace CardCheckAssistant.Services
                 XamlRoot = element.XamlRoot,
                 RequestedTheme = element.ActualTheme
             };
-
-            Dialogs ??= new ObservableCollection<ContentDialog>();
 
             Dialogs.Add(dialog);
 
@@ -148,6 +142,8 @@ namespace CardCheckAssistant.Services
 
         public static async Task<string> InputTextDialogAsync(this FrameworkElement element, string title, string defaultText)
         {
+            Dialogs ??= new ObservableCollection<ContentDialog>();
+
             var inputTextBox = new TextBox
             {
                 AcceptsReturn = true,
@@ -166,8 +162,6 @@ namespace CardCheckAssistant.Services
                 XamlRoot = element.XamlRoot,
                 RequestedTheme = element.ActualTheme
             };
-
-            Dialogs ??= new ObservableCollection<ContentDialog>();
 
             Dialogs.Add(dialog);
 

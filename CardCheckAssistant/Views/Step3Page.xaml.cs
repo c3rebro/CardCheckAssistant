@@ -1,23 +1,25 @@
-﻿using Microsoft.UI.Xaml;
+﻿using CardCheckAssistant.ViewModels;
+
 using Microsoft.UI.Xaml.Controls;
-using System.Diagnostics;
-using CardCheckAssistant.ViewModels;
-using CardCheckAssistant.Services;
+using Microsoft.UI.Xaml;
 
 namespace CardCheckAssistant.Views;
 
 public sealed partial class Step3Page : Page
 {
-    public Step3Page()
+    public Step3PageViewModel ViewModel
     {
-        InitializeComponent();
+        get;
     }
 
-    public Step3PageViewModel ViewModel => DataContext as Step3PageViewModel;
+    public Step3Page()
+    {
+        ViewModel = App.GetService<Step3PageViewModel>();
+        InitializeComponent();
+    }
 
     private void Page_Loaded(object sender, RoutedEventArgs e)
     {
         ViewModel.PostPageLoadedCommand.Execute(null);
     }
-
 }

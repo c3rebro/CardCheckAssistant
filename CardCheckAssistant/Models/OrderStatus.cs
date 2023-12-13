@@ -7,7 +7,7 @@ using System.ComponentModel;
 
 namespace CardCheckAssistant.Models;
 
-[TypeConverter(typeof(EnumDescriptionTypeConverter))]
+//[TypeConverter(typeof(EnumDescriptionTypeConverter))]
 public enum OrderStatus
 {
     [Description("NotDefined")]

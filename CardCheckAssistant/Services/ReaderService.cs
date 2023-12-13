@@ -1,4 +1,4 @@
-﻿using CardCheckAssistant.Model;
+﻿using CardCheckAssistant.Models;
 
 using Elatec.NET;
 using Elatec.NET.Model;

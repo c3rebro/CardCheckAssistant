@@ -1,10 +1,10 @@
-{
-  "profiles": {
-    "CardCheckAssistant (Package)": {
-      "commandName": "Project"
-    },
-    "CardCheckAssistant (Unpackaged)": {
-      "commandName": "Project"
+﻿{
+    "profiles": {
+      "CardCheckAssistant (Package)": {
+        "commandName": "MsixPackage"
+      },
+      "CardCheckAssistant (Unpackaged)": {
+        "commandName": "Project"
+      }
     }
-  }
 }

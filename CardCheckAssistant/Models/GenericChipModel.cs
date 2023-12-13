@@ -1,7 +1,7 @@
 ﻿using Elatec.NET;
 using System.Collections.Generic;
 
-namespace CardCheckAssistant.Model
+namespace CardCheckAssistant.Models
 {
     /// <summary>
     /// Description of chipUid.

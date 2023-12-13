@@ -1,4 +1,5 @@
-﻿using CardCheckAssistant.DataAccessLayer;
+﻿using CardCheckAssistant.Contracts.Services;
+using CardCheckAssistant.DataAccessLayer;
 using CardCheckAssistant.Services;
 
 using Log4CSharp;

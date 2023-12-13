@@ -1,12 +1,17 @@
-﻿<Page x:Class="CardCheckAssistant.Views.SettingsPage"
-      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-      xmlns:viewmodels="using:CardCheckAssistant.ViewModels"
-      xmlns:controls="using:WinUICommunity.SettingsUI.Controls">
+﻿<Page
+    x:Class="CardCheckAssistant.Views.SettingsPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:helpers="using:CardCheckAssistant.Helpers"
+    xmlns:xaml="using:Microsoft.UI.Xaml"
+    xmlns:controls="using:CommunityToolkit.WinUI.Controls"
+    mc:Ignorable="d">
+    <Page.Resources>
+        <helpers:EnumToBooleanConverter x:Key="EnumToBooleanConverter" />
+    </Page.Resources>
 
-    <Page.DataContext>
-        <viewmodels:SettingsPageViewModel />
-    </Page.DataContext>
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
@@ -16,339 +21,343 @@
         </Grid.RowDefinitions>
 
         <Button 
-            Grid.Row="0"
-            Grid.Column="0"
-            Height="36"
-            Margin="8,-60,20,8"
-            Padding="30,8"
-            VerticalAlignment="Top"
-            HorizontalAlignment="Right"
-            IsEnabled="{Binding GoBackCanExecute, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
-            Opacity="1"
-            Command="{Binding NavigateBackCommand}"
-            Content="Zurück und Speichern">
+        Grid.Row="0"
+        Grid.Column="0"
+        Height="36"
+        Margin="8,-60,20,8"
+        Padding="30,8"
+        VerticalAlignment="Top"
+        HorizontalAlignment="Right"
+        Opacity="1"
+        Command="{x:Bind ViewModel.NavigateBackCommand}"
+        Content="Zurück und Speichern">
             <Button.Resources>
-                <ResourceDictionary>
+                <ResourceDictionary x:Key="SettingsPageRessources">
                     <SolidColorBrush x:Key="ButtonBorderBrushDisabled" Opacity="0.6" Color="#BFBFBF" />
                     <SolidColorBrush x:Key="ButtonBackground" Color="IndianRed" />
                     <SolidColorBrush x:Key="ButtonBackgroundDisabled" Color="#73726e" />
                     <SolidColorBrush x:Key="ButtonBackgroundPressed" Color="#f5fa75" />
                     <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="#c4c736" />
-
                     <SolidColorBrush x:Key="ButtonForegroundDisabled" Color="DarkGray" />
-
                     <SolidColorBrush x:Key="ButtonForeground" Color="Black" />
                     <SolidColorBrush x:Key="ButtonForegroundPointerOver" Color="White" />
-
-                    <!--<SolidColorBrush x:Key="ButtonBorderBrush" Color="White" />-->
-                    <!--<SolidColorBrush x:Key="ButtonBorderBrushPointerOver" Color="White" />-->
-                    <!--<SolidColorBrush x:Key="ButtonBorderBrushFocused" Color="#ECF542" />-->
-                    <!--<SolidColorBrush x:Key="ButtonBorderBrushPressed" Color="#ECF542" />-->
-
                     <SolidColorBrush x:Key="ButtonBackgroundFocused" Color="LightGreen" />
-
                 </ResourceDictionary>
+                <!--<SolidColorBrush x:Key="ButtonBorderBrush" Color="White" />-->
+                <!--<SolidColorBrush x:Key="ButtonBorderBrushPointerOver" Color="White" />-->
+                <!--<SolidColorBrush x:Key="ButtonBorderBrushFocused" Color="#ECF542" />-->
+                <!--<SolidColorBrush x:Key="ButtonBorderBrushPressed" Color="#ECF542" />-->
             </Button.Resources>
         </Button>
 
         <ScrollViewer
-            Margin="0,0,0,20">
+        Margin="0,0,0,20">
             <StackPanel 
-                Margin="30,30"
-                Padding="0,30"
-                Orientation="Vertical" 
-                VerticalAlignment="Stretch"
-                HorizontalAlignment="Center">
-                <controls:SettingsGroup Header="Pfadeinstellungen">
-                    <controls:SettingExpander IsExpanded="False">
-                        <controls:SettingExpander.Header>
-                            <controls:Setting Description="Pfad zu RFIDGear Prüfprogramm-EXE auswählen"
-                                            Header="RFiDGear Pfad"
-                                            Icon="&#xE1A5;"
-                                            Style="{StaticResource ExpanderHeaderSettingStyle}">
-                                <controls:Setting.ActionContent>
-                                    <Button Content="Datei öffnen..." Command="{Binding SelectRFIDGearExeCommand}"/>
-                                </controls:Setting.ActionContent>
-                            </controls:Setting>
-                        </controls:SettingExpander.Header>
-                        <controls:SettingExpander.Content>
-                            <StackPanel Orientation="Vertical">
-                                <InfoBar Title="Bitte halte deine RFiDGear Version immer aktuell."
-                                        IsClosable="False"
-                                        IsOpen="True"
-                                        Severity="Informational" />
-                                <controls:Setting Header="Pfad zu RFiDGear:"
-                                                Content="{Binding SelectedRFIDGearPath, UpdateSourceTrigger=PropertyChanged}"
-                                                Style="{StaticResource ExpanderContentSettingStyle}">
-                                </controls:Setting>
-                            </StackPanel>
-                        </controls:SettingExpander.Content>
-                    </controls:SettingExpander>
+            Margin="0,10"
+            Orientation="Vertical" 
+            VerticalAlignment="Stretch"
+            HorizontalAlignment="Center">
+                <TextBlock Margin="8,8,0,8" Text="RFiDGear Optionen" Style="{ThemeResource SubtitleTextBlockStyle }" />
+                <controls:SettingsExpander
+                    IsExpanded="False"
+                    Header="Pfadeinstellungen"
+                    Description="Hier wird RFiDGear konfiguriert...">
+                    <controls:SettingsExpander.HeaderIcon>
+                        <FontIcon Glyph="&#xE1A5;"/>
+                    </controls:SettingsExpander.HeaderIcon>
+                    <controls:SettingsExpander.Items>
+                        <controls:SettingsExpander 
+                            Header="RFiDGear Programmdatei"
+                            Description="Bitte die RFiDGear.exe auswählen...">
+                            <controls:SettingsExpander.HeaderIcon>
+                                <FontIcon Glyph="&#xE1A5;"/>
+                            </controls:SettingsExpander.HeaderIcon>
+                            <controls:SettingsExpander.Content>
+                                <Button Content="Datei öffnen..." Command="{x:Bind ViewModel.SelectRFIDGearExeCommand}"/>
+                            </controls:SettingsExpander.Content>
+                            <controls:SettingsExpander.Items>
+                                <controls:SettingsCard  
+                                    Header="Pfad zu RFiDGear:">
+                                    <controls:SettingsCard.Content>
+                                        <TextBlock Text="{x:Bind ViewModel.SelectedRFIDGearPath}" />
+                                    </controls:SettingsCard.Content>
+                                </controls:SettingsCard>
+                            </controls:SettingsExpander.Items>
+                        </controls:SettingsExpander>
 
-                    <controls:SettingExpander IsExpanded="False">
-                        <controls:SettingExpander.Header>
-                            <controls:Setting Description="Projektpfad für Kartenprüfungen"
-                                            Header="Projekt-Pfad"
-                                            Icon="&#xE197;"
-                                            Style="{StaticResource ExpanderHeaderSettingStyle}">
-                                <controls:Setting.ActionContent>
-                                    <Button Content="Ordner wählen..." Command="{Binding SelectProjectFolderCommand}"/>
-                                </controls:Setting.ActionContent>
-                            </controls:Setting>
-                        </controls:SettingExpander.Header>
-                        <controls:SettingExpander.Content>
-                            <StackPanel Orientation="Vertical">
-                                <InfoBar Title="Unterhalb dieses Ordners werden alle Prüfberichte angelegt."
-                                        IsClosable="False"
-                                        IsOpen="True"
-                                        Severity="Informational" />
-                                <controls:Setting Header="Standard Projektpfad:"
-                                                Content="{Binding SelectedProjectFolder, UpdateSourceTrigger=PropertyChanged}"
-                                                Style="{StaticResource ExpanderContentSettingStyle}">
-                                </controls:Setting>
-                            </StackPanel>
-                        </controls:SettingExpander.Content>
-                    </controls:SettingExpander>
+                        <controls:SettingsExpander 
+                            Header="Projekt-Pfad"
+                            Description="Projektpfad für Kartenprüfungen">
+                            <controls:SettingsExpander.HeaderIcon>
+                                <FontIcon Glyph="&#xE1A5;"/>
+                            </controls:SettingsExpander.HeaderIcon>
+                            <controls:SettingsExpander.Content>
+                                <Button Content="Ordner wählen..." Command="{x:Bind ViewModel.SelectProjectFolderCommand}"/>
+                            </controls:SettingsExpander.Content>
+                            <controls:SettingsExpander.Items>
+                                <controls:SettingsCard  
+                                    Header="Pfad zu RFiDGear:" Description="Unterhalb dieses Ordners werden alle Prüfberichte angelegt.">
+                                    <controls:SettingsCard.Content>
+                                        <TextBlock Text="{x:Bind ViewModel.SelectedProjectFolder}" />
+                                    </controls:SettingsCard.Content>
+                                </controls:SettingsCard>
+                            </controls:SettingsExpander.Items>
+                        </controls:SettingsExpander>
 
-                    <controls:SettingExpander IsExpanded="False">
-                        <controls:SettingExpander.Header>
-                            <controls:Setting Description="Pfad zu RFIDGear Speicherauslese-Projektdatei"
-                                            Header="RFiDGear *.rfprj Datei"
-                                            Icon="&#xE1A5;"
-                                            Style="{StaticResource ExpanderHeaderSettingStyle}">
-                                <controls:Setting.ActionContent>
-                                    <Button Content="Datei öffnen..." Command="{Binding SelectRFIDGearCustomProjectCommand}"/>
-                                </controls:Setting.ActionContent>
-                            </controls:Setting>
-                        </controls:SettingExpander.Header>
-                        <controls:SettingExpander.Content>
-                            <StackPanel Orientation="Vertical">
-                                <InfoBar Title="Mit dieser Projektdatei wird der freie Speicher ausgelesen."
-                                        IsClosable="False"
-                                        IsOpen="True"
-                                        Severity="Informational" />
-                                <controls:Setting Header="Pfad zu RFiDGear:"
-                                                Content="{Binding SelectedCustomProjectFolder, UpdateSourceTrigger=PropertyChanged}"
-                                                Style="{StaticResource ExpanderContentSettingStyle}">
-                                </controls:Setting>
-                            </StackPanel>
-                        </controls:SettingExpander.Content>
-                    </controls:SettingExpander>
-                    <controls:Setting 
+                        <controls:SettingsExpander 
+                            Header="RFiDGear *.rfprj Datei"
+                            Description="Pfad zu RFIDGear Speicherauslese-Projektdatei">
+                            <controls:SettingsExpander.HeaderIcon>
+                                <FontIcon Glyph="&#xE1A5;"/>
+                            </controls:SettingsExpander.HeaderIcon>
+                            <controls:SettingsExpander.Content>
+                                <Button Content="Datei öffnen..." Command="{x:Bind ViewModel.SelectRFIDGearCustomProjectCommand}"/>
+                            </controls:SettingsExpander.Content>
+                            <controls:SettingsExpander.Items>
+                                <controls:SettingsCard  
+                                    Header="Pfad zu RFiDGear:" Description="Mit dieser Projektdatei wird der freie Speicher ausgelesen.">
+                                    <controls:SettingsCard.Content>
+                                        <TextBlock Text="{x:Bind ViewModel.SelectedCustomProjectFolder}" />
+                                    </controls:SettingsCard.Content>
+                                </controls:SettingsCard>
+                            </controls:SettingsExpander.Items>
+                        </controls:SettingsExpander>
+    
+    
+                        
+                    </controls:SettingsExpander.Items>
+                    
+                </controls:SettingsExpander>
+
+                <controls:SettingsExpander 
                     Header="Unterverzeichnis für Berichte anlegen"
                     Description="Legt für jede Jobnummer ein extra Unterverzeichnis unterhalb von &quot;Projekt-Pfad&quot; an"
-                    Icon="&#xE1A5;"
                     HorizontalContentAlignment="Stretch"
                     HorizontalAlignment="Stretch">
-                        <controls:Setting.ActionContent>
-                            <ToggleSwitch IsOn="{Binding CreateSubdirectoryIsEnabled, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
-                        </controls:Setting.ActionContent>
-                    </controls:Setting>
-                    <controls:Setting 
+                    <controls:SettingsExpander.HeaderIcon>
+                        <FontIcon Glyph="&#xE1A5;"/>
+                    </controls:SettingsExpander.HeaderIcon>                    
+                    <controls:SettingsExpander.Content>
+                        <ToggleSwitch IsOn="{x:Bind ViewModel.CreateSubdirectoryIsEnabled, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
+                    </controls:SettingsExpander.Content>
+                </controls:SettingsExpander>
+
+                <controls:SettingsExpander 
+                    IsExpanded="False" 
+                    Description="Prüfvorgang automatisch Starten"                    
+                    Header="RFiDGear Automatisch starten">
+                    <controls:SettingsExpander.HeaderIcon>
+                        <FontIcon Glyph="&#xE1A5;"/>
+                    </controls:SettingsExpander.HeaderIcon>
+                    <controls:SettingsExpander.Content>
+                        <ToggleSwitch IsOn="{Binding RFiDGearIsAutoRunEnabled, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
+                    </controls:SettingsExpander.Content>
+                </controls:SettingsExpander>
+                
+                <controls:SettingsExpander 
                     Header="Temporäre PDF-Berichte nach der Fertigstellung löschen"
                     Description="Entfernt alle *_.pdf und *.pdf Dateien aus dem Bericht-Ablageverzeichnis und behält nur die *_final.pdf Dateien bei."
-                    Icon="&#xE1A5;"
                     HorizontalContentAlignment="Stretch"
                     HorizontalAlignment="Stretch">
-                        <controls:Setting.ActionContent>
-                            <ToggleSwitch IsOn="{Binding RemoveTemporaryReportsIsEnabled, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
-                        </controls:Setting.ActionContent>
-                    </controls:Setting>
-                </controls:SettingsGroup>
+                    <controls:SettingsExpander.HeaderIcon>
+                        <FontIcon Glyph="&#xE1A5;"/>
+                    </controls:SettingsExpander.HeaderIcon>
+                    <controls:SettingsExpander.Content>
+                        <ToggleSwitch IsOn="{x:Bind ViewModel.RemoveTemporaryReportsIsEnabled, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
+                    </controls:SettingsExpander.Content>
+                </controls:SettingsExpander>
 
-                <controls:SettingsGroup Header="Zusatztexte">
-                    <controls:SettingExpander IsExpanded="False">
-                        <controls:SettingExpander.Header>
-                            <controls:Setting Description="Die hier angelegten Zusatztexte sind im Prüfrozess über die Verknüpfung wählbar"
-                                            Header="Zusatztexte anlegen und editieren"
-                                            Icon="&#xE1A5;"
-                                            Style="{StaticResource ExpanderHeaderSettingStyle}">
-                            </controls:Setting>
-                        </controls:SettingExpander.Header>
-                        <controls:SettingExpander.Content>
-                            <StackPanel Orientation="Vertical">
-                                <StackPanel.Resources>
-                                    <Style TargetType="Grid">
-                                        <Setter Property="RowSpacing" Value="20" />
-                                        <Setter Property="ColumnSpacing" Value="10" />
-                                        <Setter Property="Padding" Value="10" />
-                                    </Style>
-                                </StackPanel.Resources>
-                                <Grid>
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="auto"/>
-                                        <RowDefinition Height="auto"/>
-                                        <RowDefinition Height="150"/>
-                                        <RowDefinition Height="auto"/>
-                                    </Grid.RowDefinitions>
+                <controls:SettingsExpander 
+                    IsExpanded="False" 
+                    Description="Die hier angelegten Zusatztexte sind im Prüfrozess über die Verknüpfung wählbar"
+                    Header="Zusatztexte anlegen und editieren">
+                    <controls:SettingsExpander.HeaderIcon>
+                        <FontIcon Glyph="&#xE1A5;"/>
+                    </controls:SettingsExpander.HeaderIcon>
+                    <controls:SettingsExpander.Items>
+                        <StackPanel Orientation="Vertical">
+                            <StackPanel.Resources>
+                                <Style TargetType="Grid">
+                                    <Setter Property="RowSpacing" Value="20" />
+                                    <Setter Property="ColumnSpacing" Value="10" />
+                                    <Setter Property="Padding" Value="10" />
+                                </Style>
+                            </StackPanel.Resources>
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="auto"/>
+                                    <RowDefinition Height="auto"/>
+                                    <RowDefinition Height="150"/>
+                                    <RowDefinition Height="auto"/>
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBox 
+                                    Grid.Row="0"
+                                    Grid.Column="1"
+                                    Grid.ColumnSpan="2"
+                                    HorizontalAlignment="Stretch" 
+                                    VerticalAlignment="Stretch" 
+                                    TextWrapping="Wrap" 
+                                    AcceptsReturn="True" 
+                                    Header="Neue Zusatztextbezeichnung" 
+                                    Text="{x:Bind ViewModel.TextTemplateName, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" 
+                                    PlaceholderText="z.B. &quot;Template_1&quot; oder &quot;CompactReaderThematik_1&quot;"/>
+                                <ComboBox 
+                                    Grid.Row="0"
+                                    Grid.Column="0"
+                                    Header="Zusatztextauswahl" 
+                                    IsEnabled="{x:Bind ViewModel.IsTextBoxCardCheckTextTemplateEnabled}"
+                                    ItemsSource="{x:Bind ViewModel.TextTemplates, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" 
+                                    SelectedItem="{x:Bind ViewModel.SelectedTextTemplate, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}">
+                                    <ComboBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <TextBlock ToolTipService.ToolTip="{Binding TemplateToolTip, Mode=OneWay}" Text="{Binding TemplateTextName, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}"/>
+                                        </DataTemplate>
+                                    </ComboBox.ItemTemplate>
+                                </ComboBox>
+                                <TextBox 
+                                    Grid.Row="1"
+                                    Grid.RowSpan="2"
+                                    Grid.Column="0"
+                                    Grid.ColumnSpan="2"
+                                    HorizontalAlignment="Stretch" 
+                                    VerticalAlignment="Stretch" 
+                                    TextWrapping="Wrap" 
+                                    AcceptsReturn="True" 
+                                    Header="Zusatztext:" 
+                                    Text="{x:Bind ViewModel.SelectedTextTemplate.TemplateTextContent, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" 
+                                    IsEnabled="{x:Bind ViewModel.IsTextBoxCardCheckTextTemplateEnabled, Mode=OneWay}"
+                                    PlaceholderText="Textvorlage hier eingeben"/>
+
+                                <Grid Grid.Row="3">
                                     <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="auto"/>
+                                        <ColumnDefinition Width="*"/>
                                         <ColumnDefinition Width="*"/>
                                     </Grid.ColumnDefinitions>
-                                    <TextBox 
-                                        Grid.Row="0"
-                                        Grid.Column="1"
-                                        Grid.ColumnSpan="2"
-                                        HorizontalAlignment="Stretch" 
-                                        VerticalAlignment="Stretch" 
-                                        TextWrapping="Wrap" 
-                                        AcceptsReturn="True" 
-                                        Header="Neue Zusatztextbezeichnung" 
-                                        Text="{Binding TextTemplateName, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" 
-                                        PlaceholderText="z.B. &quot;Template_1&quot; oder &quot;CompactReaderThematik_1&quot;"/>
-                                    <ComboBox 
-                                        Grid.Row="0"
-                                        Grid.Column="0"
-                                        Header="Zusatztextauswahl" 
-                                        IsEnabled="{Binding IsTextBoxCardCheckTextTemplateEnabled, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}"
-                                        ItemsSource="{Binding TextTemplates, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" 
-                                        SelectedItem="{Binding SelectedTextTemplate, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}">
-                                        <ComboBox.ItemTemplate>
-                                            <DataTemplate>
-                                                <TextBlock ToolTipService.ToolTip="{Binding TemplateToolTip, Mode=OneWay}" Text="{Binding TemplateTextName, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}"/>
-                                            </DataTemplate>
-                                        </ComboBox.ItemTemplate>
-                                    </ComboBox>
-                                    <TextBox 
-                                        Grid.Row="1"
-                                        Grid.RowSpan="2"
-                                        Grid.Column="0"
-                                        Grid.ColumnSpan="2"
-                                        HorizontalAlignment="Stretch" 
-                                        VerticalAlignment="Stretch" 
-                                        TextWrapping="Wrap" 
-                                        AcceptsReturn="True" 
-                                        Header="Zusatztext:" 
-                                        Text="{Binding SelectedTextTemplate.TemplateTextContent, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" 
-                                        IsEnabled="{Binding IsTextBoxCardCheckTextTemplateEnabled, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}"
-                                        PlaceholderText="Textvorlage hier eingeben"/>
-
-                                    <Grid Grid.Row="3">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*"/>
-                                            <ColumnDefinition Width="*"/>
-                                        </Grid.ColumnDefinitions>
-                                        <Button Grid.Row="0" Grid.Column="0" Content="Neuen Eintrag erstellen" Command="{Binding CreateNewTextTemplate}"/>
-                                        <Button Grid.Row="0" Grid.Column="1" Content="Aktuellen Eintrag löschen" Command="{Binding DeleteTextTemplate}"/>
-                                    </Grid>
+                                    <Button Grid.Row="0" Grid.Column="0" Content="Neuen Eintrag erstellen" Command="{x:Bind ViewModel.CreateNewTextTemplate}"/>
+                                    <Button Grid.Row="0" Grid.Column="1" Content="Aktuellen Eintrag löschen" Command="{x:Bind ViewModel.DeleteTextTemplate}"/>
                                 </Grid>
+                            </Grid>
+                        </StackPanel>
+                    </controls:SettingsExpander.Items>
+                </controls:SettingsExpander>
+
+                <TextBlock Margin="8,8,0,8" Text="Datenbank Optionen" Style="{ThemeResource SubtitleTextBlockStyle }" />
+                <controls:SettingsExpander 
+                    IsExpanded="False"
+                    Description="Verbindungseinstellungen"
+                    Header="Datenbankeinstellungen">
+                    <controls:SettingsExpander.HeaderIcon>
+                        <FontIcon Glyph="&#xE1A5;"/>
+                    </controls:SettingsExpander.HeaderIcon>
+                    <controls:SettingsExpander.Items>
+                        <StackPanel Orientation="Vertical">
+                            <StackPanel.Resources>
+                                <Style TargetType="Grid">
+                                    <Setter Property="RowSpacing" Value="20" />
+                                    <Setter Property="ColumnSpacing" Value="10" />
+                                    <Setter Property="Padding" Value="10" />
+                                </Style>
+                            </StackPanel.Resources>
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="auto"/>
+                                    <RowDefinition Height="auto"/>
+                                    <RowDefinition Height="auto"/>
+                                    <RowDefinition Height="auto"/>
+                                    <RowDefinition Height="auto"/>
+                                    <RowDefinition Height="auto"/>
+                                    <RowDefinition Height="auto"/>
+                                    <RowDefinition Height="auto"/>
+                                    <!-- <RowDefinition Height="Auto" /> -->
+                                    <!-- <RowDefinition Height="Auto" /> -->
+                                </Grid.RowDefinitions>
+                                <ToggleSwitch Grid.Row="0" x:Name="useSQL" Header="MS-SQL verwenden?" HorizontalAlignment="Left" IsOn="{x:Bind ViewModel.CardCheckUseSQLLite, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
+                                <TextBox Grid.Row="1" Visibility="{Binding IsOn, ElementName=useSQL}" Header="Servername:" Text="{x:Bind ViewModel.SelectedDBServerName, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" PlaceholderText="localhost"/>
+                                <TextBox Grid.Row="2" Visibility="{Binding IsOn, ElementName=useSQL}" Header="Port:" Text="{x:Bind ViewModel.SelectedDBServerPort, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" PlaceholderText="3306"/>
+                                <TextBox Grid.Row="3" Visibility="{Binding IsOn, ElementName=useSQL}" Header="DB Name:" Text="{x:Bind ViewModel.SelectedDBName, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" PlaceholderText="database"/>
+                                <ToggleSwitch Grid.Row="4" x:Name="useWinLoginToggleSwitch" HorizontalAlignment="Left" Header="Verwende Benutzername/Passwort statt Windows-Login" IsOn="{Binding UseWindowsAuthForDB}" />
+                                <TextBox Grid.Row="5" Visibility="{Binding IsOn, ElementName=useWinLoginToggleSwitch}" Header="Datenbankbenutzer:" Text="{x:Bind ViewModel.SelectedDBUsername, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" PlaceholderText="johndoe"/>
+                                <PasswordBox Grid.Row="6" Visibility="{Binding IsOn, ElementName=useWinLoginToggleSwitch}" Header="Benutzerpasswort:" Password="{x:Bind ViewModel.SelectedDBUserPwd, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"  PlaceholderText="12345678"/>
+                                <Button Grid.Row="7" Content="Verbindung Testen" Command="{x:Bind ViewModel.DBConnectionTest}"/>
+                                <Grid Grid.Row="1">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="2*"/>
+                                    </Grid.ColumnDefinitions>
+                                </Grid>
+                            </Grid>
+                        </StackPanel>
+                    </controls:SettingsExpander.Items>
+                </controls:SettingsExpander>
+
+                <TextBlock Margin="8,8,0,8" x:Uid="Settings_Personalization" Style="{ThemeResource SubtitleTextBlockStyle}" />
+                <controls:SettingsExpander 
+                    IsExpanded="False"
+                    Description="Ansichteinstellungen"
+                    Header="Thema">
+                    <controls:SettingsExpander.HeaderIcon>
+                        <FontIcon Glyph="&#xE1A5;"/>
+                    </controls:SettingsExpander.HeaderIcon>
+                    <controls:SettingsExpander.Items>
+                        <StackPanel Orientation="Vertical">
+                            <StackPanel Margin="8,8,0,8">
+                                <RadioButton
+                                    x:Uid="Settings_Theme_Light"
+                                    Command="{x:Bind ViewModel.SwitchThemeCommand}"
+                                    IsChecked="{x:Bind ViewModel.ElementTheme, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Light, Mode=OneWay}"
+                                    FontSize="15"
+                                    GroupName="AppTheme">
+                                    <RadioButton.CommandParameter>
+                                        <xaml:ElementTheme>Light</xaml:ElementTheme>
+                                    </RadioButton.CommandParameter>
+                                </RadioButton>
+                                <RadioButton
+                                    x:Uid="Settings_Theme_Dark"
+                                    Command="{x:Bind ViewModel.SwitchThemeCommand}"
+                                    IsChecked="{x:Bind ViewModel.ElementTheme, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Dark, Mode=OneWay}"
+                                    FontSize="15"
+                                    GroupName="AppTheme">
+                                    <RadioButton.CommandParameter>
+                                        <xaml:ElementTheme>Dark</xaml:ElementTheme>
+                                    </RadioButton.CommandParameter>
+                                </RadioButton>
+                                <RadioButton
+                                    x:Uid="Settings_Theme_Default"
+                                    Command="{x:Bind ViewModel.SwitchThemeCommand}"
+                                    IsChecked="{x:Bind ViewModel.ElementTheme, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Default, Mode=OneWay}"
+                                    FontSize="15"
+                                    GroupName="AppTheme">
+                                    <RadioButton.CommandParameter>
+                                        <xaml:ElementTheme>Default</xaml:ElementTheme>
+                                    </RadioButton.CommandParameter>
+                                </RadioButton>
                             </StackPanel>
-                        </controls:SettingExpander.Content>
-                    </controls:SettingExpander>
-                </controls:SettingsGroup>
+                        </StackPanel>
+                    </controls:SettingsExpander.Items>
+                </controls:SettingsExpander>
                 
-                <controls:SettingsGroup Header="RFiDGear Optionen">
-                    <controls:SettingExpander IsExpanded="False">
-                        <controls:SettingExpander.Header>
-                            <controls:Setting Description="Prüfvorgang automatisch Starten"
-                                            Header="RFiDGear Automatisch starten"
-                                            Icon="&#xE1A5;"
-                                            Style="{StaticResource ExpanderHeaderSettingStyle}">
-                                <controls:Setting.ActionContent>
-                                    <ToggleSwitch IsOn="{Binding RFiDGearIsAutoRunEnabled, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
-                                </controls:Setting.ActionContent>
-                            </controls:Setting>
-                        </controls:SettingExpander.Header>
-                        <controls:SettingExpander.Content>
-                            <StackPanel Orientation="Vertical">
-                                <InfoBar Title="Bitte halte deine RFiDGear Version immer aktuell."
-                                        IsClosable="False"
-                                        IsOpen="True"
-                                        Severity="Informational" />
-                                <controls:Setting Header="Pfad zu RFiDGear:"
-                                                Content="{Binding SelectedRFIDGearPath, UpdateSourceTrigger=PropertyChanged}"
-                                                Style="{StaticResource ExpanderContentSettingStyle}">
-                                </controls:Setting>
+                <StackPanel
+                    Margin="8,8,0,8"
+                    x:Name="ContentArea">
 
-                                <controls:Setting Header="Pfad zu RFiDGear Speicherauslese-Projektdatei:"
-                                                Content="{Binding SelectedCustomProjectFolder, UpdateSourceTrigger=PropertyChanged}"
-                                                Style="{StaticResource ExpanderContentSettingStyle}">
-                                </controls:Setting>
-                            </StackPanel>
-                        </controls:SettingExpander.Content>
-                    </controls:SettingExpander>
-                </controls:SettingsGroup>
+                    <TextBlock x:Uid="Settings_About" Style="{ThemeResource SubtitleTextBlockStyle}" />
 
-                <controls:SettingsGroup Header="OMNI Anbindung">
-                    <controls:SettingExpander IsExpanded="False">
-                        <controls:SettingExpander.Header>
-                            <controls:Setting Description="Servername"
-                                            Header="Datenbankoptionen"
-                                            Icon="&#xE1A5;"
-                                            Style="{StaticResource ExpanderHeaderSettingStyle}">
-                            </controls:Setting>
-                        </controls:SettingExpander.Header>
-                        <controls:SettingExpander.Content>
-                            <StackPanel Orientation="Vertical">
-                                <StackPanel.Resources>
-                                    <Style TargetType="Grid">
-                                        <Setter Property="RowSpacing" Value="20" />
-                                        <Setter Property="ColumnSpacing" Value="10" />
-                                        <Setter Property="Padding" Value="10" />
-                                    </Style>
-                                </StackPanel.Resources>
-                                <Grid>
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="auto"/>
-                                        <RowDefinition Height="auto"/>
-                                        <RowDefinition Height="auto"/>
-                                        <RowDefinition Height="auto"/>
-                                        <RowDefinition Height="auto"/>
-                                        <RowDefinition Height="auto"/>
-                                        <RowDefinition Height="auto"/>
-                                        <RowDefinition Height="auto"/>
-                                        <!-- <RowDefinition Height="Auto" /> -->
-                                        <!-- <RowDefinition Height="Auto" /> -->
-                                    </Grid.RowDefinitions>
-                                    <ToggleSwitch Grid.Row="0" x:Name="useSQL" Header="MS-SQL statt SQL-Lite verwenden?" HorizontalAlignment="Left" FlowDirection="RightToLeft" IsOn="{Binding CardCheckUseSQLLite, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
-                                    <TextBox Grid.Row="1" Visibility="{Binding IsOn, ElementName=useSQL}" Header="Servername:" Text="{Binding SelectedDBServerName, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" PlaceholderText="localhost"/>
-                                    <TextBox Grid.Row="2" Visibility="{Binding IsOn, ElementName=useSQL}" Header="Port:" Text="{Binding SelectedDBServerPort, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" PlaceholderText="3306"/>
-                                    <TextBox Grid.Row="3" Visibility="{Binding IsOn, ElementName=useSQL}" Header="DB Name:" Text="{Binding SelectedDBName, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" PlaceholderText="database"/>
-                                    <ToggleSwitch Grid.Row="4" x:Name="useWinLoginToggleSwitch" HorizontalAlignment="Left" FlowDirection="RightToLeft" Header="Verwende Benutzername/Passwort statt Windows-Login" IsOn="{Binding UseWindowsAuthForDB}" />
-                                    <TextBox Grid.Row="5" Visibility="{Binding IsOn, ElementName=useWinLoginToggleSwitch}" Header="Datenbankbenutzer:" Text="{Binding SelectedDBUsername, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" PlaceholderText="johndoe"/>
-                                    <PasswordBox Grid.Row="6" Visibility="{Binding IsOn, ElementName=useWinLoginToggleSwitch}" Header="Benutzerpasswort:" Password="{Binding SelectedDBUserPwd, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"  PlaceholderText="12345678"/>
-                                    <Button Grid.Row="7" Content="Verbindung Testen" Command="{Binding DBConnectionTest}"/>
-                                    <Grid Grid.Row="1">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*"/>
-                                            <ColumnDefinition Width="2*"/>
-                                        </Grid.ColumnDefinitions>
-                                    </Grid>
-                                </Grid>
-                            </StackPanel>
-                        </controls:SettingExpander.Content>
-                    </controls:SettingExpander>
-                </controls:SettingsGroup>
+                    <StackPanel Margin="{StaticResource XSmallTopMargin}">
+                        <TextBlock Text="{x:Bind ViewModel.VersionDescription, Mode=OneWay}" Style="{ThemeResource BodyTextBlockStyle}" />
 
-                <controls:SettingsGroup Header="Appearance &amp; behavior">
-                    <controls:Setting Header="Choose a mode"
-                                    Icon="&#xE771;">
-                        <controls:Setting.Description>
-                            <HyperlinkButton Content="Windows color settings" />
-                        </controls:Setting.Description>
-                        <controls:Setting.ActionContent>
-                            <ComboBox MinWidth="{StaticResource SettingActionControlMinWidth}"
-                                    ItemsSource="{Binding ThemeSource}"
-                                    SelectedItem="{Binding SelectedTheme, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}">
-                            </ComboBox>
-                        </controls:Setting.ActionContent>
-                    </controls:Setting>
-                </controls:SettingsGroup>
-                <CheckBox Name="check"
-                        Margin="56,0,40,16"
-                        AutomationProperties.Name="{Binding ElementName=IncludeInGlobalResultTitle, Path=Text}">
-                    <StackPanel Orientation="Vertical">
-                        <TextBlock x:Name="IncludeInGlobalResultTitle"
-                                Margin="0,10,0,0"
-                                Text="Include in global result" />
-                        <controls:IsEnabledTextBlock FontSize="{StaticResource SecondaryTextFontSize}"
-                                                    IsEnabled="{Binding ElementName=check, Path=IsChecked}"
-                                                    Text="Show results on queries without direct activation command" />
+                        <TextBlock
+                    x:Uid="Settings_AboutDescription"
+                    Margin="{StaticResource XSmallTopMargin}"
+                    Style="{ThemeResource BodyTextBlockStyle}" />
+                        <HyperlinkButton x:Uid="SettingsPage_PrivacyTermsLink" Margin="{StaticResource SettingsPageHyperlinkButtonMargin}" />
                     </StackPanel>
-                </CheckBox>
+                </StackPanel>
             </StackPanel>
         </ScrollViewer>
 
     </Grid>
-    
 </Page>

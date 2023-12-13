@@ -11,10 +11,7 @@ using System.Windows.Input;
 
 namespace CardCheckAssistant.ViewModels;
 
-/// <summary>
-/// 
-/// </summary>
-public class AboutPageViewModel : ObservableObject
+public partial class AboutPageViewModel : ObservableRecipient
 {
     /// <summary>
     /// 
@@ -23,6 +20,8 @@ public class AboutPageViewModel : ObservableObject
     {
         NextStepCanExecute = false;
         GoBackCanExecute = true;
+
+        (App.MainRoot.XamlRoot.Content as ShellPage)?.ViewModel.NavigationService.GoBack();
     }
 
     #region ObservableObjects
@@ -96,11 +95,7 @@ public class AboutPageViewModel : ObservableObject
     {
         try
         {
-            var window = (Application.Current as App)?.Window as MainWindow ?? new MainWindow();
-            var navigation = window.Navigation;
-            var step2Page = navigation.GetNavigationViewItems(typeof(Step2Page)).First();
-            navigation.SetCurrentNavigationViewItem(step2Page);
-            step2Page.IsEnabled = true;
+            (App.MainRoot.XamlRoot.Content as ShellPage)?.ViewModel.NavigationService.NavigateTo(typeof(HomePageViewModel).FullName ?? "");
         }
 
         catch (Exception e)
@@ -114,9 +109,6 @@ public class AboutPageViewModel : ObservableObject
     /// </summary>
     private void NavigateBackCommand_Executed()
     {
-        var window = (Application.Current as App)?.Window as MainWindow ?? new MainWindow();
-        var navigation = window.Navigation;
-        var homePage = navigation.GetNavigationViewItems(typeof(HomePage)).First();
-        navigation.SetCurrentNavigationViewItem(homePage);
+        (App.MainRoot.XamlRoot.Content as ShellPage)?.ViewModel.NavigationService.NavigateTo(typeof(HomePageViewModel).FullName ?? "");
     }
 }

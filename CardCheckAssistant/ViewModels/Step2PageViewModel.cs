@@ -3,18 +3,22 @@ using System.Data.Entity.Core.Metadata.Edm;
 using System.Diagnostics;
 using System.Linq;
 using System.Windows.Input;
+using CardCheckAssistant.Contracts.ViewModels;
 using CardCheckAssistant.Models;
 using CardCheckAssistant.Services;
 using CardCheckAssistant.Views;
+
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+
 using Log4CSharp;
+
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 
 namespace CardCheckAssistant.ViewModels;
 
-public partial class Step2PageViewModel : ObservableObject
+public partial class Step2PageViewModel : ObservableRecipient, INavigationAware
 {
     // Define the cancellation token.
     CancellationTokenSource source = new CancellationTokenSource();
@@ -28,11 +32,8 @@ public partial class Step2PageViewModel : ObservableObject
     private const string DBNAME = "OT_CardCheck_Test";
 #else
     private const string DBNAME = "OT_CardCheck";
-#endif
 
-    /// <summary>
-    /// 
-    /// </summary>
+#endif
     public Step2PageViewModel()
     {
         using SettingsReaderWriter settings = new SettingsReaderWriter();
@@ -80,18 +81,18 @@ public partial class Step2PageViewModel : ObservableObject
             new ("MD2500L_AV (Speicherbedarf: 1024 + 160 = 1184 Bytes)", 1184, 0),
             new ("MD4000L_AV (Speicherbedarf: 1600 + 160 = 1760 Bytes)", 1760, 0),
             new ("MD10000L_AV (Speicherbedarf: 3048 + 184 = 3232 Bytes)", 1760, 0),
-            new ("MD32000L_AV (Speicherbedarf: 7000 + 168 = 7168 Bytes)", 7168, 0) 
+            new ("MD32000L_AV (Speicherbedarf: 7000 + 168 = 7168 Bytes)", 7168, 0)
         };
 
         TextTemplates = settings.DefaultSettings.CardCheckTextTemplates ?? new ObservableCollection<CardCheckTextTemplate>(new());
 
-        SelectedCustomerRequestTemplate = CustomerRequestTemplate.NA;
         SelectedLSMCardTemplate = LsmCardTemplates.Single(x => x.TemplateText == "N/A");
 
         TextBoxSectorsUsed = "2,3,4,5,6,7,8,9,10,11,12";
 
         NextStepButtonContent = "Weiter";
     }
+
 
     #region ObservableProperties
     /// <summary>
@@ -114,7 +115,7 @@ public partial class Step2PageViewModel : ObservableObject
         get => _selectedCardCheckTextTemplate;
         set
         {
-            TextBoxAdditionalHints = string.Format("{1}{0}",TextBoxAdditionalHints,!string.IsNullOrEmpty(value?.TemplateTextContent) ? value?.TemplateTextContent + "\n\n" : string.Empty);
+            TextBoxAdditionalHints = string.Format("{1}{0}", TextBoxAdditionalHints, !string.IsNullOrEmpty(value?.TemplateTextContent) ? value?.TemplateTextContent + "\n\n" : string.Empty);
             SetProperty(ref _selectedCardCheckTextTemplate, value);
         }
     }
@@ -182,7 +183,7 @@ public partial class Step2PageViewModel : ObservableObject
     public bool CheckBoxChipProgrammableNo
     {
         get => _checkBoxChipProgrammableNo;
-        set 
+        set
         {
             SetProperty(ref _checkBoxChipProgrammableNo, value);
             NextStepCanExecute = true;
@@ -190,7 +191,7 @@ public partial class Step2PageViewModel : ObservableObject
             {
                 CheckBoxChipProgrammableYes = !value;
             }
-        } 
+        }
     }
     private bool _checkBoxChipProgrammableNo;
 
@@ -200,7 +201,7 @@ public partial class Step2PageViewModel : ObservableObject
     public bool CheckBoxTestOnLockSuccess
     {
         get => _checkBoxTestOnLockSuccess;
-        set 
+        set
         {
             SetProperty(ref _checkBoxTestOnLockSuccess, value);
             NextStepCanExecute = true;
@@ -208,7 +209,7 @@ public partial class Step2PageViewModel : ObservableObject
             {
                 CheckBoxTestOnLockFailed = !value;
             }
-        } 
+        }
     }
     private bool _checkBoxTestOnLockSuccess;
 
@@ -218,7 +219,7 @@ public partial class Step2PageViewModel : ObservableObject
     public bool CheckBoxTestOnLockFailed
     {
         get => _checkBoxTestOnLockFailed;
-        set 
+        set
         {
             SetProperty(ref _checkBoxTestOnLockFailed, value);
             NextStepCanExecute = true;
@@ -226,7 +227,7 @@ public partial class Step2PageViewModel : ObservableObject
             {
                 CheckBoxTestOnLockSuccess = !value;
             }
-        } 
+        }
     }
     private bool _checkBoxTestOnLockFailed;
 
@@ -236,7 +237,7 @@ public partial class Step2PageViewModel : ObservableObject
     public bool CheckBoxTestOnLockLimitedYes
     {
         get => _checkBoxTestOnLockLimitedYes;
-        set 
+        set
         {
             SetProperty(ref _checkBoxTestOnLockLimitedYes, value);
             NextStepCanExecute = true;
@@ -244,7 +245,7 @@ public partial class Step2PageViewModel : ObservableObject
             {
                 CheckBoxTestOnLockLimitedNo = !value;
             }
-        } 
+        }
     }
     private bool _checkBoxTestOnLockLimitedYes;
 
@@ -258,10 +259,10 @@ public partial class Step2PageViewModel : ObservableObject
         {
             SetProperty(ref _checkBoxTestOnLockLimitedNo, value);
             NextStepCanExecute = true;
-            if(_checkBoxTestOnLockLimitedYes)
+            if (_checkBoxTestOnLockLimitedYes)
             {
                 CheckBoxTestOnLockLimitedYes = !value;
-            }           
+            }
         }
     }
     private bool _checkBoxTestOnLockLimitedNo;
@@ -277,12 +278,6 @@ public partial class Step2PageViewModel : ObservableObject
     /// </summary>
     [ObservableProperty]
     private LSMCardTemplate _selectedLSMCardTemplate;
-
-    /// <summary>
-    /// 
-    /// </summary>
-    [ObservableProperty]
-    private CustomerRequestTemplate _selectedCustomerRequestTemplate;
 
     /// <summary>
     /// 
@@ -362,7 +357,8 @@ public partial class Step2PageViewModel : ObservableObject
     public bool NextStepCanExecute
     {
         get => _nextStepCanExecute;
-        set {
+        set
+        {
 
             if ((CheckBoxChipProgrammableNo || CheckBoxChipProgrammableYes) &&
                 (CheckBoxTestOnLockFailed || CheckBoxTestOnLockSuccess) &&
@@ -374,8 +370,8 @@ public partial class Step2PageViewModel : ObservableObject
             {
                 SetProperty(ref _nextStepCanExecute, false);
             }
-            
-                
+
+
         }
     }
     private bool _nextStepCanExecute;
@@ -394,7 +390,7 @@ public partial class Step2PageViewModel : ObservableObject
     /// 
     /// </summary>
     public string JobNumber => string.Format("JobNr.: {0}; ChipNummer: {1}; Kunde: {2}", CheckProcessService.CurrentCardCheckProcess.JobNr, CheckProcessService.CurrentCardCheckProcess.ChipNumber, CheckProcessService.CurrentCardCheckProcess.CName);
-    
+
     /// <summary>
     /// 
     /// </summary>
@@ -403,7 +399,10 @@ public partial class Step2PageViewModel : ObservableObject
     /// <summary>
     /// 
     /// </summary>
-    public ObservableCollection<string> ChipCount { get; set; }
+    public ObservableCollection<string> ChipCount
+    {
+        get; set;
+    }
 
     #endregion
 
@@ -412,7 +411,10 @@ public partial class Step2PageViewModel : ObservableObject
     /// <summary>
     /// 
     /// </summary>
-    public IAsyncRelayCommand NavigateNextStepCommand { get; }
+    public IAsyncRelayCommand NavigateNextStepCommand
+    {
+        get;
+    }
 
     /// <summary>
     /// 
@@ -422,7 +424,10 @@ public partial class Step2PageViewModel : ObservableObject
     /// <summary>
     /// 
     /// </summary>
-    public IAsyncRelayCommand PostPageLoadedCommand { get;  }
+    public IAsyncRelayCommand PostPageLoadedCommand
+    {
+        get;
+    }
 
     /// <summary>
     /// 
@@ -463,11 +468,11 @@ public partial class Step2PageViewModel : ObservableObject
 
             settings.ReadSettings();
 
-            if(settings?.DefaultSettings.CreateSubdirectoryIsEnabled == true)
+            if (settings?.DefaultSettings.CreateSubdirectoryIsEnabled == true)
             {
-                if(!Directory.Exists(
+                if (!Directory.Exists(
                     settings.DefaultSettings.DefaultProjectOutputPath + "\\"
-                    + (CheckProcessService.CurrentCardCheckProcess.JobNr + "\\" ))
+                    + (CheckProcessService.CurrentCardCheckProcess.JobNr + "\\"))
                     )
                 {
                     Directory.CreateDirectory(
@@ -488,9 +493,9 @@ public partial class Step2PageViewModel : ObservableObject
                     "$CHIPNUMBER=" + "\"" + "{2}" + "\" " +
                     "{3}",
                     settings.DefaultSettings.DefaultProjectOutputPath + "\\"
-                    + (settings.DefaultSettings.CreateSubdirectoryIsEnabled == true ? CheckProcessService.CurrentCardCheckProcess.JobNr + "\\" : string.Empty) 
-                    + CheckProcessService.CurrentCardCheckProcess.JobNr + "-" 
-                    + CheckProcessService.CurrentCardCheckProcess.ChipNumber 
+                    + (settings.DefaultSettings.CreateSubdirectoryIsEnabled == true ? CheckProcessService.CurrentCardCheckProcess.JobNr + "\\" : string.Empty)
+                    + CheckProcessService.CurrentCardCheckProcess.JobNr + "-"
+                    + CheckProcessService.CurrentCardCheckProcess.ChipNumber
                     + ".pdf",
                     CheckProcessService.CurrentCardCheckProcess.JobNr,
                     CheckProcessService.CurrentCardCheckProcess.ChipNumber,
@@ -505,9 +510,9 @@ public partial class Step2PageViewModel : ObservableObject
             p.Exited += (sender, eventArgs) =>
             {
                 reportReader.ReportTemplatePath = settings.DefaultSettings.DefaultProjectOutputPath + "\\"
-                + (settings.DefaultSettings.CreateSubdirectoryIsEnabled == true ? CheckProcessService.CurrentCardCheckProcess.JobNr + "\\" : string.Empty) 
-                + CheckProcessService.CurrentCardCheckProcess.JobNr + "-" 
-                + CheckProcessService.CurrentCardCheckProcess.ChipNumber 
+                + (settings.DefaultSettings.CreateSubdirectoryIsEnabled == true ? CheckProcessService.CurrentCardCheckProcess.JobNr + "\\" : string.Empty)
+                + CheckProcessService.CurrentCardCheckProcess.JobNr + "-"
+                + CheckProcessService.CurrentCardCheckProcess.ChipNumber
                 + ".pdf";
 
                 supported = reportReader.GetReportField("CheckBox_isChipSuppYes") != null && reportReader.GetReportField("CheckBox_isChipSuppYes") == "Yes";
@@ -515,7 +520,7 @@ public partial class Step2PageViewModel : ObservableObject
                 freeMemField = reportReader.GetReportField("TextBox_Detail_FreeMem_1") ?? "NA";
                 chipType = reportReader.GetReportField("TextBox_ChipType") ?? "NA";
                 addHintsText = reportReader.GetReportField("TextBox_Notes_Site_2") ?? "NA";
-                
+
             };
 
             p.Start();
@@ -531,8 +536,8 @@ public partial class Step2PageViewModel : ObservableObject
                     //seem's to be a desfire
                     TextBlockFreeMem = freeMemField;
 
-                    if (amountOfFreeMemory >= 225) 
-                    { 
+                    if (amountOfFreeMemory >= 225)
+                    {
                         notEnoughFreeMemory = false;
 
                         //show only usable templates on desfire
@@ -546,7 +551,7 @@ public partial class Step2PageViewModel : ObservableObject
                     }
                 }
 
-                else if(freeMemField.Split(',').Count() >= 1)
+                else if (freeMemField.Split(',').Count() >= 1)
                 {
                     TextBlockFreeMem = freeMemField;
 
@@ -568,16 +573,16 @@ public partial class Step2PageViewModel : ObservableObject
                 else
                 {
                     amountOfFreeMemory = -1;
-                }    
-            } 
+                }
+            }
 
             TextBlockCheckNotYetFinishedIsVisible = false;
             // Select "MD4000L_AV" Template... if any. OR Select "MC1000L_AV" if any.
             // Select first item if no MD4000L_AV nor MC1000L_AV is available
             SelectedLSMCardTemplate = LsmCardTemplates.Any(
-                x => x.TemplateText.Contains("MD4000L_AV")) 
-                ? LsmCardTemplates.FirstOrDefault(y => y.TemplateText.Contains("MD4000L_AV")) ?? new LSMCardTemplate() 
-                : LsmCardTemplates.Any(x => x.TemplateText.Contains("MC1000L_AV")) 
+                x => x.TemplateText.Contains("MD4000L_AV"))
+                ? LsmCardTemplates.FirstOrDefault(y => y.TemplateText.Contains("MD4000L_AV")) ?? new LSMCardTemplate()
+                : LsmCardTemplates.Any(x => x.TemplateText.Contains("MC1000L_AV"))
                     ? LsmCardTemplates.FirstOrDefault(y => y.TemplateText.Contains("MC1000L_AV")) ?? new LSMCardTemplate()
                     : LsmCardTemplates.FirstOrDefault() ?? new LSMCardTemplate();
 
@@ -625,7 +630,7 @@ public partial class Step2PageViewModel : ObservableObject
                 IsSupported = true;
                 InfoBarSupportedChipType = chipType;
 
-                if(chipType.ToLower().Contains("classic"))
+                if (chipType.ToLower().Contains("classic"))
                 {
                     IsSupportedAndIsClassicChip = true;
                 }
@@ -641,14 +646,14 @@ public partial class Step2PageViewModel : ObservableObject
         {
             LogWriter.CreateLogEntry(e);
 
-            scanChipTimer.Stop(); 
+            scanChipTimer.Stop();
             scanChipTimer.Tick -= ScanChipEvent;
 
             NextStepCanExecute = false;
 
             await App.MainRoot.MessageDialogAsync(
                 "Fehler beim starten von RFIDGear.",
-                string.Format("Bitte melde den folgenden Fehler an mich:\n{0}",e.Message));
+                string.Format("Bitte melde den folgenden Fehler an mich:\n{0}", e.Message));
 
             throw new InvalidOperationException(e.Message);
         }
@@ -672,7 +677,7 @@ public partial class Step2PageViewModel : ObservableObject
                 while (readerService.GenericChip != null && !isCancelled)
                 {
                     await readerService.ReadChipPublic().WaitAsync(token);
-                    if(readerService.GenericChip != null && !isCancelled && chipWasRemovedAndPlacedAgain)
+                    if (readerService.GenericChip != null && !isCancelled && chipWasRemovedAndPlacedAgain)
                     {
                         await Task.Delay(500).WaitAsync(token);
                         break;
@@ -691,8 +696,8 @@ public partial class Step2PageViewModel : ObservableObject
 
             scanChipTimer.Start();
 
-        } 
-        
+        }
+
         catch (Exception e)
         {
             LogWriter.CreateLogEntry(e);
@@ -715,9 +720,9 @@ public partial class Step2PageViewModel : ObservableObject
 
             while (readerService.GenericChip == null && !NextStepCanExecute)
             {
-                if(isCancelled)
-                { 
-                    return; 
+                if (isCancelled)
+                {
+                    return;
                 }
 
                 await readerService.ReadChipPublic().WaitAsync(token);
@@ -752,7 +757,7 @@ public partial class Step2PageViewModel : ObservableObject
     /// <param name="e"></param>
     private async void ScanChipEvent(object? sender, object e)
     {
-        if(!isCancelled)
+        if (!isCancelled)
         {
             try
             {
@@ -760,7 +765,7 @@ public partial class Step2PageViewModel : ObservableObject
 
                 using (ReaderService readerService = new ReaderService())
                 {
-                    if(!NavigateNextStepCommand.IsRunning)
+                    if (!NavigateNextStepCommand.IsRunning)
                     {
                         await readerService.ReadChipPublic();
                     }
@@ -851,7 +856,7 @@ public partial class Step2PageViewModel : ObservableObject
             scanChipTimer.Tick += ScanChipEvent;
             scanChipTimer.Start();
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             await App.MainRoot.MessageDialogAsync(
                 "Fehler",
@@ -877,10 +882,10 @@ public partial class Step2PageViewModel : ObservableObject
             {
                 FileName = settings.DefaultSettings.DefaultProjectOutputPath + "\\"
                 + (settings.DefaultSettings.CreateSubdirectoryIsEnabled == true ? CheckProcessService.CurrentCardCheckProcess.JobNr + "\\" : string.Empty)
-                + CheckProcessService.CurrentCardCheckProcess.JobNr + "-" 
-                + CheckProcessService.CurrentCardCheckProcess.ChipNumber 
+                + CheckProcessService.CurrentCardCheckProcess.JobNr + "-"
+                + CheckProcessService.CurrentCardCheckProcess.ChipNumber
                 + ".pdf",
-                Verb = "",     
+                Verb = "",
                 UseShellExecute = true
             };
 
@@ -936,6 +941,16 @@ public partial class Step2PageViewModel : ObservableObject
 
     #endregion
 
+    public void OnNavigatedTo(object parameter)
+    {
+        // Run code when the app navigates to this page
+    }
+
+    public void OnNavigatedFrom()
+    {
+        // Run code when the app navigates away from this page
+    }
+
     /// <summary>
     /// 
     /// </summary>
@@ -952,40 +967,34 @@ public partial class Step2PageViewModel : ObservableObject
             using SettingsReaderWriter settings = new SettingsReaderWriter();
             settings.ReadSettings();
 
-            string finalPath = 
-                settings.DefaultSettings.DefaultProjectOutputPath + "\\" 
+            string finalPath =
+                settings.DefaultSettings.DefaultProjectOutputPath + "\\"
                 + (settings.DefaultSettings.CreateSubdirectoryIsEnabled == true ? CheckProcessService.CurrentCardCheckProcess.JobNr + "\\" : string.Empty)
-                + CheckProcessService.CurrentCardCheckProcess.JobNr + "-" 
-                + CheckProcessService.CurrentCardCheckProcess.ChipNumber 
+                + CheckProcessService.CurrentCardCheckProcess.JobNr + "-"
+                + CheckProcessService.CurrentCardCheckProcess.ChipNumber
                 + "_final.pdf";
 
-            string semiFinalPath = 
+            string semiFinalPath =
                 settings.DefaultSettings.DefaultProjectOutputPath + "\\"
-                + (settings.DefaultSettings.CreateSubdirectoryIsEnabled == true ? CheckProcessService.CurrentCardCheckProcess.JobNr + "\\" : string.Empty) 
-                + CheckProcessService.CurrentCardCheckProcess.JobNr + "-" 
-                + CheckProcessService.CurrentCardCheckProcess.ChipNumber 
+                + (settings.DefaultSettings.CreateSubdirectoryIsEnabled == true ? CheckProcessService.CurrentCardCheckProcess.JobNr + "\\" : string.Empty)
+                + CheckProcessService.CurrentCardCheckProcess.JobNr + "-"
+                + CheckProcessService.CurrentCardCheckProcess.ChipNumber
                 + "_.pdf";
 
-            string preFinalPath = 
+            string preFinalPath =
                 settings.DefaultSettings.DefaultProjectOutputPath + "\\"
-                + (settings.DefaultSettings.CreateSubdirectoryIsEnabled == true ? CheckProcessService.CurrentCardCheckProcess.JobNr + "\\" : string.Empty) 
-                + CheckProcessService.CurrentCardCheckProcess.JobNr + "-" 
-                + CheckProcessService.CurrentCardCheckProcess.ChipNumber 
+                + (settings.DefaultSettings.CreateSubdirectoryIsEnabled == true ? CheckProcessService.CurrentCardCheckProcess.JobNr + "\\" : string.Empty)
+                + CheckProcessService.CurrentCardCheckProcess.JobNr + "-"
+                + CheckProcessService.CurrentCardCheckProcess.ChipNumber
                 + ".pdf";
 
             using ReportReaderWriterService reportReader = new ReportReaderWriterService();
-
-            var window = (Application.Current as App)?.Window as MainWindow ?? new MainWindow();
-            var navigation = window.Navigation;
-            NavigationViewItem nextpage = navigation.GetNavigationViewItems(typeof(HomePage)).First();
 
             if (TextBlockCheckFinishedAndResultIsSuppOnlyIsVisible)
             {
                 reportReader.ReportTemplatePath = preFinalPath;
                 reportReader.ReportOutputPath = finalPath;
                 reportReader.SetReadOnlyOnAllFields(true);
-
-                nextpage = navigation.GetNavigationViewItems(typeof(HomePage)).First();
 
                 List<CardCheckProcess> cardChecks = SQLDBService.Instance.CardChecks;
 
@@ -1003,8 +1012,6 @@ public partial class Step2PageViewModel : ObservableObject
                 reportReader.ReportTemplatePath = preFinalPath;
                 reportReader.ReportOutputPath = finalPath;
                 reportReader.SetReadOnlyOnAllFields(true);
-
-                nextpage = navigation.GetNavigationViewItems(typeof(HomePage)).First();
 
                 List<CardCheckProcess> cardChecks = SQLDBService.Instance.CardChecks;
 
@@ -1076,16 +1083,20 @@ public partial class Step2PageViewModel : ObservableObject
                     reportReader.SetReportField("TextBox_Notes_Site_2", TextBoxAdditionalHints);
                 }
 
-                reportReader.SetReportField("ComboBox_UsedTemplate",SelectedLSMCardTemplate.TemplateText);
+                reportReader.SetReportField("ComboBox_UsedTemplate", SelectedLSMCardTemplate.TemplateText);
                 reportReader.SetReportField("TextBox_Detail_Mem_3", TextBoxSectorsUsed);
-
-                nextpage = navigation.GetNavigationViewItems(typeof(Step3Page)).First();
             }
 
             await SQLDBService.Instance.InsertData("CC-ChangedDate", CheckProcessService.CurrentCardCheckProcess.ID, DateTime.Now.ToString());
 
-            navigation.SetCurrentNavigationViewItem(nextpage);
-            nextpage.IsEnabled = true;
+            if (TextBlockCheckFinishedAndResultIsSuppAndProgIsVisible)
+            {
+                (App.MainRoot.XamlRoot.Content as ShellPage).ViewModel.NavigationService.NavigateTo(typeof(Step3PageViewModel).FullName);
+            }
+            else
+            {
+                (App.MainRoot.XamlRoot.Content as ShellPage).ViewModel.NavigationService.NavigateTo(typeof(HomePageViewModel).FullName);
+            }
         }
         catch (Exception ex)
         {
@@ -1111,10 +1122,7 @@ public partial class Step2PageViewModel : ObservableObject
 
             await Task.Delay(1000);
 
-            var window = (Application.Current as App)?.Window as MainWindow ?? new MainWindow();
-            var navigation = window.Navigation;
-            var step1Page = navigation.GetNavigationViewItems(typeof(Step1Page)).First();
-            navigation.SetCurrentNavigationViewItem(step1Page);
+            (App.MainRoot.XamlRoot.Content as ShellPage).ViewModel.NavigationService.NavigateTo(typeof(Step1PageViewModel).FullName);
         }
         catch (Exception ex)
         {

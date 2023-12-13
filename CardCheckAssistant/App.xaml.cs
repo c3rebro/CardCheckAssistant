@@ -1,87 +1,123 @@
-﻿using System.Diagnostics;
-using CardCheckAssistant.AppNotification;
-using Microsoft.UI.Xaml;
-using Microsoft.Windows.AppNotifications;
-using WinUICommunity.Common.Helpers;
+﻿using CardCheckAssistant.Activation;
+using CardCheckAssistant.Contracts.Services;
+using CardCheckAssistant.Core.Contracts.Services;
+using CardCheckAssistant.Core.Services;
+using CardCheckAssistant.Helpers;
+using CardCheckAssistant.Models;
+using CardCheckAssistant.Notifications;
+using CardCheckAssistant.Services;
+using CardCheckAssistant.ViewModels;
+using CardCheckAssistant.Views;
 
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.UI.Xaml;
 
 namespace CardCheckAssistant;
 
+// To learn more about WinUI 3, see https://docs.microsoft.com/windows/apps/winui/winui3/.
 public partial class App : Application
 {
-    public Window Window => m_window;
-    private Window m_window;
-    private readonly NotificationManager notificationManager;
+    // The .NET Generic Host provides dependency injection, configuration, logging, and other services.
+    // https://docs.microsoft.com/dotnet/core/extensions/generic-host
+    // https://docs.microsoft.com/dotnet/core/extensions/dependency-injection
+    // https://docs.microsoft.com/dotnet/core/extensions/configuration
+    // https://docs.microsoft.com/dotnet/core/extensions/logging
+    public IHost Host
+    {
+        get;
+    }
+
+    public static T GetService<T>()
+        where T : class
+    {
+        if ((App.Current as App)!.Host.Services.GetService(typeof(T)) is not T service)
+        {
+            throw new ArgumentException($"{typeof(T)} needs to be registered in ConfigureServices within App.xaml.cs.");
+        }
+
+        return service;
+    }
+
+    public static WindowEx MainWindow { get; } = new MainWindow();
+    public static FrameworkElement MainRoot
+    {
+        get
+        {
+            return MainWindow.Content as FrameworkElement;
+        }
+    }
+
+    public static UIElement? AppTitlebar { get; set; }
 
     public App()
     {
         InitializeComponent();
 
-        try
+        Host = Microsoft.Extensions.Hosting.Host.
+        CreateDefaultBuilder().
+        UseContentRoot(AppContext.BaseDirectory).
+        ConfigureServices((context, services) =>
         {
-            if (!ApplicationHelper.IsPackaged)
-            {
-                AppDomain.CurrentDomain.ProcessExit += OnProcessExit;
-                var c_notificationHandlers = new Dictionary<int, Action<AppNotificationActivatedEventArgs>>();
-                c_notificationHandlers.Add(ToastWithAvatar.Instance.ScenarioId, ToastWithAvatar.Instance.NotificationReceived);
-                c_notificationHandlers.Add(ToastWithTextBox.Instance.ScenarioId, ToastWithTextBox.Instance.NotificationReceived);
-                c_notificationHandlers.Add(ToastWithPayload.Instance.ScenarioId, ToastWithPayload.Instance.NotificationReceived);
-                notificationManager = new NotificationManager(c_notificationHandlers);
-            }
-        }
+            // Default Activation Handler
+            services.AddTransient<ActivationHandler<LaunchActivatedEventArgs>, DefaultActivationHandler>();
 
-        catch (Exception ex)
-        {
-            Debug.WriteLine(ex);
-        }
+            // Other Activation Handlers
+            services.AddTransient<IActivationHandler, AppNotificationActivationHandler>();
 
-        
+            // Services
+            services.AddSingleton<IAppNotificationService, AppNotificationService>();
+            services.AddSingleton<ILocalSettingsService, LocalSettingsService>();
+            services.AddSingleton<IThemeSelectorService, ThemeSelectorService>();
+            services.AddTransient<INavigationViewService, NavigationViewService>();
+
+            services.AddSingleton<IActivationService, ActivationService>();
+            services.AddSingleton<IPageService, PageService>();
+            services.AddSingleton<INavigationService, NavigationService>();
+
+            // Core Services
+            services.AddSingleton<IFileService, FileService>();
+
+            // Views and ViewModels
+            services.AddTransient<SettingsPageViewModel>();
+            services.AddTransient<SettingsPage>();
+            services.AddTransient<AboutPageViewModel>();
+            services.AddTransient<AboutPage>();
+            services.AddTransient<Step3PageViewModel>();
+            services.AddTransient<Step3Page>();
+            services.AddTransient<Step2PageViewModel>();
+            services.AddTransient<Step2Page>();
+            services.AddTransient<Step1PageViewModel>();
+            services.AddTransient<Step1Page>();
+            services.AddTransient<HomePageViewModel>();
+            services.AddTransient<HomePage>();
+            services.AddTransient<ShellPage>();
+            services.AddTransient<ShellViewModel>();
+
+            // Configuration
+            services.Configure<LocalSettingsOptions>(context.Configuration.GetSection(nameof(LocalSettingsOptions)));
+        }).
+        Build();
+
+        App.GetService<IAppNotificationService>().Initialize();
+
+        UnhandledException += App_UnhandledException;
     }
 
-    public static FrameworkElement MainRoot { get; private set; }
-
-    protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
+    private void App_UnhandledException(object sender, Microsoft.UI.Xaml.UnhandledExceptionEventArgs e)
     {
-        m_window = new MainWindow();
-        ThemeHelper.Initialize(m_window, BackdropType.Mica);
-        if (!ApplicationHelper.IsPackaged)
-        {
-            notificationManager.Init(notificationManager, OnNotificationInvoked);
-        }
-
-        MainRoot = m_window.Content as FrameworkElement;
-
-        m_window.SetWindowSize(1150, 750);
-
-        var hWnd = WinRT.Interop.WindowNative.GetWindowHandle(m_window);
-        Microsoft.UI.WindowId windowId = Microsoft.UI.Win32Interop.GetWindowIdFromWindow(hWnd);
-        Microsoft.UI.Windowing.AppWindow appWindow = Microsoft.UI.Windowing.AppWindow.GetFromWindowId(windowId);
-        if (appWindow is not null)
-        {
-            Microsoft.UI.Windowing.DisplayArea displayArea = Microsoft.UI.Windowing.DisplayArea.GetFromWindowId(windowId, Microsoft.UI.Windowing.DisplayAreaFallback.Nearest);
-            if (displayArea is not null)
-            {
-                var CenteredPosition = appWindow.Position;
-                CenteredPosition.X = ((displayArea.WorkArea.Width - appWindow.Size.Width) / 2);
-                CenteredPosition.Y = ((displayArea.WorkArea.Height - appWindow.Size.Height) / 2);
-                appWindow.Move(CenteredPosition);
-            }
-        }
-        m_window.Activate();
+        // TODO: Log and handle exceptions as appropriate.
+        // https://docs.microsoft.com/windows/windows-app-sdk/api/winrt/microsoft.ui.xaml.application.unhandledexception.
     }
 
-    /*
-     * This Method will be used later
-     * to get Text Inputs..
-     */
-    private void OnNotificationInvoked(string message)
+    protected async override void OnLaunched(LaunchActivatedEventArgs args)
     {
+        base.OnLaunched(args);
 
-    }
+        //App.GetService<IAppNotificationService>().Show(string.Format("AppNotificationSamplePayload".GetLocalized(), AppContext.BaseDirectory));
 
-    void OnProcessExit(object sender, EventArgs e)
-    {
-        notificationManager.Unregister();
+        await App.GetService<IActivationService>().ActivateAsync(args);
+
+        //MainRoot = MainWindow.Content as FrameworkElement;
     }
-    
 }

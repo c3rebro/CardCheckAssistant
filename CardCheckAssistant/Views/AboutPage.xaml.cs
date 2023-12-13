@@ -1,12 +1,19 @@
-﻿using Microsoft.UI.Xaml.Controls;
+﻿using CardCheckAssistant.ViewModels;
 
-namespace CardCheckAssistant.Views
+using Microsoft.UI.Xaml.Controls;
+
+namespace CardCheckAssistant.Views;
+
+public sealed partial class AboutPage : Page
 {
-    public sealed partial class AboutPage : Page
+    public AboutPageViewModel ViewModel
     {
-        public AboutPage()
-        {
-            InitializeComponent();
-        }
+        get;
+    }
+
+    public AboutPage()
+    {
+        ViewModel = App.GetService<AboutPageViewModel>();
+        InitializeComponent();
     }
 }

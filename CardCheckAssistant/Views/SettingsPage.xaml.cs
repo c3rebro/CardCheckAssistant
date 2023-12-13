@@ -1,17 +1,20 @@
-﻿using Microsoft.UI.Xaml.Controls;
+﻿using CardCheckAssistant.ViewModels;
 
-// To learn more about WinUI, the WinUI project structure,
-// and more about our project templates, see: http://aka.ms/winui-project-info.
+using Microsoft.UI.Xaml.Controls;
 
 namespace CardCheckAssistant.Views;
 
-/// <summary>
-/// An empty page that can be used on its own or navigated to within a Frame.
-/// </summary>
+// TODO: Set the URL for your privacy policy by updating SettingsPage_PrivacyTermsLink.NavigateUri in Resources.resw.
 public sealed partial class SettingsPage : Page
 {
+    public SettingsPageViewModel ViewModel
+    {
+        get;
+    }
+
     public SettingsPage()
     {
-        this.InitializeComponent();
+        ViewModel = App.GetService<SettingsPageViewModel>();
+        InitializeComponent();
     }
 }

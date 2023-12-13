@@ -1,95 +1,16 @@
-<Window
+ï»¿<windowex:WindowEx
     x:Class="CardCheckAssistant.MainWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:CardCheckAssistant"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:windowex="using:WinUIEx"
+    MinWidth="800"
+    MinHeight="500"
+    PersistenceId="MainWindow"
     mc:Ignorable="d">
-    <Grid Name="Root" Width="auto" Height="auto">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition />
-        </Grid.RowDefinitions>
-        <Grid x:Name="AppTitleBar" Height="32" IsHitTestVisible="False" >
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition x:Name="LeftPaddingColumn" Width="0"/>
-                <ColumnDefinition x:Name="IconColumn" Width="Auto"/>
-                <ColumnDefinition x:Name="TitleColumn" Width="auto"/>
-                <ColumnDefinition x:Name="LeftDragColumn" Width="*"/>
-                <ColumnDefinition x:Name="RightDragColumn" Width="*"/>
-                <ColumnDefinition x:Name="RightPaddingColumn" Width="0"/>
-            </Grid.ColumnDefinitions>
-            <Image x:Name="TitleBarIcon" Source="/Assets/AppIcon.png"
-           Grid.Column="1"
-           Width="16" Height="16"
-           Margin="8,0,0,0"/>
-            <TextBlock x:Name="TitleTextBlock" 
-               Text="CardCheckAssistant" 
-               Style="{StaticResource CaptionTextBlockStyle}"
-               Grid.Column="2"
-               VerticalAlignment="Center"
-               Margin="4,0,0,0"/>
-        </Grid>
-        <!--
-        <MenuBar Grid.Row="1">
-            <MenuBarItem Title="Datei">
-                <MenuFlyoutItem Text="Neu">
-                    <MenuFlyoutItem.KeyboardAccelerators>
-                        <KeyboardAccelerator Modifiers="Control" Key="N"/>
-                    </MenuFlyoutItem.KeyboardAccelerators>
-                </MenuFlyoutItem>
-                <MenuFlyoutItem Text="Öffnen...">
-                    <MenuFlyoutItem.KeyboardAccelerators>
-                        <KeyboardAccelerator Modifiers="Control" Key="O"/>
-                    </MenuFlyoutItem.KeyboardAccelerators>
-                </MenuFlyoutItem>
-                <MenuFlyoutItem Text="Speichern">
-                    <MenuFlyoutItem.KeyboardAccelerators>
-                        <KeyboardAccelerator Modifiers="Control" Key="S"/>
-                    </MenuFlyoutItem.KeyboardAccelerators>
-                </MenuFlyoutItem>
-                <MenuFlyoutItem Text="Beenden">
-                    <MenuFlyoutItem.KeyboardAccelerators>
-                        <KeyboardAccelerator Modifiers="Control" Key="E"/>
-                    </MenuFlyoutItem.KeyboardAccelerators>
-                </MenuFlyoutItem>
-            </MenuBarItem>
-
-            <MenuBarItem Title="Bearbeiten">
-                <MenuFlyoutItem Text="Rückgängig">
-                    <MenuFlyoutItem.KeyboardAccelerators>
-                        <KeyboardAccelerator Modifiers="Control" Key="Z"/>
-                    </MenuFlyoutItem.KeyboardAccelerators>
-                </MenuFlyoutItem>
-                <MenuFlyoutItem Text="Ausschneiden">
-                    <MenuFlyoutItem.KeyboardAccelerators>
-                        <KeyboardAccelerator Modifiers="Control" Key="X"/>
-                    </MenuFlyoutItem.KeyboardAccelerators>
-                </MenuFlyoutItem>
-                <MenuFlyoutItem Text="Kopieren">
-                    <MenuFlyoutItem.KeyboardAccelerators>
-                        <KeyboardAccelerator Modifiers="Control" Key="C"/>
-                    </MenuFlyoutItem.KeyboardAccelerators>
-                </MenuFlyoutItem>
-                <MenuFlyoutItem Text="Einfügen">
-                    <MenuFlyoutItem.KeyboardAccelerators>
-                        <KeyboardAccelerator Modifiers="Control" Key="V"/>
-                    </MenuFlyoutItem.KeyboardAccelerators>
-                </MenuFlyoutItem>
-            </MenuBarItem>
-
-            <MenuBarItem Title="Hilfe">
-                <MenuFlyoutItem Text="Über">
-                    <MenuFlyoutItem.KeyboardAccelerators>
-                        <KeyboardAccelerator Modifiers="Control" Key="I"/>
-                    </MenuFlyoutItem.KeyboardAccelerators>
-                </MenuFlyoutItem>
-            </MenuBarItem>
-        </MenuBar>
--->
-        <local:Shell x:Name="RootShell" Width="auto" Height="auto" Margin="0 15 0 0" Grid.Row="2"/>
-
-    </Grid>
-</Window>
+    <Window.SystemBackdrop>
+        <MicaBackdrop/>
+    </Window.SystemBackdrop>
+</windowex:WindowEx>

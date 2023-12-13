@@ -1,30 +1,22 @@
-﻿using CardCheckAssistant.Views;
+﻿using CardCheckAssistant.Models;
 using CardCheckAssistant.Services;
+using CardCheckAssistant.Views;
+
+using System.Collections.ObjectModel;
+using System.Diagnostics;
+using System.Windows.Input;
 
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
-using Microsoft.UI.Xaml;
-
-using System.Diagnostics;
-using System.Windows.Input;
-using System.Collections.ObjectModel;
+using Microsoft.UI.Xaml.Controls;
 
 using Log4CSharp;
 
-using CardCheckAssistant.Models;
-using Microsoft.UI.Xaml.Controls;
-
 namespace CardCheckAssistant.ViewModels;
 
-/// <summary>
-/// 
-/// </summary>
-public class Step3PageViewModel : ObservableObject
+public partial class Step3PageViewModel : ObservableRecipient
 {
-    /// <summary>
-    /// 
-    /// </summary>
     public Step3PageViewModel()
     {
         RunRFiDGearCommand = new AsyncRelayCommand(ExecuteRFIDGearCommand);
@@ -140,7 +132,10 @@ public class Step3PageViewModel : ObservableObject
     /// <summary>
     /// 
     /// </summary>
-    public ObservableCollection<string> ChipCount { get; set; }
+    public ObservableCollection<string> ChipCount
+    {
+        get; set;
+    }
 
     #endregion
 
@@ -149,12 +144,18 @@ public class Step3PageViewModel : ObservableObject
     /// <summary>
     /// 
     /// </summary>
-    public IAsyncRelayCommand NavigateNextStepCommand { get; }
+    public IAsyncRelayCommand NavigateNextStepCommand
+    {
+        get;
+    }
 
     /// <summary>
     /// 
     /// </summary>
-    public IAsyncRelayCommand RunRFiDGearCommand { get; }
+    public IAsyncRelayCommand RunRFiDGearCommand
+    {
+        get;
+    }
 
     /// <summary>
     /// 
@@ -164,7 +165,10 @@ public class Step3PageViewModel : ObservableObject
     /// <summary>
     /// 
     /// </summary>
-    public IAsyncRelayCommand PostPageLoadedCommand { get; }
+    public IAsyncRelayCommand PostPageLoadedCommand
+    {
+        get;
+    }
 
     /// <summary>
     /// 
@@ -329,9 +333,9 @@ public class Step3PageViewModel : ObservableObject
             var info = new ProcessStartInfo()
             {
                 FileName = settings.DefaultSettings.DefaultProjectOutputPath + "\\"
-                + (settings.DefaultSettings.CreateSubdirectoryIsEnabled == true ? CheckProcessService.CurrentCardCheckProcess.JobNr + "\\" : string.Empty) 
-                + CheckProcessService.CurrentCardCheckProcess.JobNr + "-" 
-                + CheckProcessService.CurrentCardCheckProcess.ChipNumber 
+                + (settings.DefaultSettings.CreateSubdirectoryIsEnabled == true ? CheckProcessService.CurrentCardCheckProcess.JobNr + "\\" : string.Empty)
+                + CheckProcessService.CurrentCardCheckProcess.JobNr + "-"
+                + CheckProcessService.CurrentCardCheckProcess.ChipNumber
                 + "_final.pdf",
                 Verb = "",
                 UseShellExecute = true
@@ -366,7 +370,7 @@ public class Step3PageViewModel : ObservableObject
             var info = new ProcessStartInfo()
             {
                 FileName = settings.DefaultSettings.DefaultProjectOutputPath + "\\"
-                +(settings.DefaultSettings.CreateSubdirectoryIsEnabled == true ? CheckProcessService.CurrentCardCheckProcess.JobNr + "\\" : string.Empty),
+                + (settings.DefaultSettings.CreateSubdirectoryIsEnabled == true ? CheckProcessService.CurrentCardCheckProcess.JobNr + "\\" : string.Empty),
                 Verb = "",
                 UseShellExecute = true
             };
@@ -427,11 +431,6 @@ public class Step3PageViewModel : ObservableObject
             reportReader.ReportOutputPath = finalPath;
             reportReader.SetReadOnlyOnAllFields(true);
 
-            var window = (Application.Current as App)?.Window as MainWindow ?? new MainWindow();
-            var navigation = window.Navigation;
-            NavigationViewItem nextpage;
-            nextpage = navigation.GetNavigationViewItems(typeof(HomePage)).First();
-
             var fileName = finalPath;
             var fileStream = File.Open(fileName, FileMode.Open);
 
@@ -443,7 +442,7 @@ public class Step3PageViewModel : ObservableObject
 
             try
             {
-                if(settings.DefaultSettings.RemoveTemporaryReportsIsEnabled == true)
+                if (settings.DefaultSettings.RemoveTemporaryReportsIsEnabled == true)
                 {
                     File.Delete(preFinalPath);
                     File.Delete(semiFinalPath);
@@ -458,9 +457,8 @@ public class Step3PageViewModel : ObservableObject
                 return;
             }
 
-            navigation.SetCurrentNavigationViewItem(nextpage);
-            nextpage.IsEnabled = true;
-            
+            (App.MainRoot.XamlRoot.Content as ShellPage).ViewModel.NavigationService.NavigateTo(typeof(HomePageViewModel).FullName);
+
         }
         catch (Exception ex)
         {
@@ -479,10 +477,7 @@ public class Step3PageViewModel : ObservableObject
     {
         try
         {
-            var window = (Application.Current as App)?.Window as MainWindow ?? new MainWindow();
-            var navigation = window.Navigation;
-            var step1Page = navigation.GetNavigationViewItems(typeof(Step1Page)).First();
-            navigation.SetCurrentNavigationViewItem(step1Page);
+            (App.MainRoot.XamlRoot.Content as ShellPage).ViewModel.NavigationService.NavigateTo(typeof(Step1PageViewModel).FullName);
         }
         catch (Exception e)
         {
@@ -490,6 +485,5 @@ public class Step3PageViewModel : ObservableObject
         }
     }
     #endregion
-
 
 }

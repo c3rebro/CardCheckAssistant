@@ -1,34 +1,32 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CardCheckAssistant.Services;
+using CardCheckAssistant.Views;
+
+using System.Collections.ObjectModel;
+using System.Windows.Input;
+
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
-using Microsoft.UI.Xaml;
+using Elatec.NET;
 
-using CardCheckAssistant.Services;
-using CardCheckAssistant.Views;
+using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Documents;
 
 using Log4CSharp;
 
 using System.Diagnostics;
-using System.Windows.Input;
-using System.Collections.ObjectModel;
-using Microsoft.UI.Xaml.Documents;
-using Elatec.NET;
+using CardCheckAssistant.Contracts.ViewModels;
+
 
 namespace CardCheckAssistant.ViewModels;
 
-/// <summary>
-/// 
-/// </summary>
-public partial class Step1PageViewModel : ObservableObject, IDisposable
+public partial class Step1PageViewModel : ObservableRecipient, INavigationAware
 {
     /// <summary>
     /// 
     /// </summary>
     private readonly DispatcherTimer scanChipTimer;
 
-    /// <summary>
-    /// 
-    /// </summary>
     public Step1PageViewModel()
     {
         try
@@ -46,7 +44,7 @@ public partial class Step1PageViewModel : ObservableObject, IDisposable
         }
 
         scanChipTimer = new DispatcherTimer();
-        scanChipTimer.Interval = new TimeSpan(0,0,0,0,1000);
+        scanChipTimer.Interval = new TimeSpan(0, 0, 0, 0, 1000);
         scanChipTimer.Stop();
 
         WaitForNextStep = false;
@@ -55,7 +53,7 @@ public partial class Step1PageViewModel : ObservableObject, IDisposable
 
         Languages = new ObservableCollection<string>
         {
-            "Deutsch" 
+            "Deutsch"
         };
 
         SelectedReportLaguage = Languages.FirstOrDefault() ?? "de";
@@ -127,7 +125,7 @@ public partial class Step1PageViewModel : ObservableObject, IDisposable
     /// <summary>
     /// 
     /// </summary>
-    [ObservableProperty] 
+    [ObservableProperty]
     private bool _nextStepCanExecute;
 
     /// <summary>
@@ -141,7 +139,7 @@ public partial class Step1PageViewModel : ObservableObject, IDisposable
     /// <summary>
     /// 
     /// </summary>
-    public string JobNumber => string.Format("JobNr.: {0}; ChipNummer: {1}; Kunde: {2}",CheckProcessService.CurrentCardCheckProcess.JobNr, CheckProcessService.CurrentCardCheckProcess.ChipNumber, CheckProcessService.CurrentCardCheckProcess.CName);
+    public string JobNumber => string.Format("JobNr.: {0}; ChipNummer: {1}; Kunde: {2}", CheckProcessService.CurrentCardCheckProcess.JobNr, CheckProcessService.CurrentCardCheckProcess.ChipNumber, CheckProcessService.CurrentCardCheckProcess.CName);
 
     /// <summary>
     /// 
@@ -243,7 +241,7 @@ public partial class Step1PageViewModel : ObservableObject, IDisposable
                         NoChipDetectedInfoBarIsVisible = false;
                         ChipDetectedInfoBarIsVisible = true;
 
-                        if(readerService.GenericChip.CardType.ToString().ToLower().Contains("mifare"))
+                        if (readerService.GenericChip.CardType.ToString().ToLower().Contains("mifare"))
                         {
                             AskClassicKeysIsVisible = true;
                             AskPICCMKIsVisible = false;
@@ -258,7 +256,7 @@ public partial class Step1PageViewModel : ObservableObject, IDisposable
 
                         ChipInfoMessage = string.Format("Es wurde ein Chip erkannt:\nErkannt 1: {0}", readerService.GenericChip.CardType.ToString());
 
-                        if(readerService.GenericChip.Child != null)
+                        if (readerService.GenericChip.Child != null)
                         {
                             ChipInfoMessage = ChipInfoMessage + string.Format("\nErkannt 2: {0}", readerService.GenericChip.Child.CardType);
                         }
@@ -272,7 +270,7 @@ public partial class Step1PageViewModel : ObservableObject, IDisposable
                         AskClassicKeysIsVisible = false;
                         AskPICCMKIsVisible = false;
 
-                        NextStepCanExecute  = true;
+                        NextStepCanExecute = true;
                     }
                 }
 
@@ -280,7 +278,7 @@ public partial class Step1PageViewModel : ObservableObject, IDisposable
             }
             scanChipTimer.Start();
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             LogWriter.CreateLogEntry(ex);
         }
@@ -301,17 +299,17 @@ public partial class Step1PageViewModel : ObservableObject, IDisposable
             settings.ReadSettings();
 
             FileInfo finalPath = new FileInfo(
-                settings.DefaultSettings.DefaultProjectOutputPath + "\\" 
+                settings.DefaultSettings.DefaultProjectOutputPath + "\\"
                 + (settings.DefaultSettings.CreateSubdirectoryIsEnabled == true ? CheckProcessService.CurrentCardCheckProcess.JobNr + "\\" : string.Empty)
-                + CheckProcessService.CurrentCardCheckProcess.JobNr + "-" 
-                + CheckProcessService.CurrentCardCheckProcess.ChipNumber 
+                + CheckProcessService.CurrentCardCheckProcess.JobNr + "-"
+                + CheckProcessService.CurrentCardCheckProcess.ChipNumber
                 + "_final.pdf");
 
             FileInfo semiFinalPath = new FileInfo(
                 settings.DefaultSettings.DefaultProjectOutputPath + "\\"
-                + (settings.DefaultSettings.CreateSubdirectoryIsEnabled == true ? CheckProcessService.CurrentCardCheckProcess.JobNr + "\\" : string.Empty) 
-                + CheckProcessService.CurrentCardCheckProcess.JobNr + "-" 
-                + CheckProcessService.CurrentCardCheckProcess.ChipNumber 
+                + (settings.DefaultSettings.CreateSubdirectoryIsEnabled == true ? CheckProcessService.CurrentCardCheckProcess.JobNr + "\\" : string.Empty)
+                + CheckProcessService.CurrentCardCheckProcess.JobNr + "-"
+                + CheckProcessService.CurrentCardCheckProcess.ChipNumber
                 + "_.pdf");
 
             FileInfo preFinalPath = new FileInfo(
@@ -349,12 +347,13 @@ public partial class Step1PageViewModel : ObservableObject, IDisposable
                         await App.MainRoot.MessageDialogAsync(
                         "Fehler",
                         string.Format("Windows Fehlertext: {0}\n\n" +
-                        "Bitte beende die Anwendung die auf diese Datei zugreift und versuche es im Anschluss erneut.",ioex.Message),
+                        "Bitte beende die Anwendung die auf diese Datei zugreift und versuche es im Anschluss erneut.", ioex.Message),
                         "OK");
 
                         return;
                     }
-                    finally {
+                    finally
+                    {
                         LogWriter.CreateLogEntry("ioex");
                     }
                 }
@@ -372,11 +371,7 @@ public partial class Step1PageViewModel : ObservableObject, IDisposable
 
             await Task.Delay(1000);
 
-            var window = (Application.Current as App)?.Window as MainWindow ?? new MainWindow();
-            var navigation = window.Navigation;
-            var step2Page = navigation.GetNavigationViewItems(typeof(Step2Page)).First();
-            navigation.SetCurrentNavigationViewItem(step2Page);
-            step2Page.IsEnabled = true;
+            (App.MainRoot.XamlRoot.Content as ShellPage).ViewModel.NavigationService.NavigateTo(typeof(Step2PageViewModel).FullName);
         }
 
         catch (Exception e)
@@ -395,16 +390,23 @@ public partial class Step1PageViewModel : ObservableObject, IDisposable
             scanChipTimer.Stop();
             scanChipTimer.Tick -= ScanChipEvent;
 
-            var window = (Application.Current as App)?.Window as MainWindow ?? new MainWindow();
-            var navigation = window.Navigation;
-            var homePage = navigation.GetNavigationViewItems(typeof(HomePage)).First();
-            navigation.SetCurrentNavigationViewItem(homePage);
+            (App.MainRoot.XamlRoot.Content as ShellPage).ViewModel.NavigationService.NavigateTo(typeof(HomePageViewModel).FullName);
         }
-        catch(Exception e)
+        catch (Exception e)
         {
             LogWriter.CreateLogEntry(e);
         }
 
+    }
+
+    public void OnNavigatedTo(object parameter)
+    {
+        // Run code when the app navigates to this page
+    }
+
+    public void OnNavigatedFrom()
+    {
+        // Run code when the app navigates away from this page
     }
 
     protected void Dispose(bool disposing)
@@ -426,5 +428,4 @@ public partial class Step1PageViewModel : ObservableObject, IDisposable
         GC.SuppressFinalize(this);
     }
     private bool _disposed;
-
 }
