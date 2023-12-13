@@ -21,7 +21,7 @@ namespace CardCheckAssistant.Services;
 public class SettingsReaderWriter : IDisposable
 {
     #region fields
-    private static readonly string FacilityName = Assembly.GetExecutingAssembly().GetName().Name;
+    private static readonly string FacilityName = Assembly.GetExecutingAssembly().GetName().Name ?? "";
 
     private readonly string _settingsFileFileName = "settings.xml";
     private readonly string _updateConfigFileFileName = "update.xml";

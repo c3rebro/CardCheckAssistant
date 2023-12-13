@@ -165,7 +165,7 @@ public partial class Step1PageViewModel : ObservableRecipient, INavigationAware
     /// <summary>
     /// 
     /// </summary>
-    public ICommand NavigateNextStepCommand => new RelayCommand(NavigateNextStepCommand_Executed);
+    public IAsyncRelayCommand NavigateNextStepCommand => new AsyncRelayCommand(NavigateNextStepCommand_Executed);
 
     /// <summary>
     /// 
@@ -288,7 +288,7 @@ public partial class Step1PageViewModel : ObservableRecipient, INavigationAware
     /// 
     /// </summary>
     /// <returns></returns>
-    private async void NavigateNextStepCommand_Executed()
+    private async Task NavigateNextStepCommand_Executed()
     {
         try
         {

@@ -92,7 +92,7 @@ public partial class HomePageViewModel : ObservableRecipient, INavigationAware
         {
             Assembly assembly = Assembly.GetExecutingAssembly();
             FileVersionInfo fvi = FileVersionInfo.GetVersionInfo(assembly.Location);
-            string packageVersion = "";
+            var packageVersion = "";
 
             try
             {
@@ -577,18 +577,16 @@ public partial class HomePageViewModel : ObservableRecipient, INavigationAware
     {
         try
         {
-            using (SettingsReaderWriter settings = new SettingsReaderWriter())
-            {
-                // Connect to DB Async
+            using SettingsReaderWriter settings = new SettingsReaderWriter();
+            // Connect to DB Async
 
-                if (settings.DefaultSettings.CardCheckUseMSSQL ?? false)
-                {
-                    return await SQLDBService.Instance.GetCardChecksFromMSSQLAsync();
-                }
-                else
-                {
-                    return await SQLDBService.Instance.GetCardChecksFromSQLLiteAsync();
-                }
+            if (settings.DefaultSettings.CardCheckUseMSSQL ?? false)
+            {
+                return await SQLDBService.Instance.GetCardChecksFromMSSQLAsync();
+            }
+            else
+            {
+                return await SQLDBService.Instance.GetCardChecksFromSQLLiteAsync();
             }
         }
         catch (Exception ex)

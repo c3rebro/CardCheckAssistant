@@ -135,19 +135,18 @@ public class SQLDBService : IDisposable
             builder.InitialCatalog = dbName;
             builder.ApplicationName = serverName.Split('\\')[1];
 
-            using (SqlConnection sqlConnection = new SqlConnection(builder.ConnectionString))
+            using SqlConnection sqlConnection = new SqlConnection(builder.ConnectionString);
+
+            await sqlConnection.OpenAsync();
+
+            if (!TableExists(sqlConnection, OMNIDBNAME, OMNITABLENAME))
             {
-                await sqlConnection.OpenAsync();
+                //await CreateTableAsync(sqlConnection, OMNITABLENAME, OMNITABLECOLUMNS);
+            }
 
-                if (!TableExists(sqlConnection, OMNIDBNAME, OMNITABLENAME))
-                {
-                    //await CreateTableAsync(sqlConnection, OMNITABLENAME, OMNITABLECOLUMNS);
-                }
-
-                if (!TableExists(sqlConnection, OMNIDBNAME, RFIDTABLENAME))
-                {
-                    //await CreateTableAsync(sqlConnection, RFIDTABLENAME, RFIDTABLECOLUMNS);
-                }
+            if (!TableExists(sqlConnection, OMNIDBNAME, RFIDTABLENAME))
+            {
+                //await CreateTableAsync(sqlConnection, RFIDTABLENAME, RFIDTABLECOLUMNS);
             }
         }
         catch (Exception ex)
@@ -172,52 +171,50 @@ public class SQLDBService : IDisposable
             builder.ConnectTimeout = 30;
             builder.ApplicationName = serverName.Split('\\')[1];
 
-            using (SqlConnection sqlConnection = new SqlConnection(builder.ConnectionString))
+            using SqlConnection sqlConnection = new SqlConnection(builder.ConnectionString);
+
+            if (sqlConnection != null)
             {
-                if (sqlConnection != null)
+                if (sqlConnection.State == System.Data.ConnectionState.Closed)
                 {
-                    if (sqlConnection.State == System.Data.ConnectionState.Closed)
-                    {
-                        await sqlConnection.OpenAsync();
-                        IsConnected = true;
-                    }
+                    await sqlConnection.OpenAsync();
+                    IsConnected = true;
+                }
 
-                    using (SqlCommand sql_cmd = sqlConnection.CreateCommand())
-                    {
-                        sql_cmd.CommandText = "SELECT [CC-ID], [CC-JobNumber], [CC-CardNumber], [CC-CreationDate], [CC-Customername], [CC-EditorName], [CC-Status], [CC-DealerName], [CC-SalesName], [CC-ChangedDate] FROM " + OMNITABLENAME;
+                using (SqlCommand sql_cmd = sqlConnection.CreateCommand())
+                {
+                    sql_cmd.CommandText = "SELECT [CC-ID], [CC-JobNumber], [CC-CardNumber], [CC-CreationDate], [CC-Customername], [CC-EditorName], [CC-Status], [CC-DealerName], [CC-SalesName], [CC-ChangedDate] FROM " + OMNITABLENAME;
 
-                        using (SqlDataReader sql_datareader = await sql_cmd.ExecuteReaderAsync())
+                    using SqlDataReader sql_datareader = await sql_cmd.ExecuteReaderAsync();
+
+                    while (await sql_datareader.ReadAsync())
+                    {
+                        try
                         {
-                            while (await sql_datareader.ReadAsync())
+                            cardCheckProcess = new CardCheckProcess
                             {
-                                try
-                                {
-                                    cardCheckProcess = new CardCheckProcess
-                                    {
-                                        ID = await sql_datareader.IsDBNullAsync(2) ? "" : sql_datareader.GetString(0),
-                                        JobNr = await sql_datareader.IsDBNullAsync(1) ? "" : sql_datareader.GetString(1),
-                                        ChipNumber = await sql_datareader.IsDBNullAsync(2) ? "" : sql_datareader.GetString(2),
-                                        DateCreated = await sql_datareader.IsDBNullAsync(3) ? "" : sql_datareader.GetString(3),
-                                        DealerName = await sql_datareader.IsDBNullAsync(7) ? "" : sql_datareader.GetString(7),
-                                        CName = await sql_datareader.IsDBNullAsync(5) ? "" : sql_datareader.GetString(4),
-                                        EditorName = await sql_datareader.IsDBNullAsync(6) ? "" : sql_datareader.GetString(5),
-                                        SalesName = await sql_datareader.IsDBNullAsync(8) ? "" : sql_datareader.GetString(8),
-                                        DateModified = await sql_datareader.IsDBNullAsync(9) ? "" : sql_datareader.GetString(9),
-                                        Status = await sql_datareader.IsDBNullAsync(6) ? "NA" : sql_datareader.GetString(6)
-                                        
-                                    };
-                                    CardChecks.Add(cardCheckProcess);
-                                    CardChecks = CardChecks.OrderByDescending(x => x.DateCreated).ToList();
-                                }
-                                catch(Exception ex)
-                                {
-                                    LogWriter.CreateLogEntry(ex);
-                                }
-                            }
+                                ID = await sql_datareader.IsDBNullAsync(2) ? "" : sql_datareader.GetString(0),
+                                JobNr = await sql_datareader.IsDBNullAsync(1) ? "" : sql_datareader.GetString(1),
+                                ChipNumber = await sql_datareader.IsDBNullAsync(2) ? "" : sql_datareader.GetString(2),
+                                DateCreated = await sql_datareader.IsDBNullAsync(3) ? "" : sql_datareader.GetString(3),
+                                DealerName = await sql_datareader.IsDBNullAsync(7) ? "" : sql_datareader.GetString(7),
+                                CName = await sql_datareader.IsDBNullAsync(5) ? "" : sql_datareader.GetString(4),
+                                EditorName = await sql_datareader.IsDBNullAsync(6) ? "" : sql_datareader.GetString(5),
+                                SalesName = await sql_datareader.IsDBNullAsync(8) ? "" : sql_datareader.GetString(8),
+                                DateModified = await sql_datareader.IsDBNullAsync(9) ? "" : sql_datareader.GetString(9),
+                                Status = await sql_datareader.IsDBNullAsync(6) ? "NA" : sql_datareader.GetString(6)
+
+                            };
+                            CardChecks.Add(cardCheckProcess);
+                            CardChecks = CardChecks.OrderByDescending(x => x.DateCreated).ToList();
+                        }
+                        catch (Exception ex)
+                        {
+                            LogWriter.CreateLogEntry(ex);
                         }
                     }
-                    return new ObservableCollection<CardCheckProcess>(CardChecks);
                 }
+                return new ObservableCollection<CardCheckProcess>(CardChecks);
             }
         }
         catch (Exception ex)
@@ -236,44 +233,40 @@ public class SQLDBService : IDisposable
             CardCheckProcess cardCheckProcess;
             List<CardCheckProcess> cardChecks = new List<CardCheckProcess>();
 
-            using (SQLiteConnection sqlLiteConnection = new SQLiteConnection("Data Source=" +
-                    dbName + ".db; Version = 3; Pooling = False; New = True; Compress = True; Timeout = 5"))
+            using SQLiteConnection sqlLiteConnection = new SQLiteConnection("Data Source=" +
+                    dbName + ".db; Version = 3; Pooling = False; New = True; Compress = True; Timeout = 5");
+
+            if (sqlLiteConnection != null)
             {
-                if (sqlLiteConnection != null)
+                if (sqlLiteConnection.State == System.Data.ConnectionState.Closed)
                 {
-                    if (sqlLiteConnection.State == System.Data.ConnectionState.Closed)
-                    {
-                        await sqlLiteConnection.OpenAsync();
-                    }
-
-                    using (SQLiteCommand sqlite_cmd = sqlLiteConnection.CreateCommand())
-                    {
-                        sqlite_cmd.CommandText = "SELECT * FROM " + OMNITABLENAME;
-
-                        using (SQLiteDataReader sqlite_datareader = sqlite_cmd.ExecuteReader())
-                        {
-                            while (await sqlite_datareader.ReadAsync())
-                            {
-                                cardCheckProcess = new CardCheckProcess
-                                {
-                                    
-                                    ID = sqlite_datareader.GetString(0),
-                                    ChipNumber = sqlite_datareader.GetString(2),
-                                    CName = sqlite_datareader.GetString(5),
-                                    JobNr = sqlite_datareader.GetString(1),
-                                    EditorName = sqlite_datareader.GetString(8),
-                                    //NumberOfChipsToCheck = sqlite_datareader.GetInt32(3),
-                                    Status = sqlite_datareader.GetString(6),
-                                    DateCreated = sqlite_datareader.GetString(3),
-                                };
-
-                                cardChecks.Add(cardCheckProcess);
-                            }
-                            return new ObservableCollection<CardCheckProcess>(cardChecks);
-                        }
-                    }
+                    await sqlLiteConnection.OpenAsync();
                 }
-            } 
+
+                using SQLiteCommand sqlite_cmd = sqlLiteConnection.CreateCommand();
+
+                sqlite_cmd.CommandText = "SELECT * FROM " + OMNITABLENAME;
+
+                using SQLiteDataReader sqlite_datareader = sqlite_cmd.ExecuteReader();
+
+                while (await sqlite_datareader.ReadAsync())
+                {
+                    cardCheckProcess = new CardCheckProcess
+                    {
+
+                        ID = sqlite_datareader.GetString(0),
+                        ChipNumber = sqlite_datareader.GetString(2),
+                        CName = sqlite_datareader.GetString(5),
+                        JobNr = sqlite_datareader.GetString(1),
+                        EditorName = sqlite_datareader.GetString(8),
+                        Status = sqlite_datareader.GetString(6),
+                        DateCreated = sqlite_datareader.GetString(3),
+                    };
+
+                    cardChecks.Add(cardCheckProcess);
+                }
+                return new ObservableCollection<CardCheckProcess>(cardChecks);
+            }
         }
         catch (Exception ex)
         {
@@ -290,7 +283,7 @@ public class SQLDBService : IDisposable
             using SettingsReaderWriter settings = new SettingsReaderWriter();
             settings.ReadSettings();
 
-            string tmpFilePath = settings.DefaultSettings.DefaultProjectOutputPath + "\\" + "downloadedReport.pdf";
+            var tmpFilePath = settings.DefaultSettings.DefaultProjectOutputPath + "\\" + "downloadedReport.pdf";
 
             SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder();
             builder.DataSource = serverName;
@@ -301,39 +294,35 @@ public class SQLDBService : IDisposable
             builder.ConnectTimeout = 30;
             builder.ApplicationName = serverName.Split('\\')[1];
 
-            using (SqlConnection sqlConnection = new SqlConnection(builder.ConnectionString))
+            using SqlConnection sqlConnection = new SqlConnection(builder.ConnectionString);
+
+            if (sqlConnection != null)
             {
-                if (sqlConnection != null)
+                if (sqlConnection.State == System.Data.ConnectionState.Closed)
                 {
-                    if (sqlConnection.State == System.Data.ConnectionState.Closed)
+                    await sqlConnection.OpenAsync();
+                    IsConnected = true;
+                }
+
+                using SqlCommand sql_cmd = sqlConnection.CreateCommand();
+
+                sql_cmd.CommandText = "SELECT [CC-ReportBase64] FROM " + OMNITABLENAME + " Where [CC-ID] = @id";
+
+                sql_cmd.Parameters.AddWithValue("@id", id);
+
+                // The reader needs to be executed with the SequentialAccess behavior to enable network streaming
+                // Otherwise ReadAsync will buffer the entire BLOB into memory which can cause scalability issues or even OutOfMemoryExceptions
+                using SqlDataReader reader = await sql_cmd.ExecuteReaderAsync(CommandBehavior.SequentialAccess);
+
+                if (await reader.ReadAsync())
+                {
+                    if (!(await reader.IsDBNullAsync(0)))
                     {
-                        await sqlConnection.OpenAsync();
-                        IsConnected = true;
-                    }
+                        using FileStream file = File.Create(tmpFilePath);
 
-                    using (SqlCommand sql_cmd = sqlConnection.CreateCommand())
-                    {
-                        sql_cmd.CommandText = "SELECT [CC-ReportBase64] FROM " + OMNITABLENAME + " Where [CC-ID] = @id";
+                        var data = ConvertFromBase64(reader.GetString(0));
 
-                        sql_cmd.Parameters.AddWithValue("@id", id);
-
-                        // The reader needs to be executed with the SequentialAccess behavior to enable network streaming
-                        // Otherwise ReadAsync will buffer the entire BLOB into memory which can cause scalability issues or even OutOfMemoryExceptions
-                        using (SqlDataReader reader = await sql_cmd.ExecuteReaderAsync(CommandBehavior.SequentialAccess))
-                        {
-                            if (await reader.ReadAsync())
-                            {
-                                if (!(await reader.IsDBNullAsync(0)))
-                                {
-                                    using (FileStream file = File.Create(tmpFilePath))
-                                    {
-                                        var data = ConvertFromBase64(reader.GetString(0));
-
-                                        await file.WriteAsync(data, 0, data.Length);
-                                    }
-                                }
-                            }
-                        }
+                        await file.WriteAsync(data, 0, data.Length);
                     }
                 }
             }
@@ -395,34 +384,32 @@ public class SQLDBService : IDisposable
             builder.ConnectTimeout = 30;
             builder.ApplicationName = serverName.Split('\\')[1];
 
-            using (SqlConnection sqlConnection = new SqlConnection(builder.ConnectionString))
+            using SqlConnection sqlConnection = new SqlConnection(builder.ConnectionString);
+
+            if (sqlConnection != null)
             {
-                if (sqlConnection != null)
+                if (sqlConnection.State == System.Data.ConnectionState.Closed)
                 {
-                    if (sqlConnection.State == System.Data.ConnectionState.Closed)
-                    {
-                        await sqlConnection.OpenAsync();
-                        IsConnected = true;
-                    }
-
-                    using (SqlCommand sql_cmd = sqlConnection.CreateCommand())
-                    {
-                        sql_cmd.CommandText = "UPDATE " + OMNITABLENAME + " SET [CC-ReportBase64] = @data Where [CC-ID] = @id";
-
-                        sql_cmd.Parameters.AddWithValue("@id", key);
-
-                        // Add a parameter which uses the FileStream we just opened
-                        // Size is set to -1 to indicate "MAX"
-
-                        sql_cmd.Parameters.Add("@data", SqlDbType.NText, -1).Value = ConvertToBase64(fs);
-
-                        // Send the data to the server asynchronously
-                        await sql_cmd.ExecuteScalarAsync();
-
-                        sqlConnection.Close();
-                    }
-
+                    await sqlConnection.OpenAsync();
+                    IsConnected = true;
                 }
+
+                using SqlCommand sql_cmd = sqlConnection.CreateCommand();
+
+                sql_cmd.CommandText = "UPDATE " + OMNITABLENAME + " SET [CC-ReportBase64] = @data Where [CC-ID] = @id";
+
+                sql_cmd.Parameters.AddWithValue("@id", key);
+
+                // Add a parameter which uses the FileStream we just opened
+                // Size is set to -1 to indicate "MAX"
+
+                sql_cmd.Parameters.Add("@data", SqlDbType.NText, -1).Value = ConvertToBase64(fs);
+
+                // Send the data to the server asynchronously
+                await sql_cmd.ExecuteScalarAsync();
+
+                sqlConnection.Close();
+
             }
         }
         catch (Exception ex)
@@ -461,27 +448,25 @@ public class SQLDBService : IDisposable
             builder.PacketSize = 512;
             builder.ApplicationName = serverName.Split('\\')[1];
 
-            using (SqlConnection sqlConnection = new SqlConnection(builder.ConnectionString))
+            using SqlConnection sqlConnection = new SqlConnection(builder.ConnectionString);
+
+            if (sqlConnection != null)
             {
-                if (sqlConnection != null)
+                if (sqlConnection.State == System.Data.ConnectionState.Closed)
                 {
-                    if (sqlConnection.State == System.Data.ConnectionState.Closed)
-                    {
-                        await sqlConnection.OpenAsync();
-                        IsConnected = true;
-                    }
-
-                    using (SqlCommand sql_cmd = sqlConnection.CreateCommand())
-                    {
-                        sql_cmd.CommandText = string.Format("UPDATE {0} SET [{1}] = @status Where [CC-ID] = @id", OMNITABLENAME, columnID);
-
-                        sql_cmd.Parameters.AddWithValue("@id", key);
-                        sql_cmd.Parameters.AddWithValue("@status", value);
-
-                        sql_cmd.ExecuteNonQuery();
-                        sqlConnection.Close();
-                    }
+                    await sqlConnection.OpenAsync();
+                    IsConnected = true;
                 }
+
+                using SqlCommand sql_cmd = sqlConnection.CreateCommand();
+
+                sql_cmd.CommandText = string.Format("UPDATE {0} SET [{1}] = @status Where [CC-ID] = @id", OMNITABLENAME, columnID);
+
+                sql_cmd.Parameters.AddWithValue("@id", key);
+                sql_cmd.Parameters.AddWithValue("@status", value);
+
+                sql_cmd.ExecuteNonQuery();
+                sqlConnection.Close();
             }
         }
         catch (Exception ex)

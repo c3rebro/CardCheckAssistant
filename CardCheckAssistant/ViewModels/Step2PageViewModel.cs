@@ -451,17 +451,17 @@ public partial class Step2PageViewModel : ObservableRecipient, INavigationAware
 
             await Task.Delay(1000);
 
-            int amountOfFreeMemory = 0;
-            string freeMemField = "N/A";
+            var amountOfFreeMemory = 0;
+            var freeMemField = "N/A";
             TextBlockFreeMem = freeMemField;
 
-            string chipType = "";
+            var chipType = "";
             InfoBarSupportedChipType = chipType;
 
-            bool notEnoughFreeMemory = true;
-            bool supported = false;
-            bool programmable = false;
-            string addHintsText = "";
+            var notEnoughFreeMemory = true;
+            var supported = false;
+            var programmable = false;
+            var addHintsText = "";
 
             using ReportReaderWriterService reportReader = new ReportReaderWriterService();
             using SettingsReaderWriter settings = new SettingsReaderWriter();
@@ -966,21 +966,21 @@ public partial class Step2PageViewModel : ObservableRecipient, INavigationAware
             using SettingsReaderWriter settings = new SettingsReaderWriter();
             settings.ReadSettings();
 
-            string finalPath =
+            var finalPath =
                 settings.DefaultSettings.DefaultProjectOutputPath + "\\"
                 + (settings.DefaultSettings.CreateSubdirectoryIsEnabled == true ? CheckProcessService.CurrentCardCheckProcess.JobNr + "\\" : string.Empty)
                 + CheckProcessService.CurrentCardCheckProcess.JobNr + "-"
                 + CheckProcessService.CurrentCardCheckProcess.ChipNumber
                 + "_final.pdf";
 
-            string semiFinalPath =
+            var semiFinalPath =
                 settings.DefaultSettings.DefaultProjectOutputPath + "\\"
                 + (settings.DefaultSettings.CreateSubdirectoryIsEnabled == true ? CheckProcessService.CurrentCardCheckProcess.JobNr + "\\" : string.Empty)
                 + CheckProcessService.CurrentCardCheckProcess.JobNr + "-"
                 + CheckProcessService.CurrentCardCheckProcess.ChipNumber
                 + "_.pdf";
 
-            string preFinalPath =
+            var preFinalPath =
                 settings.DefaultSettings.DefaultProjectOutputPath + "\\"
                 + (settings.DefaultSettings.CreateSubdirectoryIsEnabled == true ? CheckProcessService.CurrentCardCheckProcess.JobNr + "\\" : string.Empty)
                 + CheckProcessService.CurrentCardCheckProcess.JobNr + "-"

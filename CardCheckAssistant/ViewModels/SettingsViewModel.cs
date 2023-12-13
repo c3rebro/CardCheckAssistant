@@ -76,7 +76,7 @@ public partial class SettingsPageViewModel : ObservableRecipient
 
             SelectedDBUserPwd = enc.Decrypt(settings?.DefaultSettings?.SelectedDBUserPwd ?? "NoPWD");
 
-            if (settings.DefaultSettings.CardCheckTextTemplates != null && settings.DefaultSettings.CardCheckTextTemplates.Any())
+            if (settings?.DefaultSettings.CardCheckTextTemplates != null && settings.DefaultSettings.CardCheckTextTemplates.Any())
             {
                 TextTemplates = new ObservableCollection<CardCheckTextTemplate>(settings.DefaultSettings.CardCheckTextTemplates);
                 SelectedTextTemplate = TextTemplates?.FirstOrDefault();
@@ -400,27 +400,23 @@ public partial class SettingsPageViewModel : ObservableRecipient
 
     private async Task DBConnectionTest_Executed()
     {
-        using (SettingsReaderWriter settings = new SettingsReaderWriter())
+        using SettingsReaderWriter settings = new SettingsReaderWriter();
+
+        // Connect to DB Async
+        if (settings.DefaultSettings.CardCheckUseMSSQL ?? false)
         {
-            // Connect to DB Async
-            if (settings.DefaultSettings.CardCheckUseMSSQL ?? false)
-            {
-                using (SQLDBService dbService = new SQLDBService(
-                    settings.DefaultSettings.SelectedDBServerName,
-                    settings.DefaultSettings.SelectedDBName,
-                    settings.DefaultSettings.SelectedDBUsername,
-                    settings.DefaultSettings.SelectedDBUserPwd))
-                {
-                    await dbService.GetCardChecksFromMSSQLAsync();
-                }
-            }
-            else
-            {
-                using (SQLDBService dbService = new SQLDBService(""))
-                {
-                    await dbService.GetCardChecksFromSQLLiteAsync();
-                }
-            }
+            using SQLDBService dbService = new SQLDBService(
+                settings.DefaultSettings.SelectedDBServerName,
+                settings.DefaultSettings.SelectedDBName,
+                settings.DefaultSettings.SelectedDBUsername,
+                settings.DefaultSettings.SelectedDBUserPwd);
+            await dbService.GetCardChecksFromMSSQLAsync();
+        }
+        else
+        {
+            using SQLDBService dbService = new SQLDBService("");
+
+            await dbService.GetCardChecksFromSQLLiteAsync();
         }
     }
 
@@ -489,12 +485,11 @@ public partial class SettingsPageViewModel : ObservableRecipient
     {
         try
         {
-            using (SettingsReaderWriter settings = new SettingsReaderWriter())
-            {
-                settings.DefaultSettings.CardCheckTextTemplates = TextTemplates;
+            using SettingsReaderWriter settings = new SettingsReaderWriter();
 
-                settings.SaveSettings();
-            }
+            settings.DefaultSettings.CardCheckTextTemplates = TextTemplates;
+
+            settings.SaveSettings();
         }
         catch
         {
@@ -530,9 +525,9 @@ public partial class SettingsPageViewModel : ObservableRecipient
         {
             try
             {
-                String[] arr = source.Split('-');
-                byte[] array = new byte[arr.Length];
-                for (int i = 0; i < arr.Length; i++)
+                var arr = source.Split('-');
+                var array = new byte[arr.Length];
+                for (var i = 0; i < arr.Length; i++)
                 {
                     array[i] = Convert.ToByte(arr[i], 16);
                 }
@@ -577,19 +572,15 @@ public partial class SettingsPageViewModel : ObservableRecipient
                 ICryptoTransform encryptor = rijAlg.CreateEncryptor(rijAlg.Key, rijAlg.IV);
 
                 // Create the streams used for encryption.
-                using (MemoryStream msEncrypt = new MemoryStream())
-                {
-                    using (CryptoStream csEncrypt = new CryptoStream(msEncrypt, encryptor, CryptoStreamMode.Write))
-                    {
-                        using (StreamWriter swEncrypt = new StreamWriter(csEncrypt))
-                        {
+                using MemoryStream msEncrypt = new MemoryStream();
+                using CryptoStream csEncrypt = new CryptoStream(msEncrypt, encryptor, CryptoStreamMode.Write);
 
-                            //Write all data to the stream.
-                            swEncrypt.Write(plainText);
-                        }
-                        encrypted = msEncrypt.ToArray();
-                    }
+                using (StreamWriter swEncrypt = new StreamWriter(csEncrypt))
+                {
+                    //Write all data to the stream.
+                    swEncrypt.Write(plainText);
                 }
+                encrypted = msEncrypt.ToArray();
             }
 
             // Return the encrypted bytes from the memory stream.
@@ -616,7 +607,7 @@ public partial class SettingsPageViewModel : ObservableRecipient
 
             // Declare the string used to hold
             // the decrypted text.
-            string plaintext = "";
+            var plaintext = "";
 
             // Create an Rijndael object
             // with the specified key and IV.
@@ -629,19 +620,13 @@ public partial class SettingsPageViewModel : ObservableRecipient
                 ICryptoTransform decryptor = rijAlg.CreateDecryptor(rijAlg.Key, rijAlg.IV);
 
                 // Create the streams used for decryption.
-                using (MemoryStream msDecrypt = new MemoryStream(cipherText))
-                {
-                    using (CryptoStream csDecrypt = new CryptoStream(msDecrypt, decryptor, CryptoStreamMode.Read))
-                    {
-                        using (StreamReader srDecrypt = new StreamReader(csDecrypt))
-                        {
+                using MemoryStream msDecrypt = new MemoryStream(cipherText);
+                using CryptoStream csDecrypt = new CryptoStream(msDecrypt, decryptor, CryptoStreamMode.Read);
+                using StreamReader srDecrypt = new StreamReader(csDecrypt);
 
-                            // Read the decrypted bytes from the decrypting stream
-                            // and place them in a string.
-                            plaintext = srDecrypt.ReadToEnd();
-                        }
-                    }
-                }
+                // Read the decrypted bytes from the decrypting stream
+                // and place them in a string.
+                plaintext = srDecrypt.ReadToEnd();
             }
 
             return plaintext;

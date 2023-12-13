@@ -142,12 +142,12 @@ public partial class Step3PageViewModel : ObservableRecipient
     /// <summary>
     /// 
     /// </summary>
-    public ICommand OpenReportCommand => new RelayCommand(OpenReportCommand_Executed);
+    public IAsyncRelayCommand OpenReportCommand => new AsyncRelayCommand(OpenReportCommand_Executed);
 
     /// <summary>
     /// 
     /// </summary>
-    public ICommand OpenReportPathCommand => new RelayCommand(OpenReportPathCommand_Executed);
+    public IAsyncRelayCommand OpenReportPathCommand => new AsyncRelayCommand(OpenReportPathCommand_Executed);
 
     /// <summary>
     /// 
@@ -163,14 +163,14 @@ public partial class Step3PageViewModel : ObservableRecipient
 
             await Task.Delay(1000);
 
-            string finalPath =
+            var finalPath =
                 settings.DefaultSettings.DefaultProjectOutputPath + "\\"
                 + (settings.DefaultSettings.CreateSubdirectoryIsEnabled == true ? CheckProcessService.CurrentCardCheckProcess.JobNr + "\\" : string.Empty)
                 + CheckProcessService.CurrentCardCheckProcess.JobNr + "-"
                 + CheckProcessService.CurrentCardCheckProcess.ChipNumber
                 + "_final.pdf";
 
-            string semiFinalPath =
+            var semiFinalPath =
                 settings.DefaultSettings.DefaultProjectOutputPath + "\\"
                 + (settings.DefaultSettings.CreateSubdirectoryIsEnabled == true ? CheckProcessService.CurrentCardCheckProcess.JobNr + "\\" : string.Empty)
                 + CheckProcessService.CurrentCardCheckProcess.JobNr + "-"
@@ -290,7 +290,7 @@ public partial class Step3PageViewModel : ObservableRecipient
     /// <summary>
     /// 
     /// </summary>
-    private async void OpenReportCommand_Executed()
+    private async Task OpenReportCommand_Executed()
     {
         try
         {
@@ -327,7 +327,7 @@ public partial class Step3PageViewModel : ObservableRecipient
     /// <summary>
     /// 
     /// </summary>
-    private async void OpenReportPathCommand_Executed()
+    private async Task OpenReportPathCommand_Executed()
     {
         try
         {
@@ -375,21 +375,21 @@ public partial class Step3PageViewModel : ObservableRecipient
 
             settings.ReadSettings();
 
-            string finalPath =
+            var finalPath =
                 settings.DefaultSettings.DefaultProjectOutputPath + "\\"
                 + (settings.DefaultSettings.CreateSubdirectoryIsEnabled == true ? CheckProcessService.CurrentCardCheckProcess.JobNr + "\\" : string.Empty)
                 + CheckProcessService.CurrentCardCheckProcess.JobNr + "-"
                 + CheckProcessService.CurrentCardCheckProcess.ChipNumber
                 + "_final.pdf";
 
-            string semiFinalPath =
+            var semiFinalPath =
                 settings.DefaultSettings.DefaultProjectOutputPath + "\\"
                 + (settings.DefaultSettings.CreateSubdirectoryIsEnabled == true ? CheckProcessService.CurrentCardCheckProcess.JobNr + "\\" : string.Empty)
                 + CheckProcessService.CurrentCardCheckProcess.JobNr + "-"
                 + CheckProcessService.CurrentCardCheckProcess.ChipNumber
                 + "_.pdf";
 
-            string preFinalPath =
+            var preFinalPath =
                 settings.DefaultSettings.DefaultProjectOutputPath + "\\"
                 + (settings.DefaultSettings.CreateSubdirectoryIsEnabled == true ? CheckProcessService.CurrentCardCheckProcess.JobNr + "\\" : string.Empty)
                 + CheckProcessService.CurrentCardCheckProcess.JobNr + "-"
