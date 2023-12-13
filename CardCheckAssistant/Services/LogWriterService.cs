@@ -27,7 +27,7 @@ namespace Log4CSharp
         /// <param name="entry"></param>
         public static void CreateLogEntry(string entry)
         {
-            string _logFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), FacilityName, "log");
+            var _logFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), FacilityName, "log");
 
             if (!Directory.Exists(_logFilePath))
             {
@@ -61,7 +61,7 @@ namespace Log4CSharp
         /// <param name="entry"></param>
         public static void CreateLogEntry(Exception e)
         {
-            string _logFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), FacilityName, "log");
+            var _logFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), FacilityName, "log");
 
             if (!Directory.Exists(_logFilePath))
             {

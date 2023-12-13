@@ -798,7 +798,6 @@ public partial class Step2PageViewModel : ObservableRecipient, INavigationAware
                             }
                             catch (Exception ae)
                             {
-                                //readerService.Close();
                             }
                         }
 
@@ -1091,11 +1090,11 @@ public partial class Step2PageViewModel : ObservableRecipient, INavigationAware
 
             if (TextBlockCheckFinishedAndResultIsSuppAndProgIsVisible)
             {
-                (App.MainRoot.XamlRoot.Content as ShellPage).ViewModel.NavigationService.NavigateTo(typeof(Step3PageViewModel).FullName);
+                (App.MainRoot.XamlRoot.Content as ShellPage)?.ViewModel.NavigationService.NavigateTo(typeof(Step3PageViewModel).FullName ?? "");
             }
             else
             {
-                (App.MainRoot.XamlRoot.Content as ShellPage).ViewModel.NavigationService.NavigateTo(typeof(HomePageViewModel).FullName);
+                (App.MainRoot.XamlRoot.Content as ShellPage)?.ViewModel.NavigationService.NavigateTo(typeof(HomePageViewModel).FullName ?? "");
             }
         }
         catch (Exception ex)
@@ -1122,7 +1121,7 @@ public partial class Step2PageViewModel : ObservableRecipient, INavigationAware
 
             await Task.Delay(1000);
 
-            (App.MainRoot.XamlRoot.Content as ShellPage).ViewModel.NavigationService.NavigateTo(typeof(Step1PageViewModel).FullName);
+            (App.MainRoot.XamlRoot.Content as ShellPage)?.ViewModel.NavigationService.NavigateTo(typeof(Step1PageViewModel).FullName ?? "");
         }
         catch (Exception ex)
         {

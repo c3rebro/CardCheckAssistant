@@ -589,10 +589,6 @@ public class SQLDBService : IDisposable
     {
         if (!_disposed)
         {
-            if (disposing)
-            {
-            }
-
             _disposed = true;
         }
     }

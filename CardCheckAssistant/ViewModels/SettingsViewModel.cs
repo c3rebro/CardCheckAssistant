@@ -62,7 +62,6 @@ public partial class SettingsPageViewModel : ObservableRecipient
                 });
 
             IsTextBoxCardCheckTextTemplateEnabled = false;
-            //SelectedTheme = settings.DefaultSettings.DefaultTheme;
             SelectedProjectFolder = settings.DefaultSettings.DefaultProjectOutputPath ?? string.Empty;
             SelectedCustomProjectFolder = settings.DefaultSettings.LastUsedCustomProjectPath ?? string.Empty;
             SelectedRFIDGearPath = settings.DefaultSettings.DefaultRFIDGearExePath ?? string.Empty;
@@ -481,7 +480,7 @@ public partial class SettingsPageViewModel : ObservableRecipient
         {
         }
 
-        (App.MainRoot.XamlRoot.Content as ShellPage).ViewModel.NavigationService.NavigateTo(typeof(HomePageViewModel).FullName);
+        (App.MainRoot.XamlRoot.Content as ShellPage)?.ViewModel.NavigationService.NavigateTo(typeof(HomePageViewModel).FullName ?? "");
     }
 
     private class RijndaelEnc : IDisposable

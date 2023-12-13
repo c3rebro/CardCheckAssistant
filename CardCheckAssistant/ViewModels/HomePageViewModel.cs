@@ -70,16 +70,6 @@ public partial class HomePageViewModel : ObservableRecipient, INavigationAware
                 SelectedCardCheckProcess = DataGridItemCollection.First(x => x.Status == "InProgress");
             }
         }
-        /*
-        var window = (Application.Current as App)?.Window as MainWindow ?? new MainWindow();
-        var navigation = window.Navigation;
-
-        // At AppLaunch: Disable all "In between" Steps.
-        foreach (NavigationViewItem nVI in navigation.GetNavigationViewItems().Where(x => x.Content.ToString() != "Start").Where(x => x.Content.ToString().Contains("Schritt")))
-        {
-            nVI.IsEnabled = false;
-        }
-        */
     }
 
     private void OpenReportWritable_Click(object sender, RoutedEventArgs e)
@@ -107,7 +97,7 @@ public partial class HomePageViewModel : ObservableRecipient, INavigationAware
 
             try
             {
-                packageVersion = ""; // CommunityToolkit.Common.Helpers..Helpers.PackageVersionHelper.ToPackageVersion; //.ToFormattedString(3) ?? "";
+                packageVersion = "";
             }
             catch { }
 
@@ -491,7 +481,6 @@ public partial class HomePageViewModel : ObservableRecipient, INavigationAware
                 }
 
                 ModalView.Dialogs.Where(x => x.Name == "connectWaitMsgDlg").Single().Hide();
-                //ModalView.Dialogs.Remove(ModalView.Dialogs.Where(x => x.Name == "connectWaitMsgDlg").Single());
             }
 
             //I expect the Delay to be not so sufficient on some machines
@@ -759,7 +748,7 @@ public partial class HomePageViewModel : ObservableRecipient, INavigationAware
         {
             await App.MainRoot.MessageDialogAsync(
                 "Fehler:",
-                string.Format("Die Anwendung konnte nicht automatisch neu gestartet werden.\nBitte starte sie manuell neu."));
+                "Die Anwendung konnte nicht automatisch neu gestartet werden.\nBitte starte sie manuell neu.");
         }
 
     }
@@ -779,10 +768,6 @@ public partial class HomePageViewModel : ObservableRecipient, INavigationAware
     {
         if (!_disposed)
         {
-            if (disposing)
-            {
-            }
-
             _disposed = true;
         }
     }

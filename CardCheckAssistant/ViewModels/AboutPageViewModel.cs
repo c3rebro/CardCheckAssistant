@@ -11,7 +11,7 @@ using System.Windows.Input;
 
 namespace CardCheckAssistant.ViewModels;
 
-public partial class AboutPageViewModel : ObservableRecipient
+public class AboutPageViewModel : ObservableRecipient
 {
     /// <summary>
     /// 

@@ -134,8 +134,6 @@ public partial class Step1PageViewModel : ObservableRecipient, INavigationAware
     [ObservableProperty]
     private bool _goBackCanExecute;
 
-
-
     /// <summary>
     /// 
     /// </summary>
@@ -323,8 +321,8 @@ public partial class Step1PageViewModel : ObservableRecipient, INavigationAware
             {
                 if (await App.MainRoot.ConfirmationDialogAsync(
                         "Warnung",
-                        string.Format("Die Datei, die erstellt werden soll, existiert bereits.\n" +
-                        "Soll sie überschrieben werden?"),
+                        "Die Datei, die erstellt werden soll, existiert bereits.\n" +
+                        "Soll sie überschrieben werden?",
                         "Ja", "Nein") == true)
                 {
                     try
@@ -371,7 +369,7 @@ public partial class Step1PageViewModel : ObservableRecipient, INavigationAware
 
             await Task.Delay(1000);
 
-            (App.MainRoot.XamlRoot.Content as ShellPage).ViewModel.NavigationService.NavigateTo(typeof(Step2PageViewModel).FullName);
+            (App.MainRoot.XamlRoot.Content as ShellPage)?.ViewModel.NavigationService.NavigateTo(typeof(Step2PageViewModel).FullName ?? "");
         }
 
         catch (Exception e)
@@ -390,7 +388,7 @@ public partial class Step1PageViewModel : ObservableRecipient, INavigationAware
             scanChipTimer.Stop();
             scanChipTimer.Tick -= ScanChipEvent;
 
-            (App.MainRoot.XamlRoot.Content as ShellPage).ViewModel.NavigationService.NavigateTo(typeof(HomePageViewModel).FullName);
+            (App.MainRoot.XamlRoot.Content as ShellPage)?.ViewModel.NavigationService.NavigateTo(typeof(HomePageViewModel).FullName ?? "");
         }
         catch (Exception e)
         {
@@ -413,10 +411,6 @@ public partial class Step1PageViewModel : ObservableRecipient, INavigationAware
     {
         if (!_disposed)
         {
-            if (disposing)
-            {
-            }
-
             _disposed = true;
         }
     }

@@ -31,15 +31,9 @@ namespace CardCheckAssistant.Services
             }
         }
 
-        public bool MoreThanOneReaderFound
-        {
-            get { return readerDevice?.MoreThanOneReader ?? true; }
-        }
+        public bool MoreThanOneReaderFound => readerDevice?.MoreThanOneReader ?? true;
 
-        public bool ReaderPortBusy
-        {
-            get { return readerDevice?.PortAccessDenied ?? true; }
-        }
+        public bool ReaderPortBusy => readerDevice?.PortAccessDenied ?? true;
 
         public GenericChipModel? GenericChip
         {
@@ -164,14 +158,10 @@ namespace CardCheckAssistant.Services
             });
         }
 
-        protected async Task Dispose(bool disposing)
+        protected void Dispose(bool disposing)
         {
             if (!_disposed)
             {
-                if (disposing)
-                {
-                }
-
                 _disposed = true;
             }
         }

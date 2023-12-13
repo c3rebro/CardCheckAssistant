@@ -103,33 +103,32 @@ public class ReportReaderWriterService : IDisposable
         {
             if (!String.IsNullOrWhiteSpace(ReportOutputPath))
             {
-                using (var pdfDoc = PdfDocument.Load(ReportTemplatePath))
+                using PdfDocument pdfDoc = PdfDocument.Load(ReportTemplatePath);
+                
+                try
                 {
-                    try
+                    if(pdfDoc != null)
                     {
-                        if(pdfDoc != null)
+                        ReportTemplatePath = System.IO.Path.Combine(appDataPath, reportTemplateTempFileName);
+
+                        var form = pdfDoc.Form;
+
+                        foreach (var _field in form.Fields)
                         {
-                            ReportTemplatePath = System.IO.Path.Combine(appDataPath, reportTemplateTempFileName);
-
-                            var form = pdfDoc.Form;
-
-                            foreach (var _field in form.Fields)
-                            {
-                                pdfDoc.Form.Fields[_field.Name].ReadOnly = isReadOnly;
-                            }
-
-                            pdfDoc.Save(ReportOutputPath);
-                            pdfDoc.Close();
-
-                            File.Copy(ReportOutputPath, System.IO.Path.Combine(appDataPath, reportTemplateTempFileName), true);
+                            pdfDoc.Form.Fields[_field.Name].ReadOnly = isReadOnly;
                         }
 
+                        pdfDoc.Save(ReportOutputPath);
+                        pdfDoc.Close();
+
+                        File.Copy(ReportOutputPath, System.IO.Path.Combine(appDataPath, reportTemplateTempFileName), true);
                     }
-                    catch (Exception e)
-                    {
-                        LogWriter.CreateLogEntry(e);
-                    }
+
                 }
+                catch (Exception e)
+                {
+                    LogWriter.CreateLogEntry(e);
+                }           
             }
         }
         catch (XmlException e)
@@ -149,30 +148,30 @@ public class ReportReaderWriterService : IDisposable
         {
             if (!String.IsNullOrWhiteSpace(ReportOutputPath))
             {
-                using (var pdfDoc = PdfDocument.Load(ReportTemplatePath))
+                using PdfDocument pdfDoc = PdfDocument.Load(ReportTemplatePath); 
+                
+                try
                 {
-                    try
+                    ReportTemplatePath = System.IO.Path.Combine(appDataPath, reportTemplateTempFileName);
+
+                    if(pdfDoc.Form.Fields[_field] != null)
                     {
-                        ReportTemplatePath = System.IO.Path.Combine(appDataPath, reportTemplateTempFileName);
-
-                        if(pdfDoc.Form.Fields[_field] != null)
-                        {
-                            pdfDoc.Form.Fields[_field].Hidden = false;
-                            pdfDoc.Form.Fields[_field].ReadOnly = false;
-                            pdfDoc.Form.Fields[_field].Value = _value;
-                        }
-
-
-                        pdfDoc.Save(ReportOutputPath);
-                        pdfDoc.Close();
-
-                        File.Copy(ReportOutputPath, System.IO.Path.Combine(appDataPath, reportTemplateTempFileName), true);
+                        pdfDoc.Form.Fields[_field].Hidden = false;
+                        pdfDoc.Form.Fields[_field].ReadOnly = false;
+                        pdfDoc.Form.Fields[_field].Value = _value;
                     }
-                    catch (Exception e)
-                    {
-                        LogWriter.CreateLogEntry(e);
-                    }
+
+
+                    pdfDoc.Save(ReportOutputPath);
+                    pdfDoc.Close();
+
+                    File.Copy(ReportOutputPath, System.IO.Path.Combine(appDataPath, reportTemplateTempFileName), true);
                 }
+                catch (Exception e)
+                {
+                    LogWriter.CreateLogEntry(e);
+                }
+                
             }
         }
         catch (XmlException e)
@@ -194,25 +193,24 @@ public class ReportReaderWriterService : IDisposable
             {
                 ReportTemplatePath = System.IO.Path.Combine(appDataPath, reportTemplateTempFileName);
 
-                using (var pdfDoc = PdfDocument.Load(ReportTemplatePath))
+                using var pdfDoc = PdfDocument.Load(ReportTemplatePath);
+
+                try
                 {
-                    try
-                    {
-                        var form = pdfDoc.Form;
+                    var form = pdfDoc.Form;
 
-                        pdfDoc.Form.Fields[_field].Hidden = false;
-                        pdfDoc.Form.Fields[_field].ReadOnly = false;
-                        pdfDoc.Form.Fields[_field].Value = string.Format("{0}{1}", pdfDoc.Form.Fields[_field]?.Value, _value);
+                    pdfDoc.Form.Fields[_field].Hidden = false;
+                    pdfDoc.Form.Fields[_field].ReadOnly = false;
+                    pdfDoc.Form.Fields[_field].Value = string.Format("{0}{1}", pdfDoc.Form.Fields[_field]?.Value, _value);
 
-                        pdfDoc.Save(ReportOutputPath);
-                        pdfDoc.Close();
+                    pdfDoc.Save(ReportOutputPath);
+                    pdfDoc.Close();
 
-                        File.Copy(ReportOutputPath, System.IO.Path.Combine(appDataPath, reportTemplateTempFileName), true);
-                    }
-                    catch (Exception e)
-                    {
-                        LogWriter.CreateLogEntry(e);
-                    }
+                    File.Copy(ReportOutputPath, System.IO.Path.Combine(appDataPath, reportTemplateTempFileName), true);
+                }
+                catch (Exception e)
+                {
+                    LogWriter.CreateLogEntry(e);
                 }
             }
         }
@@ -235,23 +233,20 @@ public class ReportReaderWriterService : IDisposable
 
             if (!String.IsNullOrWhiteSpace(ReportTemplatePath) && File.Exists(ReportTemplatePath))
             {
-                using (var pdfDoc = PdfDocument.Load(ReportTemplatePath))
+                using var pdfDoc = PdfDocument.Load(ReportTemplatePath);
+
+                try
                 {
-                    try
-                    {
-                        var form = pdfDoc.Form;
+                    var form = pdfDoc.Form;
 
-                        result = pdfDoc.Form.Fields[_field]?.Value as string ?? string.Empty;
+                    result = pdfDoc.Form.Fields[_field]?.Value as string ?? string.Empty;
 
-                        pdfDoc.Close();
-                    }
-                    catch (Exception e)
-                    {
-                        LogWriter.CreateLogEntry(e);
-                    }
+                    pdfDoc.Close();
                 }
-
-                    
+                catch (Exception e)
+                {
+                    LogWriter.CreateLogEntry(e);
+                }
             }
             return result ?? string.Empty;
         }

@@ -240,10 +240,6 @@ public class DefaultSettings : IDisposable
     {
         if (!_disposed)
         {
-            if (disposing)
-            {
-            }
-
             _disposed = true;
         }
     }

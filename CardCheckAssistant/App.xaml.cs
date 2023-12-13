@@ -114,10 +114,6 @@ public partial class App : Application
     {
         base.OnLaunched(args);
 
-        //App.GetService<IAppNotificationService>().Show(string.Format("AppNotificationSamplePayload".GetLocalized(), AppContext.BaseDirectory));
-
         await App.GetService<IActivationService>().ActivateAsync(args);
-
-        //MainRoot = MainWindow.Content as FrameworkElement;
     }
 }

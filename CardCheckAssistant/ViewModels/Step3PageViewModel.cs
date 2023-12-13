@@ -52,71 +52,43 @@ public partial class Step3PageViewModel : ObservableRecipient
     /// <summary>
     /// 
     /// </summary>
-    public bool TextBlockCheckFinishedAndResultIsSuppAndProgIsVisible
-    {
-        get => _textBlockCheckFinishedAndResultIsSuppAndProgIsVisible;
-        set => SetProperty(ref _textBlockCheckFinishedAndResultIsSuppAndProgIsVisible, value);
-    }
+    [ObservableProperty]
     private bool _textBlockCheckFinishedAndResultIsSuppAndProgIsVisible;
 
     /// <summary>
     /// 
     /// </summary>
-    public bool HyperlinkButtonReportIsVisible
-    {
-        get => _hyperlinkButtonReportIsVisible;
-        set => SetProperty(ref _hyperlinkButtonReportIsVisible, value);
-    }
+    [ObservableProperty]
     private bool _hyperlinkButtonReportIsVisible;
 
     /// <summary>
     /// 
     /// </summary>
-    public bool TextBlockCheckFinishedIsVisible
-    {
-        get => _textBlockCheckFinishedIsVisible;
-        set => SetProperty(ref _textBlockCheckFinishedIsVisible, value);
-    }
+    [ObservableProperty]
     private bool _textBlockCheckFinishedIsVisible;
 
     /// <summary>
     /// 
     /// </summary>
-    public bool TextBlockCheckNotYetFinishedIsVisible
-    {
-        get => _textBlockCheckNotYetFinishedIsVisible;
-        set => SetProperty(ref _textBlockCheckNotYetFinishedIsVisible, value);
-    }
+    [ObservableProperty]
     private bool _textBlockCheckNotYetFinishedIsVisible;
 
     /// <summary>
     /// 
     /// </summary>
-    public bool TextBlockCheckFinishedAndResultIsSuppOnlyIsVisible
-    {
-        get => _textBlockCheckFinishedAndResultIsSuppOnlyIsVisible;
-        set => SetProperty(ref _textBlockCheckFinishedAndResultIsSuppOnlyIsVisible, value);
-    }
+    [ObservableProperty]
     private bool _textBlockCheckFinishedAndResultIsSuppOnlyIsVisible;
 
     /// <summary>
     /// 
     /// </summary>
-    public bool NextStepCanExecute
-    {
-        get => _nextStepCanExecute;
-        set => SetProperty(ref _nextStepCanExecute, value);
-    }
+    [ObservableProperty]
     private bool _nextStepCanExecute;
 
     /// <summary>
     /// 
     /// </summary>
-    public bool GoBackCanExecute
-    {
-        get => _goBackCanExecute;
-        set => SetProperty(ref _goBackCanExecute, value);
-    }
+    [ObservableProperty]
     private bool _goBackCanExecute;
 
     /// <summary>
@@ -132,11 +104,8 @@ public partial class Step3PageViewModel : ObservableRecipient
     /// <summary>
     /// 
     /// </summary>
-    public ObservableCollection<string> ChipCount
-    {
-        get; set;
-    }
-
+    [ObservableProperty]
+    private ObservableCollection<string> _chipCount;
     #endregion
 
     #region Commands
@@ -272,12 +241,12 @@ public partial class Step3PageViewModel : ObservableRecipient
 
                 await App.MainRoot.MessageDialogAsync(
                     "Prüfung erfolgreich abgeschlossen.",
-                    string.Format("Die Prüfung ist hiermit abgeschlossen.\n" +
+                    "Die Prüfung ist hiermit abgeschlossen.\n" +
                     "Bitte nimm die Karte vom Leser und bereite sie für den Rückversand vor.\n" +
                     "\n" +
                     "Hinweis: \n" +
                     "Mit dem Klick auf \"Fertigstellen\" wird das Ergebnis der Prüfung\n" +
-                    "Automatisch in die Datenbank hochgeladen und an OMNI übertragen."),
+                    "Automatisch in die Datenbank hochgeladen und an OMNI übertragen.",
                     "OK");
 
                 TextBlockCheckFinishedAndResultIsSuppAndProgIsVisible = true;
@@ -457,7 +426,7 @@ public partial class Step3PageViewModel : ObservableRecipient
                 return;
             }
 
-            (App.MainRoot.XamlRoot.Content as ShellPage).ViewModel.NavigationService.NavigateTo(typeof(HomePageViewModel).FullName);
+            (App.MainRoot.XamlRoot.Content as ShellPage)?.ViewModel.NavigationService.NavigateTo(typeof(HomePageViewModel).FullName ?? "");
 
         }
         catch (Exception ex)
@@ -477,7 +446,7 @@ public partial class Step3PageViewModel : ObservableRecipient
     {
         try
         {
-            (App.MainRoot.XamlRoot.Content as ShellPage).ViewModel.NavigationService.NavigateTo(typeof(Step1PageViewModel).FullName);
+            (App.MainRoot.XamlRoot.Content as ShellPage)?.ViewModel.NavigationService.NavigateTo(typeof(Step1PageViewModel).FullName ?? "");
         }
         catch (Exception e)
         {
