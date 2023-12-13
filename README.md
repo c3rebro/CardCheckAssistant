@@ -23,26 +23,26 @@ Bitte melde Fehler per Teams direkt an mich oder über [GitHub](https://github.c
 
 ## Letzte Änderungen:
 
-Version 1.0.33
+### Version 1.0.33
 -----------------------------------------------------------------
 Hintergrundfunktionen:
-  + Änderung: Text "Sprachauswahl" ist keine Frage mehr. Anpassung der Funktion erfolgt später: Die Sprache soll zwar änderbar sein, jedoch erfolgt die Einstellung aus Omni heraus.
-  + Änderung: Es werden Standardmäßig nur Aufträge mit dem Status "In Bearbeitung" angezeigt und nicht mehr alle. Dies kann über die Filterfunktion geändert werden.
-  + Neue Funktion: Neue Einstellung: "Temporäre Berichtdateien löschen". Löscht alle editierbaren *_.pdf und *.pdf Dateien aus den Berichtverzeichnissen und behält nur die *_final.pdf* Dateien nach Fertigstellung. Ein Abschalten belässt diese Berichtdateien im Pfad.
-  + Fehlerbehebung: InfoBar: "geöffneten Bericht wieder schließen" und Fortschrittverhinderung wenn dieser noch geöffnet ist. Dies verhindert ein "Steckenbleiben" wegen einer Zugriffsverweigerung auf die geöffnete PDF Datei.
-  + Fehlerbehebung: "Schritt-Icon's" im linken Menüband (Häuschen-Icon und 1,2,3 - Icons) sind nicht mehr zur Navigation vorgesehen. Dies verhindert ein Springen zwischen Schritten wenn der Kartenleser noch beschäftigt ist.
-  + Fehlerbehebung: Solange ein Bericht geöffnet ist, kann nicht von Schritt 2 auf Schritt 3 gewechselt werden. 
-  + Fehlerbehebung: Ein Prüfvorgang kann nicht gestartet werden, wenn der Bericht bereits exitiert und nicht überschrieben werden kann oder werden soll.
++ Änderung: Text "Sprachauswahl" ist keine Frage mehr. Anpassung der Funktion erfolgt später: Die Sprache soll zwar änderbar sein, jedoch erfolgt die Einstellung aus Omni heraus.
++ Änderung: Es werden Standardmäßig nur Aufträge mit dem Status "In Bearbeitung" angezeigt und nicht mehr alle. Dies kann über die Filterfunktion geändert werden.
++ Neue Funktion: Neue Einstellung: "Temporäre Berichtdateien löschen". Löscht alle editierbaren *_.pdf und *.pdf Dateien aus den Berichtverzeichnissen und behält nur die *_final.pdf* Dateien nach Fertigstellung. Ein Abschalten belässt diese Berichtdateien im Pfad.
++ Fehlerbehebung: InfoBar: "geöffneten Bericht wieder schließen" und Fortschrittverhinderung wenn dieser noch geöffnet ist. Dies verhindert ein "Steckenbleiben" wegen einer Zugriffsverweigerung auf die geöffnete PDF Datei.
++ Fehlerbehebung: "Schritt-Icon's" im linken Menüband (Häuschen-Icon und 1,2,3 - Icons) sind nicht mehr zur Navigation vorgesehen. Dies verhindert ein Springen zwischen Schritten wenn der Kartenleser noch beschäftigt ist.
++ Fehlerbehebung: Solange ein Bericht geöffnet ist, kann nicht von Schritt 2 auf Schritt 3 gewechselt werden. 
++ Fehlerbehebung: Ein Prüfvorgang kann nicht gestartet werden, wenn der Bericht bereits exitiert und nicht überschrieben werden kann oder werden soll.
 
-Version 1.0.32
+### Version 1.0.32
 -----------------------------------------------------------------
 Hintergrundfunktionen:
-  + Fehlerbehebung: Endlos - "ToastMessage" bei neuen Aufträgen...
-  + Erste Einträge auf der "Hilfeseite"
++ Fehlerbehebung: Endlos - "ToastMessage" bei neuen Aufträgen...
++ Erste Einträge auf der "Hilfeseite"
 
-Version 1.0.31
+### Version 1.0.31
 -----------------------------------------------------------------
 Hintergrundfunktionen:
-  + Sortieroptionen: Sortieren nach Jobnummer erfolgt jetzt anhand der ID um die Chipnummer zu berücksichtigen
-  + Sortieroptionen: Aufsteigend / Absteigend
-  + "SetReadOnly" verschoben: Der Bericht wird jetzt nicht mehr direkt nach dem RFiDGear Aufruf in Schritt3 abgeschlossen sondern erst mit dem Klick auf "Fertigstellen"
++ Sortieroptionen: Sortieren nach Jobnummer erfolgt jetzt anhand der ID um die Chipnummer zu berücksichtigen
++ Sortieroptionen: Aufsteigend / Absteigend
++ "SetReadOnly" verschoben: Der Bericht wird jetzt nicht mehr direkt nach dem RFiDGear Aufruf in Schritt3 abgeschlossen sondern erst mit dem Klick auf "Fertigstellen"

@@ -482,7 +482,7 @@ public partial class HomePageViewModel : ObservableRecipient, INavigationAware
                 ModalView.Dialogs.Where(x => x.Name == "connectWaitMsgDlg").Single().Hide();
             }
 
-            //I expect the Delay to be not so sufficient on some machines
+            // I expect the Delay to be not so sufficient on some machines
             catch (Exception e)
             {
                 LogWriter.CreateLogEntry(e);
