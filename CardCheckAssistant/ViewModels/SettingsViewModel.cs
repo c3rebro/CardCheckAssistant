@@ -51,6 +51,7 @@ public partial class SettingsPageViewModel : ObservableRecipient
             _elementTheme = _themeSelectorService.Theme;
             _versionDescription = GetVersionDescription();
 
+            
             SwitchThemeCommand = new RelayCommand<ElementTheme>(
                 async (param) =>
                 {
@@ -60,7 +61,7 @@ public partial class SettingsPageViewModel : ObservableRecipient
                         await _themeSelectorService.SetThemeAsync(param);
                     }
                 });
-
+            
             IsTextBoxCardCheckTextTemplateEnabled = false;
             SelectedProjectFolder = settings.DefaultSettings.DefaultProjectOutputPath ?? string.Empty;
             SelectedCustomProjectFolder = settings.DefaultSettings.LastUsedCustomProjectPath ?? string.Empty;

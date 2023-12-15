@@ -9,7 +9,7 @@ using System.Windows.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.WinUI.Helpers;
-using Elatec.Net.Helpers.Log4CSharp;
+using Log4CSharp;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml;
 using Windows.ApplicationModel;
@@ -762,6 +762,7 @@ public partial class HomePageViewModel : ObservableRecipient, INavigationAware
     public void OnNavigatedFrom()
     {
         // Run code when the app navigates away from this page
+        scanDBTimer.Tick -= OnTimedEvent;
     }
 
     protected void Dispose(bool disposing)

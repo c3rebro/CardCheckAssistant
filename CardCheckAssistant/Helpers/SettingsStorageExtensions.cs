@@ -1,5 +1,7 @@
 ﻿using CardCheckAssistant.Core.Helpers;
 
+using Log4CSharp;
+
 using Windows.Storage;
 using Windows.Storage.Streams;
 
@@ -11,102 +13,238 @@ public static class SettingsStorageExtensions
 {
     private const string FileExtension = ".json";
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="appData"></param>
+    /// <returns></returns>
     public static bool IsRoamingStorageAvailable(this ApplicationData appData)
     {
         return appData.RoamingStorageQuota == 0;
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="folder"></param>
+    /// <param name="name"></param>
+    /// <param name="content"></param>
+    /// <returns></returns>
     public static async Task SaveAsync<T>(this StorageFolder folder, string name, T content)
     {
-        var file = await folder.CreateFileAsync(GetFileName(name), CreationCollisionOption.ReplaceExisting);
-        var fileContent = await Json.StringifyAsync(content);
+        try
+        {
+            var file = await folder.CreateFileAsync(GetFileName(name), CreationCollisionOption.ReplaceExisting);
+            var fileContent = await Json.StringifyAsync(content);
 
-        await FileIO.WriteTextAsync(file, fileContent);
+            await FileIO.WriteTextAsync(file, fileContent);
+        }
+        catch (Exception ex)
+        {
+            LogWriter.CreateLogEntry(ex);
+        }
+
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="folder"></param>
+    /// <param name="name"></param>
+    /// <returns></returns>
     public static async Task<T?> ReadAsync<T>(this StorageFolder folder, string name)
     {
-        if (!File.Exists(Path.Combine(folder.Path, GetFileName(name))))
+        try
         {
+            if (!File.Exists(Path.Combine(folder.Path, GetFileName(name))))
+            {
+                return default;
+            }
+
+            var file = await folder.GetFileAsync($"{name}.json");
+            var fileContent = await FileIO.ReadTextAsync(file);
+            return await Json.ToObjectAsync<T>(fileContent);
+        }
+        catch (Exception ex)
+        {
+            LogWriter.CreateLogEntry(ex);
+
             return default;
         }
-
-        var file = await folder.GetFileAsync($"{name}.json");
-        var fileContent = await FileIO.ReadTextAsync(file);
-
-        return await Json.ToObjectAsync<T>(fileContent);
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="settings"></param>
+    /// <param name="key"></param>
+    /// <param name="value"></param>
+    /// <returns></returns>
     public static async Task SaveAsync<T>(this ApplicationDataContainer settings, string key, T value)
     {
-        settings.SaveString(key, await Json.StringifyAsync(value));
+        try
+        {
+            settings.SaveString(key, await Json.StringifyAsync(value));
+        }
+        catch (Exception ex)
+        {
+            LogWriter.CreateLogEntry(ex);
+        }
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="settings"></param>
+    /// <param name="key"></param>
+    /// <param name="value"></param>
     public static void SaveString(this ApplicationDataContainer settings, string key, string value)
     {
-        settings.Values[key] = value;
+        try
+        {
+            settings.Values[key] = value;
+        }
+        catch (Exception ex)
+        {
+            LogWriter.CreateLogEntry(ex);
+        } 
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="settings"></param>
+    /// <param name="key"></param>
+    /// <returns></returns>
     public static async Task<T?> ReadAsync<T>(this ApplicationDataContainer settings, string key)
     {
-        object? obj;
-
-        if (settings.Values.TryGetValue(key, out obj))
+        try
         {
-            return await Json.ToObjectAsync<T>((string)obj);
-        }
+            object? obj;
 
-        return default;
+            if (settings.Values.TryGetValue(key, out obj))
+            {
+                return await Json.ToObjectAsync<T>((string)obj);
+            }
+            return default;
+        }
+        catch (Exception ex)
+        {
+            LogWriter.CreateLogEntry(ex);
+            return default;
+        }
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="folder"></param>
+    /// <param name="content"></param>
+    /// <param name="fileName"></param>
+    /// <param name="options"></param>
+    /// <returns></returns>
+    /// <exception cref="ArgumentNullException"></exception>
+    /// <exception cref="ArgumentException"></exception>
     public static async Task<StorageFile> SaveFileAsync(this StorageFolder folder, byte[] content, string fileName, CreationCollisionOption options = CreationCollisionOption.ReplaceExisting)
     {
-        if (content == null)
+        try
         {
-            throw new ArgumentNullException(nameof(content));
-        }
+            if (content == null)
+            {
+                throw new ArgumentNullException(nameof(content));
+            }
 
-        if (string.IsNullOrEmpty(fileName))
+            if (string.IsNullOrEmpty(fileName))
+            {
+                throw new ArgumentException("File name is null or empty. Specify a valid file name", nameof(fileName));
+            }
+
+            var storageFile = await folder.CreateFileAsync(fileName, options);
+            await FileIO.WriteBytesAsync(storageFile, content);
+            return storageFile;
+        }
+        catch (Exception ex)
         {
-            throw new ArgumentException("File name is null or empty. Specify a valid file name", nameof(fileName));
-        }
+            LogWriter.CreateLogEntry(ex);
 
-        var storageFile = await folder.CreateFileAsync(fileName, options);
-        await FileIO.WriteBytesAsync(storageFile, content);
-        return storageFile;
+            return default;
+        }
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="folder"></param>
+    /// <param name="fileName"></param>
+    /// <returns></returns>
     public static async Task<byte[]?> ReadFileAsync(this StorageFolder folder, string fileName)
     {
-        var item = await folder.TryGetItemAsync(fileName).AsTask().ConfigureAwait(false);
-
-        if ((item != null) && item.IsOfType(StorageItemTypes.File))
+        try
         {
-            var storageFile = await folder.GetFileAsync(fileName);
-            var content = await storageFile.ReadBytesAsync();
-            return content;
-        }
+            var item = await folder.TryGetItemAsync(fileName).AsTask().ConfigureAwait(false);
 
-        return null;
+            if ((item != null) && item.IsOfType(StorageItemTypes.File))
+            {
+                var storageFile = await folder.GetFileAsync(fileName);
+                var content = await storageFile.ReadBytesAsync();
+                return content;
+            }
+
+            return null;
+        }
+        catch (Exception ex)
+        {
+            LogWriter.CreateLogEntry(ex);
+
+            return default;
+        }
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="file"></param>
+    /// <returns></returns>
     public static async Task<byte[]?> ReadBytesAsync(this StorageFile file)
     {
-        if (file != null)
+        try
         {
-            using IRandomAccessStream stream = await file.OpenReadAsync();
-            using var reader = new DataReader(stream.GetInputStreamAt(0));
-            await reader.LoadAsync((uint)stream.Size);
-            var bytes = new byte[stream.Size];
-            reader.ReadBytes(bytes);
-            return bytes;
-        }
+            if (file != null)
+            {
+                using IRandomAccessStream stream = await file.OpenReadAsync();
+                using var reader = new DataReader(stream.GetInputStreamAt(0));
+                await reader.LoadAsync((uint)stream.Size);
+                var bytes = new byte[stream.Size];
+                reader.ReadBytes(bytes);
+                return bytes;
+            }
 
-        return null;
+            return null;
+        }
+        catch (Exception ex)
+        {
+            LogWriter.CreateLogEntry(ex);
+
+            return null;
+        }
     }
 
     private static string GetFileName(string name)
     {
-        return string.Concat(name, FileExtension);
+        try
+        {
+            return string.Concat(name, FileExtension);
+        }
+        catch (Exception ex)
+        {
+            LogWriter.CreateLogEntry(ex);
+
+            return string.Empty;
+        }
+        
     }
 }
