@@ -187,6 +187,7 @@ namespace CardCheckAssistant.Services
                     if(hfTag == null && lfTag == null && legicTag == null)
                     {
                         await readerDevice.BeepAsync(40, 2500, 50, 0);
+
                         GenericChip = null;
 
                         return 3;
