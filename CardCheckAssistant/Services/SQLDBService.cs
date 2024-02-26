@@ -10,7 +10,6 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using CardCheckAssistant.Models;
 using Elatec.NET;
-using Log4CSharp;
 
 namespace CardCheckAssistant.Services;
 
@@ -18,19 +17,18 @@ public class SQLDBService : IDisposable
 {
     public bool IsConnected { get; private set; }
     public List<CardCheckProcess> CardChecks {get; private set;}
+    private readonly EventLog eventLog = new("Application", ".", Assembly.GetEntryAssembly().GetName().Name);
 
     private static readonly object syncRoot = new object();
     private static SQLDBService instance;
 
     private readonly string serverName = string.Empty;
     private readonly string dbName;
+    private readonly string tableName;
     private readonly string usr;
     private readonly string pwd;
 
-#if DEBUG
-    private const string OMNIDBNAME = "OT_CardCheck_Test";
-    private const string OMNITABLENAME = "T_CardCheck";
-    private readonly string[] OMNITABLECOLUMNS = { 
+    private readonly string[] OMNITABLECOLUMNS = {
         "CC_ID VARCHAR(25)",
         "CC_JobNumber VARCHAR(25)",
         "CC_CardNumber VARCHAR(25)",
@@ -50,19 +48,6 @@ public class SQLDBService : IDisposable
         "RG_SAK VARCHAR(25)",
         "RG_L4Version VARCHAR(25)"};
 
-#else
-    private const string OMNITABLENAME = "T_CardCheck";
-    private const string OMNIDBNAME = "OT_CardCheck_Test";
-    private readonly string[] OMNITABLECOLUMNS = { "CC-ID", "CC-JobNumber", "CC-CardNumber", "CC-CreationDate", "CC-ChangedDate", "CC-CustomerName", "CC-Status", "CC-Report", "CC-EditorName", "CC-EditorComment" };
-    private const string RFIDTABLENAME = "T_RFIDGEAR";
-    private readonly string[] RFIDTABLECOLUMNS = {
-        "RG_ID VARCHAR(25)",
-        "RG_ChipType VARCHAR(25)",
-        "RG_ATS VARCHAR(25)",
-        "RG_SAK VARCHAR(25)",
-        "RG_L4Version VARCHAR(25)"};
-#endif
-
     public static SQLDBService Instance
     {
         get
@@ -71,7 +56,7 @@ public class SQLDBService : IDisposable
             {
                 if (instance == null)
                 {
-                    instance = new SQLDBService(OMNIDBNAME);
+                    instance = new SQLDBService();
                     return instance;
 
                 }
@@ -83,15 +68,16 @@ public class SQLDBService : IDisposable
         }
     }
 
-    public SQLDBService(string _dbName)
+    public SQLDBService()
     {
-        dbName = _dbName;
     }
 
-    public SQLDBService(string _server, string _dbName, string _userID, string _pwd)
+    public SQLDBService(string _server, string _dbName, string _dbTable, string _userID, string _pwd)
     {
+        
         serverName = _server;
         dbName = _dbName;
+        tableName = _dbTable;
         usr = _userID;
         pwd = _pwd;
 
@@ -108,9 +94,9 @@ public class SQLDBService : IDisposable
                 // Open the connection:
                 await sqlLiteConnection.OpenAsync();
 
-                if (!TableExists(sqlLiteConnection, OMNITABLENAME))
+                if (!TableExists(sqlLiteConnection, tableName))
                 {
-                    await CreateTableAsync(sqlLiteConnection, OMNITABLENAME, OMNITABLECOLUMNS);
+                    await CreateTableAsync(sqlLiteConnection, tableName, OMNITABLECOLUMNS);
                 }
 
                 if (!TableExists(sqlLiteConnection, RFIDTABLENAME))
@@ -121,7 +107,7 @@ public class SQLDBService : IDisposable
         }
         catch (Exception ex)
         {
-            LogWriter.CreateLogEntry(ex);
+            eventLog.WriteEntry(ex.Message, EventLogEntryType.Error);
         }
     }
 
@@ -139,12 +125,12 @@ public class SQLDBService : IDisposable
 
             await sqlConnection.OpenAsync();
 
-            if (!TableExists(sqlConnection, OMNIDBNAME, OMNITABLENAME))
+            if (!TableExists(sqlConnection, dbName, tableName))
             {
 
             }
 
-            if (!TableExists(sqlConnection, OMNIDBNAME, RFIDTABLENAME))
+            if (!TableExists(sqlConnection, dbName, tableName))
             {
 
             }
@@ -183,7 +169,7 @@ public class SQLDBService : IDisposable
 
                 using (SqlCommand sql_cmd = sqlConnection.CreateCommand())
                 {
-                    sql_cmd.CommandText = "SELECT [CC-ID], [CC-JobNumber], [CC-CardNumber], [CC-CreationDate], [CC-Customername], [CC-EditorName], [CC-Status], [CC-DealerName], [CC-SalesName], [CC-ChangedDate] FROM " + OMNITABLENAME;
+                    sql_cmd.CommandText = "SELECT [CC-ID], [CC-JobNumber], [CC-CardNumber], [CC-CreationDate], [CC-Customername], [CC-EditorName], [CC-Status], [CC-DealerName], [CC-SalesName], [CC-ChangedDate] FROM " + tableName;
 
                     using SqlDataReader sql_datareader = await sql_cmd.ExecuteReaderAsync();
 
@@ -210,7 +196,7 @@ public class SQLDBService : IDisposable
                         }
                         catch (Exception ex)
                         {
-                            LogWriter.CreateLogEntry(ex);
+                            eventLog.WriteEntry(ex.Message, EventLogEntryType.Error);
                         }
                     }
                 }
@@ -219,7 +205,7 @@ public class SQLDBService : IDisposable
         }
         catch (Exception ex)
         {
-            LogWriter.CreateLogEntry(ex);
+            eventLog.WriteEntry(ex.Message, EventLogEntryType.Error);
             IsConnected = false;
         }
 
@@ -245,7 +231,7 @@ public class SQLDBService : IDisposable
 
                 using SQLiteCommand sqlite_cmd = sqlLiteConnection.CreateCommand();
 
-                sqlite_cmd.CommandText = "SELECT * FROM " + OMNITABLENAME;
+                sqlite_cmd.CommandText = "SELECT * FROM " + tableName;
 
                 using SQLiteDataReader sqlite_datareader = sqlite_cmd.ExecuteReader();
 
@@ -270,7 +256,7 @@ public class SQLDBService : IDisposable
         }
         catch (Exception ex)
         {
-            LogWriter.CreateLogEntry(ex);
+            eventLog.WriteEntry(ex.Message, EventLogEntryType.Error);
         }
 
         return null;
@@ -306,7 +292,7 @@ public class SQLDBService : IDisposable
 
                 using SqlCommand sql_cmd = sqlConnection.CreateCommand();
 
-                sql_cmd.CommandText = "SELECT [CC-ReportBase64] FROM " + OMNITABLENAME + " Where [CC-ID] = @id";
+                sql_cmd.CommandText = "SELECT [CC-ReportBase64] FROM " + tableName + " Where [CC-ID] = @id";
 
                 sql_cmd.Parameters.AddWithValue("@id", id);
 
@@ -329,7 +315,7 @@ public class SQLDBService : IDisposable
         }
         catch (Exception ex)
         {
-            LogWriter.CreateLogEntry(ex);
+            eventLog.WriteEntry(ex.Message, EventLogEntryType.Error);
             IsConnected = false;
         }
     }
@@ -349,7 +335,7 @@ public class SQLDBService : IDisposable
         }
         catch (Exception e)
         {
-            LogWriter.CreateLogEntry(e);
+            eventLog.WriteEntry(e.Message, EventLogEntryType.Error);
         }
     }
 
@@ -365,7 +351,7 @@ public class SQLDBService : IDisposable
         }
         catch (Exception e)
         {
-            LogWriter.CreateLogEntry(e);
+            eventLog.WriteEntry(e.Message, EventLogEntryType.Error);
         }
     }
 
@@ -396,7 +382,7 @@ public class SQLDBService : IDisposable
 
                 using SqlCommand sql_cmd = sqlConnection.CreateCommand();
 
-                sql_cmd.CommandText = "UPDATE " + OMNITABLENAME + " SET [CC-ReportBase64] = @data Where [CC-ID] = @id";
+                sql_cmd.CommandText = "UPDATE " + tableName + " SET [CC-ReportBase64] = @data Where [CC-ID] = @id";
 
                 sql_cmd.Parameters.AddWithValue("@id", key);
 
@@ -414,7 +400,7 @@ public class SQLDBService : IDisposable
         }
         catch (Exception ex)
         {
-            LogWriter.CreateLogEntry(ex);
+            eventLog.WriteEntry(ex.Message, EventLogEntryType.Error);
             IsConnected = false;
         }
     }
@@ -427,7 +413,7 @@ public class SQLDBService : IDisposable
         }
         catch (Exception ex)
         {
-            LogWriter.CreateLogEntry(ex);
+            eventLog.WriteEntry(ex.Message, EventLogEntryType.Error);
             IsConnected = false;
         }
     }
@@ -460,7 +446,7 @@ public class SQLDBService : IDisposable
 
                 using SqlCommand sql_cmd = sqlConnection.CreateCommand();
 
-                sql_cmd.CommandText = string.Format("UPDATE {0} SET [{1}] = @status Where [CC-ID] = @id", OMNITABLENAME, columnID);
+                sql_cmd.CommandText = string.Format("UPDATE {0} SET [{1}] = @status Where [CC-ID] = @id", tableName, columnID);
 
                 sql_cmd.Parameters.AddWithValue("@id", key);
                 sql_cmd.Parameters.AddWithValue("@status", value);
@@ -471,7 +457,7 @@ public class SQLDBService : IDisposable
         }
         catch (Exception ex)
         {
-            LogWriter.CreateLogEntry(ex);
+            eventLog.WriteEntry(ex.Message, EventLogEntryType.Error);
             IsConnected = false;
         }
     }
@@ -527,7 +513,7 @@ public class SQLDBService : IDisposable
         }
         catch(Exception ex)
         {
-            LogWriter.CreateLogEntry(ex);
+            eventLog.WriteEntry(ex.Message, EventLogEntryType.Error);
             return false;
         }
 

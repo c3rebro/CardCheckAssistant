@@ -9,7 +9,6 @@ using System.Windows.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.WinUI.Helpers;
-using Log4CSharp;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml;
 using Windows.ApplicationModel;
@@ -24,21 +23,24 @@ namespace CardCheckAssistant.ViewModels;
 
 public partial class HomePageViewModel : ObservableRecipient, INavigationAware
 {
+    private readonly EventLog eventLog = new("Application", ".", Assembly.GetEntryAssembly().GetName().Name);
     private readonly Microsoft.UI.Xaml.DispatcherTimer scanDBTimer;
     private SQLDBService dbService;
 
     private ObservableCollection<CardCheckProcess> cardCheckProcessesFromCache;
-#if DEBUG
-    private const string DBNAME = "OT_CardCheck_Test";
-#else
-    private const string DBNAME = "OT_CardCheck";
-#endif
 
     /// <summary>
     /// 
     /// </summary>
     public HomePageViewModel()
     {
+        if (!EventLog.SourceExists(Assembly.GetEntryAssembly().GetName().Name))
+        {
+            EventLog.CreateEventSource(new EventSourceCreationData(Assembly.GetEntryAssembly().GetName().Name, "Application"));
+        }
+
+        eventLog.Source = Assembly.GetEntryAssembly().GetName().Name;
+
         DataGridItemCollection = new ObservableCollection<CardCheckProcess>();
         SetSortAscending = false;
 
@@ -404,7 +406,7 @@ public partial class HomePageViewModel : ObservableRecipient, INavigationAware
 
         catch (Exception ex)
         {
-            LogWriter.CreateLogEntry(ex);
+            eventLog.WriteEntry(ex.Message, EventLogEntryType.Error);
         }
     }
 
@@ -438,7 +440,7 @@ public partial class HomePageViewModel : ObservableRecipient, INavigationAware
 
         catch (Exception ex)
         {
-            LogWriter.CreateLogEntry(ex);
+            eventLog.WriteEntry(ex.Message, EventLogEntryType.Error);
         }
     }
 
@@ -457,6 +459,7 @@ public partial class HomePageViewModel : ObservableRecipient, INavigationAware
             dbService = new SQLDBService(
                 settings.DefaultSettings.SelectedDBServerName ?? "",
                 settings.DefaultSettings.SelectedDBName ?? "",
+                settings.DefaultSettings.SelectedDBTableName ?? "",
                 settings.DefaultSettings.SelectedDBUsername ?? "",
                 settings.DefaultSettings.SelectedDBUserPwd ?? "");
 
@@ -488,7 +491,7 @@ public partial class HomePageViewModel : ObservableRecipient, INavigationAware
             // I expect the Delay to be not so sufficient on some machines
             catch (Exception e)
             {
-                LogWriter.CreateLogEntry(e);
+                eventLog.WriteEntry(e.Message, EventLogEntryType.Error);
             }
 
             if (DataGridItemCollection == null)
@@ -515,7 +518,7 @@ public partial class HomePageViewModel : ObservableRecipient, INavigationAware
         }
         catch (Exception e)
         {
-            LogWriter.CreateLogEntry(e);
+            eventLog.WriteEntry(e.Message, EventLogEntryType.Error);
         }
     }
 
@@ -594,7 +597,7 @@ public partial class HomePageViewModel : ObservableRecipient, INavigationAware
         }
         catch (Exception ex)
         {
-            LogWriter.CreateLogEntry(ex);
+            eventLog.WriteEntry(ex.Message, EventLogEntryType.Error);
 
             return null;
         }
@@ -624,7 +627,7 @@ public partial class HomePageViewModel : ObservableRecipient, INavigationAware
                 foreach (var itemFromDB in cardCheckProcessesFromDB)
                 {
                     // There are new ID's, got from DB
-                    if (!cardCheckProcessesFromCache.Where(x => x.ID == itemFromDB.ID).Any())
+                    if (!cardCheckProcessesFromCache.Any(x => x.ID == itemFromDB.ID))
                     {
                         newJobs = true;
                     }
@@ -719,7 +722,7 @@ public partial class HomePageViewModel : ObservableRecipient, INavigationAware
 
             ModalView.Dialogs.Where(x => x.Name == "checkUpdatesWaitDlg").Single().Hide();
 
-            LogWriter.CreateLogEntry(e);
+            eventLog.WriteEntry(e.Message, EventLogEntryType.Error);
         }
 
     }

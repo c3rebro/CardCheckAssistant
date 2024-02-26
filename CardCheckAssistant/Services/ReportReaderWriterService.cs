@@ -1,8 +1,8 @@
 ﻿using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Reflection;
 using System.Xml;
 using GemBox.Pdf;
-using Log4CSharp;
 
 namespace CardCheckAssistant.Services;
 
@@ -13,6 +13,7 @@ public class ReportReaderWriterService : IDisposable
 {
     #region fields
     private readonly Version Version = Assembly.GetExecutingAssembly().GetName().Version;
+    private readonly EventLog eventLog = new("Application", ".", Assembly.GetEntryAssembly().GetName().Name);
 
     private const string reportTemplateTempFileName = "temptemplate.pdf";
     private readonly string appDataPath;
@@ -32,6 +33,7 @@ public class ReportReaderWriterService : IDisposable
         {
             // Set license key to use GemBox.Pdf in Free mode.
             ComponentInfo.SetLicense("FREE-LIMITED-KEY");
+            
 
             appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
 
@@ -49,7 +51,7 @@ public class ReportReaderWriterService : IDisposable
         }
         catch (Exception e)
         {
-            LogWriter.CreateLogEntry(e);
+            eventLog.WriteEntry(e.Message, EventLogEntryType.Error);
         }
     }
 
@@ -79,7 +81,7 @@ public class ReportReaderWriterService : IDisposable
                 }
                 catch (Exception e)
                 {
-                    LogWriter.CreateLogEntry(e);
+                    eventLog.WriteEntry(e.Message, EventLogEntryType.Error);
                 }
             }
 
@@ -88,7 +90,7 @@ public class ReportReaderWriterService : IDisposable
         }
         catch (XmlException e)
         {
-            LogWriter.CreateLogEntry(e);
+            eventLog.WriteEntry(e.Message, EventLogEntryType.Error);
             return null;
         }
     }
@@ -127,13 +129,13 @@ public class ReportReaderWriterService : IDisposable
                 }
                 catch (Exception e)
                 {
-                    LogWriter.CreateLogEntry(e);
+                    eventLog.WriteEntry(e.Message, EventLogEntryType.Error);
                 }           
             }
         }
         catch (XmlException e)
         {
-            LogWriter.CreateLogEntry(e);
+            eventLog.WriteEntry(e.Message, EventLogEntryType.Error);
         }
     }
 
@@ -169,14 +171,14 @@ public class ReportReaderWriterService : IDisposable
                 }
                 catch (Exception e)
                 {
-                    LogWriter.CreateLogEntry(e);
+                    eventLog.WriteEntry(e.Message, EventLogEntryType.Error);
                 }
                 
             }
         }
         catch (XmlException e)
         {
-            LogWriter.CreateLogEntry(e);
+            eventLog.WriteEntry(e.Message, EventLogEntryType.Error);
         }
     }
 
@@ -210,13 +212,13 @@ public class ReportReaderWriterService : IDisposable
                 }
                 catch (Exception e)
                 {
-                    LogWriter.CreateLogEntry(e);
+                    eventLog.WriteEntry(e.Message, EventLogEntryType.Error);
                 }
             }
         }
         catch (XmlException e)
         {
-            LogWriter.CreateLogEntry(e);
+            eventLog.WriteEntry(e.Message, EventLogEntryType.Error);
         }
     }
 
@@ -245,18 +247,18 @@ public class ReportReaderWriterService : IDisposable
                 }
                 catch (Exception e)
                 {
-                    LogWriter.CreateLogEntry(e);
+                    eventLog.WriteEntry(e.Message, EventLogEntryType.Error);
                 }
             }
             return result ?? string.Empty;
         }
         catch (XmlException e)
         {
-            LogWriter.CreateLogEntry(e);
+            eventLog.WriteEntry(e.Message, EventLogEntryType.Error);
         }
         catch (Exception e2)
         {
-            LogWriter.CreateLogEntry(e2);
+            eventLog.WriteEntry(e2.Message, EventLogEntryType.Error);
         }
 
         return string.Empty;
@@ -273,7 +275,7 @@ public class ReportReaderWriterService : IDisposable
         }
         catch (XmlException e)
         {
-            LogWriter.CreateLogEntry(e);
+            eventLog.WriteEntry(e.Message, EventLogEntryType.Error);
         }
     }
     #endregion
@@ -293,7 +295,7 @@ public class ReportReaderWriterService : IDisposable
 
                 catch (XmlException e)
                 {
-                    LogWriter.CreateLogEntry(e);
+                    eventLog.WriteEntry(e.Message, EventLogEntryType.Error);
                 }
             }
 

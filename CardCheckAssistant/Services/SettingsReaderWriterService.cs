@@ -2,9 +2,8 @@
 using CardCheckAssistant.DataAccessLayer;
 using CardCheckAssistant.Services;
 
-using Log4CSharp;
-
 using System;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Reflection;
@@ -22,6 +21,7 @@ public class SettingsReaderWriter : IDisposable
 {
     #region fields
     private static readonly string FacilityName = Assembly.GetExecutingAssembly().GetName().Name ?? "";
+    private readonly EventLog eventLog = new("Application", ".", Assembly.GetEntryAssembly().GetName().Name);
 
     private readonly string _settingsFileFileName = "settings.xml";
     private readonly string _updateConfigFileFileName = "update.xml";
@@ -111,7 +111,7 @@ public class SettingsReaderWriter : IDisposable
         }
         catch (Exception ex)
         {
-            LogWriter.CreateLogEntry(ex);
+            eventLog.WriteEntry(ex.Message, EventLogEntryType.Error);
         }
 
         if (!File.Exists(Path.Combine(appDataPath ?? "", _settingsFileFileName)))
@@ -130,7 +130,7 @@ public class SettingsReaderWriter : IDisposable
             }
             catch (Exception ex)
             {
-                LogWriter.CreateLogEntry(ex);
+                eventLog.WriteEntry(ex.Message, EventLogEntryType.Error);
             }
         }
         else
@@ -141,7 +141,7 @@ public class SettingsReaderWriter : IDisposable
             }
             catch (Exception ex)
             {
-                LogWriter.CreateLogEntry(ex);
+                eventLog.WriteEntry(ex.Message, EventLogEntryType.Error);
             }
         }
     }
@@ -211,7 +211,7 @@ public class SettingsReaderWriter : IDisposable
             }
             catch (Exception e)
             {
-                LogWriter.CreateLogEntry(string.Format("{0}: {1}; {2}", DateTime.Now, e.Message, e.InnerException != null ? e.InnerException.Message : ""));
+                eventLog.WriteEntry(string.Format("{0}: {1}; {2}", DateTime.Now, e.Message, e.InnerException != null ? e.InnerException.Message : "", EventLogEntryType.Error));
 
                 return true;
             }
@@ -251,7 +251,7 @@ public class SettingsReaderWriter : IDisposable
         }
         catch (XmlException ex)
         {
-            LogWriter.CreateLogEntry(ex);
+            eventLog.WriteEntry(ex.Message, EventLogEntryType.Error);
             return false;
         }
     }
@@ -276,7 +276,7 @@ public class SettingsReaderWriter : IDisposable
 
                 catch (Exception ex)
                 {
-                    LogWriter.CreateLogEntry(ex);
+                    eventLog.WriteEntry(ex.Message, EventLogEntryType.Error);
                 }
             }
 

@@ -2,6 +2,8 @@
 using System.Data.Entity.Core.Metadata.Edm;
 using System.Diagnostics;
 using System.Linq;
+using System.Reflection;
+using System.Reflection.PortableExecutable;
 using System.Windows.Input;
 using CardCheckAssistant.Contracts.ViewModels;
 using CardCheckAssistant.Models;
@@ -11,10 +13,11 @@ using CardCheckAssistant.Views;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
-using Log4CSharp;
+using Elatec.NET;
 
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Newtonsoft.Json.Linq;
 
 namespace CardCheckAssistant.ViewModels;
 
@@ -25,18 +28,15 @@ public partial class Step2PageViewModel : ObservableRecipient, INavigationAware
     CancellationToken token;
 
     private readonly DispatcherTimer scanChipTimer;
+    private readonly EventLog eventLog = new("Application", ".", Assembly.GetEntryAssembly().GetName().Name);
+
     private bool isCancelled;
     private bool chipWasRemovedAndPlacedAgain;
 
-#if DEBUG
-    private const string DBNAME = "OT_CardCheck_Test";
-#else
-    private const string DBNAME = "OT_CardCheck";
-
-#endif
     public Step2PageViewModel()
     {
         using SettingsReaderWriter settings = new SettingsReaderWriter();
+        
 
         token = source.Token;
         isCancelled = false;
@@ -115,8 +115,8 @@ public partial class Step2PageViewModel : ObservableRecipient, INavigationAware
         get => _selectedCardCheckTextTemplate;
         set
         {
-            TextBoxAdditionalHints = string.Format("{1}{0}", TextBoxAdditionalHints, !string.IsNullOrEmpty(value?.TemplateTextContent) ? value?.TemplateTextContent + "\n\n" : string.Empty);
             SetProperty(ref _selectedCardCheckTextTemplate, value);
+            TextBoxAdditionalHints = string.Format("{1}{0}", staticTextBoxAdditionalHints, !string.IsNullOrEmpty(SelectedCardCheckTextTemplate.TemplateTextContent) ? SelectedCardCheckTextTemplate.TemplateTextContent + "\n\n" : string.Empty);
         }
     }
     private CardCheckTextTemplate _selectedCardCheckTextTemplate;
@@ -144,6 +144,7 @@ public partial class Step2PageViewModel : ObservableRecipient, INavigationAware
     /// </summary>
     [ObservableProperty]
     private string _textBoxAdditionalHints;
+    private string staticTextBoxAdditionalHints;
 
     /// <summary>
     /// 
@@ -448,8 +449,10 @@ public partial class Step2PageViewModel : ObservableRecipient, INavigationAware
         try
         {
             NextStepCanExecute = false;
+            using ReaderService reader = ReaderService.Instance;
 
             await Task.Delay(1000);
+            await reader.Disconnect();
 
             var amountOfFreeMemory = 0;
             var freeMemField = "N/A";
@@ -528,6 +531,7 @@ public partial class Step2PageViewModel : ObservableRecipient, INavigationAware
             await p.WaitForExitAsync();
 
             TextBoxAdditionalHints = addHintsText;
+            staticTextBoxAdditionalHints = addHintsText;
 
             if (freeMemField != null)
             {
@@ -644,7 +648,7 @@ public partial class Step2PageViewModel : ObservableRecipient, INavigationAware
 
         catch (Exception e)
         {
-            LogWriter.CreateLogEntry(e);
+            eventLog.WriteEntry(e.Message, EventLogEntryType.Error);
 
             scanChipTimer.Stop();
             scanChipTimer.Tick -= ScanChipEvent;
@@ -700,7 +704,7 @@ public partial class Step2PageViewModel : ObservableRecipient, INavigationAware
 
         catch (Exception e)
         {
-            LogWriter.CreateLogEntry(e);
+            eventLog.WriteEntry(e.Message, EventLogEntryType.Error);
         }
     }
 
@@ -745,7 +749,7 @@ public partial class Step2PageViewModel : ObservableRecipient, INavigationAware
 
         catch (Exception e)
         {
-            LogWriter.CreateLogEntry(e);
+            eventLog.WriteEntry(e.Message, EventLogEntryType.Error);
             scanChipTimer.Tick -= ScanChipEvent;
         }
     }
@@ -763,7 +767,7 @@ public partial class Step2PageViewModel : ObservableRecipient, INavigationAware
             {
                 scanChipTimer.Stop();
 
-                using (ReaderService readerService = new ReaderService())
+                using (ReaderService readerService = ReaderService.Instance)
                 {
                     if (!NavigateNextStepCommand.IsRunning)
                     {
@@ -787,11 +791,17 @@ public partial class Step2PageViewModel : ObservableRecipient, INavigationAware
 
                                 await ChipIsPlacedAgain(readerService).WaitAsync(token);
 
-                                var ChipInfoMessage = string.Format("Es wurde ein Chip erkannt:\nErkannt 1: {0}", readerService.GenericChip?.CardType.ToString() ?? "");
+                                var ChipInfoMessage = string.Format("Es wurde ein Chip erkannt:\nErkannt 1: {0}", 
+                                    readerService.GenericChip.TCard.SecondaryType == MifareChipSubType.Unspecified ?
+                                    readerService.GenericChip.TCard.PrimaryType.ToString() :
+                                    readerService.GenericChip.TCard.SecondaryType.ToString() ?? "");
 
-                                if (!isCancelled && readerService.GenericChip?.Child != null)
+                                if (!isCancelled && readerService.GenericChip?.Childs != null)
                                 {
-                                    ChipInfoMessage = ChipInfoMessage + string.Format("\nErkannt 2: {0}", readerService.GenericChip.Child.CardType);
+                                    ChipInfoMessage += string.Format("\nErkannt 2: {0}",
+                                        readerService.GenericChip.Childs[0].TCard.SecondaryType == MifareChipSubType.Unspecified ?
+                                        readerService.GenericChip.Childs[0].TCard.PrimaryType.ToString() :
+                                        readerService.GenericChip.Childs[0].TCard.SecondaryType.ToString());
                                 }
 
                                 NextStepCanExecute = true;
@@ -806,11 +816,17 @@ public partial class Step2PageViewModel : ObservableRecipient, INavigationAware
 
                             ReaderHasNoChipInfoBarIsVisible = false;
 
-                            var ChipInfoMessage = string.Format("Es wurde ein Chip erkannt:\nErkannt 1: {0}", readerService.GenericChip.CardType.ToString());
+                            var ChipInfoMessage = string.Format("Es wurde ein Chip erkannt:\nErkannt 1: {0}", 
+                                readerService.GenericChip.TCard.SecondaryType == MifareChipSubType.Unspecified ?
+                                readerService.GenericChip.TCard.PrimaryType.ToString() :
+                                readerService.GenericChip.TCard.SecondaryType.ToString());
 
-                            if (readerService.GenericChip?.Child != null)
+                            if (readerService.GenericChip?.Childs[0] != null)
                             {
-                                ChipInfoMessage = ChipInfoMessage + string.Format("\nErkannt 2: {0}", readerService.GenericChip.Child.CardType);
+                                ChipInfoMessage += string.Format("\nErkannt 2: {0}", 
+                                    readerService.GenericChip.Childs[0].TCard.SecondaryType == MifareChipSubType.Unspecified ?
+                                    readerService.GenericChip.Childs[0].TCard.PrimaryType.ToString() :
+                                    readerService.GenericChip.Childs[0].TCard.SecondaryType.ToString());
                             }
 
                             NextStepCanExecute = true;
@@ -833,7 +849,7 @@ public partial class Step2PageViewModel : ObservableRecipient, INavigationAware
                     "Fehler",
                     string.Format("Bitte melde den folgenden Fehler an mich:\n{0}", ex.Message));
 
-                LogWriter.CreateLogEntry(ex);
+                eventLog.WriteEntry(ex.Message, EventLogEntryType.Error);
             }
         }
 
@@ -847,6 +863,9 @@ public partial class Step2PageViewModel : ObservableRecipient, INavigationAware
     {
         try
         {
+            ReaderService reader = ReaderService.Instance;
+            await reader.Disconnect();
+
             scanChipTimer.Stop();
             scanChipTimer.Tick -= ScanChipEvent;
 
@@ -860,7 +879,7 @@ public partial class Step2PageViewModel : ObservableRecipient, INavigationAware
             await App.MainRoot.MessageDialogAsync(
                 "Fehler",
                 string.Format("Bitte melde den folgenden Fehler an mich:\n{0}", ex.Message));
-            LogWriter.CreateLogEntry(ex);
+            eventLog.WriteEntry(ex.Message, EventLogEntryType.Error);
         }
     }
 
@@ -901,7 +920,7 @@ public partial class Step2PageViewModel : ObservableRecipient, INavigationAware
                 "Fehler",
                 string.Format("Bitte melde den folgenden Fehler an mich:\n{0}", ex.Message));
 
-            LogWriter.CreateLogEntry(ex);
+            eventLog.WriteEntry(ex.Message, EventLogEntryType.Error);
             IsReportOpen = false;
         }
     }
@@ -934,7 +953,7 @@ public partial class Step2PageViewModel : ObservableRecipient, INavigationAware
             await App.MainRoot.MessageDialogAsync(
                 "Fehler",
                 string.Format("Bitte melde den folgenden Fehler an mich:\n{0}", ex.Message));
-            LogWriter.CreateLogEntry(ex);
+            eventLog.WriteEntry(ex.Message, EventLogEntryType.Error);
         }
     }
 
@@ -958,7 +977,8 @@ public partial class Step2PageViewModel : ObservableRecipient, INavigationAware
     {
         try
         {
-            using ReaderService readerService = new ReaderService();
+            using ReaderService readerService = ReaderService.Instance;
+            await readerService.Disconnect();
 
             scanChipTimer.Stop();
             scanChipTimer.Tick -= ScanChipEvent;
@@ -1103,7 +1123,7 @@ public partial class Step2PageViewModel : ObservableRecipient, INavigationAware
                 "Fehler",
                 string.Format("Bitte melde den folgenden Fehler an mich:\n{0}", ex.Message));
 
-            LogWriter.CreateLogEntry(ex);
+            eventLog.WriteEntry(ex.Message, EventLogEntryType.Error);
         }
     }
 
@@ -1114,12 +1134,15 @@ public partial class Step2PageViewModel : ObservableRecipient, INavigationAware
     {
         try
         {
+            ReaderService reader = ReaderService.Instance;
+
             scanChipTimer.Stop();
             scanChipTimer.Tick -= ScanChipEvent;
 
             source.Cancel();
 
             await Task.Delay(1000);
+            await reader.Disconnect();
 
             (App.MainRoot.XamlRoot.Content as ShellPage)?.ViewModel.NavigationService.NavigateTo(typeof(Step1PageViewModel).FullName ?? "");
         }
@@ -1129,7 +1152,7 @@ public partial class Step2PageViewModel : ObservableRecipient, INavigationAware
                 "Fehler",
                 string.Format("Bitte melde den folgenden Fehler an mich:\n{0}", ex.Message));
 
-            LogWriter.CreateLogEntry(ex);
+            eventLog.WriteEntry(ex.Message, EventLogEntryType.Error);
         }
     }
 }

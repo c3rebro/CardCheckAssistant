@@ -46,6 +46,7 @@ public class DefaultSettings : IDisposable
             _cardCheckTextTemplates = new ObservableCollection<CardCheckTextTemplate>(new());
 
             _selectedDBName = "db";
+            _selectedDBTableName = "db-table";
             _selectedDBServerName = "localhost";
             _selectedDBServerPort = "1433";
             _selectedDBUsername = "user";
@@ -102,6 +103,16 @@ public class DefaultSettings : IDisposable
         set => _selectedDBServerPort = value;
     }
     private string? _selectedDBServerPort;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public string? SelectedDBTableName
+    {
+        get => _selectedDBTableName;
+        set => _selectedDBTableName = value;
+    }
+    private string? _selectedDBTableName;
 
     /// <summary>
     /// 

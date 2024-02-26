@@ -2,6 +2,7 @@
 using CardCheckAssistant.Views;
 
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Windows.Input;
 
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -12,16 +13,17 @@ using Elatec.NET;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Documents;
 
-using Log4CSharp;
-
-using System.Diagnostics;
 using CardCheckAssistant.Contracts.ViewModels;
+using System.Reflection;
+using ColorCode.Common;
 
 
 namespace CardCheckAssistant.ViewModels;
 
 public partial class Step1PageViewModel : ObservableRecipient, INavigationAware
 {
+    private readonly EventLog eventLog = new("Application", ".", Assembly.GetEntryAssembly().GetName().Name);
+
     /// <summary>
     /// 
     /// </summary>
@@ -170,7 +172,7 @@ public partial class Step1PageViewModel : ObservableRecipient, INavigationAware
     /// <summary>
     /// 
     /// </summary>
-    public ICommand NavigateBackCommand => new RelayCommand(NavigateBackCommand_Executed);
+    public IAsyncRelayCommand NavigateBackCommand => new AsyncRelayCommand(NavigateBackCommand_Executed);
 
     #endregion
 
@@ -189,7 +191,7 @@ public partial class Step1PageViewModel : ObservableRecipient, INavigationAware
         }
         catch (Exception e)
         {
-            LogWriter.CreateLogEntry(e);
+            eventLog.WriteEntry(e.Message, EventLogEntryType.Error);
         }
     }
 
@@ -204,20 +206,33 @@ public partial class Step1PageViewModel : ObservableRecipient, INavigationAware
         {
             scanChipTimer.Stop();
 
-            using (ReaderService readerService = new ReaderService())
+            await UpdateChip();
+
+            scanChipTimer.Start();
+        }
+        catch (Exception ex)
+        {
+            eventLog.WriteEntry(ex.Message, EventLogEntryType.Error);
+        }
+    }
+
+    private async Task UpdateChip()
+    {
+        using (ReaderService readerService = ReaderService.Instance)
+        {
+            try
             {
                 // ReadChipPublic != 0  is an Error
-                ReaderAccessDenied = await readerService.ReadChipPublic() < 0;
+                await readerService.ReadChipPublic();
 
-                if (ReaderAccessDenied == true)
+                if (readerService.IsConnected == null)
                 {
                     NextStepCanExecute = false;
-                    scanChipTimer.Start();
-                }
-
-                if (!TWN4ReaderDevice.Instance?.IsConnected == true)
-                {
                     NoReaderFound = true;
+                    await readerService.Connect();
+                    scanChipTimer.Start();
+
+                    return;
                 }
 
                 else if (readerService?.MoreThanOneReaderFound == true)
@@ -239,12 +254,12 @@ public partial class Step1PageViewModel : ObservableRecipient, INavigationAware
                         NoChipDetectedInfoBarIsVisible = false;
                         ChipDetectedInfoBarIsVisible = true;
 
-                        if (readerService.GenericChip.CardType.ToString().ToLower().Contains("mifare"))
+                        if (readerService.GenericChip.TCard.SecondaryType.ToString().ToLower().Contains("classic"))
                         {
                             AskClassicKeysIsVisible = true;
                             AskPICCMKIsVisible = false;
                         }
-                        else if (readerService.GenericChip.CardType.ToString().ToLower().Contains("desfire"))
+                        else if (readerService.GenericChip.TCard.SecondaryType.ToString().ToLower().Contains("desfire"))
                         {
                             AskClassicKeysIsVisible = false;
                             AskPICCMKIsVisible = true;
@@ -252,11 +267,17 @@ public partial class Step1PageViewModel : ObservableRecipient, INavigationAware
 
                         NextStepCanExecute = true;
 
-                        ChipInfoMessage = string.Format("Es wurde ein Chip erkannt:\nErkannt 1: {0}", readerService.GenericChip.CardType.ToString());
+                        ChipInfoMessage = string.Format("Es wurde ein Chip erkannt:\nErkannt 1: {0}",
+                            readerService.GenericChip.TCard.SecondaryType == MifareChipSubType.Unspecified ?
+                            readerService.GenericChip.TCard.PrimaryType.ToString() :
+                            readerService.GenericChip.TCard.SecondaryType.ToString());
 
-                        if (readerService.GenericChip.Child != null)
+                        if (readerService.GenericChip.Childs != null && readerService.GenericChip.Childs.Count > 0)
                         {
-                            ChipInfoMessage = ChipInfoMessage + string.Format("\nErkannt 2: {0}", readerService.GenericChip.Child.CardType);
+                            ChipInfoMessage = ChipInfoMessage + string.Format("\nErkannt 2: {0}",
+                                readerService.GenericChip.Childs[0].TCard.SecondaryType == MifareChipSubType.Unspecified ?
+                                readerService.GenericChip.Childs[0].TCard.PrimaryType.ToString() :
+                                readerService.GenericChip.Childs[0].TCard.SecondaryType.ToString());
                         }
                     }
 
@@ -271,14 +292,18 @@ public partial class Step1PageViewModel : ObservableRecipient, INavigationAware
                         NextStepCanExecute = true;
                     }
                 }
-
-
             }
-            scanChipTimer.Start();
-        }
-        catch (Exception ex)
-        {
-            LogWriter.CreateLogEntry(ex);
+
+            catch
+            {
+                NextStepCanExecute = false;
+                NoReaderFound = true;
+
+                HasTwoReadersInfoBarIsVisible = false;
+                ChipDetectedInfoBarIsVisible = false;
+                NoChipDetectedInfoBarIsVisible = false;
+            }
+
         }
     }
 
@@ -293,6 +318,12 @@ public partial class Step1PageViewModel : ObservableRecipient, INavigationAware
         try
         {
             using SettingsReaderWriter settings = new SettingsReaderWriter();
+            using ReaderService reader = ReaderService.Instance;
+
+            scanChipTimer.Stop();
+            scanChipTimer.Tick -= ScanChipEvent;
+            await Task.Delay(1000);
+            await reader.Disconnect();
 
             settings.ReadSettings();
 
@@ -352,7 +383,7 @@ public partial class Step1PageViewModel : ObservableRecipient, INavigationAware
                     }
                     finally
                     {
-                        LogWriter.CreateLogEntry("ioex");
+                        eventLog.WriteEntry("IO.EXception", EventLogEntryType.Error);
                     }
                 }
                 else
@@ -364,27 +395,26 @@ public partial class Step1PageViewModel : ObservableRecipient, INavigationAware
             NextStepCanExecute = false;
             WaitForNextStep = true;
 
-            scanChipTimer.Stop();
-            scanChipTimer.Tick -= ScanChipEvent;
-
-            await Task.Delay(1000);
-
             (App.MainRoot.XamlRoot.Content as ShellPage)?.ViewModel.NavigationService.NavigateTo(typeof(Step2PageViewModel).FullName ?? "");
         }
 
         catch (Exception e)
         {
-            LogWriter.CreateLogEntry(e);
+            eventLog.WriteEntry(e.Message, EventLogEntryType.Error);
         }
     }
 
     /// <summary>
     /// 
     /// </summary>
-    private void NavigateBackCommand_Executed()
+    private async Task NavigateBackCommand_Executed()
     {
         try
         {
+            using ReaderService reader = ReaderService.Instance;
+
+            await reader.Disconnect();
+
             scanChipTimer.Stop();
             scanChipTimer.Tick -= ScanChipEvent;
 
@@ -392,7 +422,7 @@ public partial class Step1PageViewModel : ObservableRecipient, INavigationAware
         }
         catch (Exception e)
         {
-            LogWriter.CreateLogEntry(e);
+            eventLog.WriteEntry(e.Message, EventLogEntryType.Error);
         }
 
     }
