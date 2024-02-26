@@ -98,7 +98,7 @@ public class AboutPageViewModel : ObservableRecipient
     {
         try
         {
-            using ReaderService reader = ReaderService.Instance;
+            using var reader = ReaderService.Instance;
 
             await reader.Disconnect();
 
@@ -116,7 +116,7 @@ public class AboutPageViewModel : ObservableRecipient
     /// </summary>
     private async Task NavigateBackCommand_Executed()
     {
-        using ReaderService reader = ReaderService.Instance;
+        using var reader = ReaderService.Instance;
 
         await reader.Disconnect();
 

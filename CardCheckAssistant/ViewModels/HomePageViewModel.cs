@@ -92,8 +92,8 @@ public partial class HomePageViewModel : ObservableRecipient, INavigationAware
     {
         get
         {
-            Assembly assembly = Assembly.GetExecutingAssembly();
-            FileVersionInfo fvi = FileVersionInfo.GetVersionInfo(assembly.Location);
+            var assembly = Assembly.GetExecutingAssembly();
+            var fvi = FileVersionInfo.GetVersionInfo(assembly.Location);
             var packageVersion = "";
 
             try
@@ -382,7 +382,7 @@ public partial class HomePageViewModel : ObservableRecipient, INavigationAware
         {
             if (CheckProcessService.CurrentCardCheckProcess.Status == "CheckFinished" && CheckProcessService.CurrentCardCheckProcess.IsSelected == true)
             {
-                using SettingsReaderWriter settings = new SettingsReaderWriter();
+                using var settings = new SettingsReaderWriter();
 
                 settings.ReadSettings();
 
@@ -416,7 +416,7 @@ public partial class HomePageViewModel : ObservableRecipient, INavigationAware
         {
             if (CheckProcessService.CurrentCardCheckProcess.Status == "CheckFinished" && CheckProcessService.CurrentCardCheckProcess.IsSelected == true)
             {
-                using SettingsReaderWriter settings = new SettingsReaderWriter();
+                using var settings = new SettingsReaderWriter();
 
                 settings.ReadSettings();
 
@@ -455,7 +455,7 @@ public partial class HomePageViewModel : ObservableRecipient, INavigationAware
         {
             await CheckForUpdates();
 
-            using SettingsReaderWriter settings = new SettingsReaderWriter();
+            using var settings = new SettingsReaderWriter();
             dbService = new SQLDBService(
                 settings.DefaultSettings.SelectedDBServerName ?? "",
                 settings.DefaultSettings.SelectedDBName ?? "",
@@ -526,7 +526,7 @@ public partial class HomePageViewModel : ObservableRecipient, INavigationAware
     /// 
     /// </summary>
     /// <returns></returns>
-    private async Task NoJobFoundInDB_Executed()
+    private static async Task NoJobFoundInDB_Executed()
     {
         await App.MainRoot.MessageDialogAsync(
         "Keine Aufträge",
@@ -583,7 +583,7 @@ public partial class HomePageViewModel : ObservableRecipient, INavigationAware
     {
         try
         {
-            using SettingsReaderWriter settings = new SettingsReaderWriter();
+            using var settings = new SettingsReaderWriter();
             // Connect to DB Async
 
             if (settings.DefaultSettings.CardCheckUseMSSQL ?? false)
@@ -691,9 +691,9 @@ public partial class HomePageViewModel : ObservableRecipient, INavigationAware
 
             await Task.Delay(1000);
 
-            PackageManager package = new PackageManager();
-            Package currentPackage = package.FindPackageForUser(string.Empty, Package.Current.Id.FullName);
-            PackageUpdateAvailabilityResult result = await currentPackage.CheckUpdateAvailabilityAsync();
+            var package = new PackageManager();
+            var currentPackage = package.FindPackageForUser(string.Empty, Package.Current.Id.FullName);
+            var result = await currentPackage.CheckUpdateAvailabilityAsync();
 
             switch (result.Availability)
             {
@@ -727,12 +727,12 @@ public partial class HomePageViewModel : ObservableRecipient, INavigationAware
 
     }
 
-    private async Task InstallUpdate()
+    private static async Task InstallUpdate()
     {
         try
         {
             var pm = new PackageManager();
-            Package currentPackage = pm.FindPackageForUser(string.Empty, Package.Current.Id.FullName);
+            var currentPackage = pm.FindPackageForUser(string.Empty, Package.Current.Id.FullName);
             var deploymentTask = await pm.UpdatePackageAsync(new Uri("https://github.com/c3rebro/CardCheckAssistant/releases/latest/download/CardCheckAssistant_x64.appinstaller"), null, DeploymentOptions.None);
 
             if (deploymentTask.ErrorText != null)
@@ -756,16 +756,29 @@ public partial class HomePageViewModel : ObservableRecipient, INavigationAware
 
     }
 
-
-    public void OnNavigatedTo(object parameter)
+    /// <summary>
+    /// INavigation Aware Event. Close Connection If Open
+    /// </summary>
+    /// <param name="parameter"></param>
+    public async void OnNavigatedTo(object parameter)
     {
         // Run code when the app navigates to this page
+        using var reader = ReaderService.Instance;
+
+        await reader.Disconnect();
+
     }
 
-    public void OnNavigatedFrom()
+    /// <summary>
+    /// INavigation Aware Event. Close Connection If Open
+    /// </summary>
+    public async void OnNavigatedFrom()
     {
         // Run code when the app navigates away from this page
         scanDBTimer.Tick -= OnTimedEvent;
+        using var reader = ReaderService.Instance;
+
+        await reader.Disconnect();
     }
 
     protected void Dispose(bool disposing)

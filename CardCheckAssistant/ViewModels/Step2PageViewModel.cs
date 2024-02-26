@@ -23,23 +23,15 @@ namespace CardCheckAssistant.ViewModels;
 
 public partial class Step2PageViewModel : ObservableRecipient, INavigationAware
 {
-    // Define the cancellation token.
-    CancellationTokenSource source = new CancellationTokenSource();
-    CancellationToken token;
-
     private readonly DispatcherTimer scanChipTimer;
     private readonly EventLog eventLog = new("Application", ".", Assembly.GetEntryAssembly().GetName().Name);
 
-    private bool isCancelled;
     private bool chipWasRemovedAndPlacedAgain;
 
     public Step2PageViewModel()
     {
-        using SettingsReaderWriter settings = new SettingsReaderWriter();
+        using var settings = new SettingsReaderWriter();
         
-
-        token = source.Token;
-        isCancelled = false;
         chipWasRemovedAndPlacedAgain = false;
 
         NavigateNextStepCommand = new AsyncRelayCommand(NavigateNextStepCommand_Executed);
@@ -147,7 +139,7 @@ public partial class Step2PageViewModel : ObservableRecipient, INavigationAware
     private string staticTextBoxAdditionalHints;
 
     /// <summary>
-    /// 
+    /// Do not continue if PDF File is open. Show Dialog
     /// </summary>
     public bool IsReportOpen
     {
@@ -388,14 +380,14 @@ public partial class Step2PageViewModel : ObservableRecipient, INavigationAware
     private bool _goBackCanExecute;
 
     /// <summary>
-    /// 
+    /// Show The JobNumber on each Step
     /// </summary>
-    public string JobNumber => string.Format("JobNr.: {0}; ChipNummer: {1}; Kunde: {2}", CheckProcessService.CurrentCardCheckProcess.JobNr, CheckProcessService.CurrentCardCheckProcess.ChipNumber, CheckProcessService.CurrentCardCheckProcess.CName);
+    public static string JobNumber => string.Format("JobNr.: {0}; ChipNummer: {1}; Kunde: {2}", CheckProcessService.CurrentCardCheckProcess.JobNr, CheckProcessService.CurrentCardCheckProcess.ChipNumber, CheckProcessService.CurrentCardCheckProcess.CName);
 
     /// <summary>
-    /// 
+    /// Show The Language on each Step
     /// </summary>
-    public string ReportLanguage => string.Format("{0}", CheckProcessService.CurrentCardCheckProcess.ReportLanguage);
+    public static string ReportLanguage => string.Format("{0}", CheckProcessService.CurrentCardCheckProcess.ReportLanguage);
 
     /// <summary>
     /// 
@@ -441,7 +433,7 @@ public partial class Step2PageViewModel : ObservableRecipient, INavigationAware
     public ICommand OpenReportPathCommand => new AsyncRelayCommand(OpenReportPathCommand_Executed);
 
     /// <summary>
-    /// 
+    /// launch rfidgear to test the chip and create a report
     /// </summary>
     /// <returns></returns>
     private async Task ExecuteRFIDGearCommand()
@@ -449,7 +441,7 @@ public partial class Step2PageViewModel : ObservableRecipient, INavigationAware
         try
         {
             NextStepCanExecute = false;
-            using ReaderService reader = ReaderService.Instance;
+            using var reader = ReaderService.Instance;
 
             await Task.Delay(1000);
             await reader.Disconnect();
@@ -466,8 +458,8 @@ public partial class Step2PageViewModel : ObservableRecipient, INavigationAware
             var programmable = false;
             var addHintsText = "";
 
-            using ReportReaderWriterService reportReader = new ReportReaderWriterService();
-            using SettingsReaderWriter settings = new SettingsReaderWriter();
+            using var reportReader = new ReportReaderWriterService();
+            using var settings = new SettingsReaderWriter();
 
             settings.ReadSettings();
 
@@ -555,7 +547,7 @@ public partial class Step2PageViewModel : ObservableRecipient, INavigationAware
                     }
                 }
 
-                else if (freeMemField.Split(',').Count() >= 1)
+                else if (freeMemField.Split(',').Length >= 1)
                 {
                     TextBlockFreeMem = freeMemField;
 
@@ -664,7 +656,7 @@ public partial class Step2PageViewModel : ObservableRecipient, INavigationAware
     }
 
     /// <summary>
-    /// 
+    /// a little delay fake forcing chip needs to be tested in lsm
     /// </summary>
     /// <param name="readerService"></param>
     /// <returns></returns>
@@ -674,16 +666,14 @@ public partial class Step2PageViewModel : ObservableRecipient, INavigationAware
         {
             scanChipTimer.Stop();
 
-            await Task.Delay(1000).WaitAsync(token);
-
-            if (await readerService.ReadChipPublic().WaitAsync(token) >= 0)
+            if (await readerService.ReadChipPublic() >= 0)
             {
-                while (readerService.GenericChip != null && !isCancelled)
+                while (readerService.GenericChip != null)
                 {
-                    await readerService.ReadChipPublic().WaitAsync(token);
-                    if (readerService.GenericChip != null && !isCancelled && chipWasRemovedAndPlacedAgain)
+                    await readerService.ReadChipPublic();
+                    if (readerService.GenericChip != null && chipWasRemovedAndPlacedAgain)
                     {
-                        await Task.Delay(500).WaitAsync(token);
+                        await Task.Delay(500);
                         break;
                     }
 
@@ -693,7 +683,7 @@ public partial class Step2PageViewModel : ObservableRecipient, INavigationAware
                     }
                     else
                     {
-                        await Task.Delay(1500).WaitAsync(token);
+                        await Task.Delay(1500);
                     }
                 }
             }
@@ -709,7 +699,7 @@ public partial class Step2PageViewModel : ObservableRecipient, INavigationAware
     }
 
     /// <summary>
-    /// 
+    /// Chip was placed again after lsm programming
     /// </summary>
     /// <param name="readerService"></param>
     /// <returns></returns>
@@ -719,17 +709,12 @@ public partial class Step2PageViewModel : ObservableRecipient, INavigationAware
         {
             scanChipTimer.Stop();
 
-            await Task.Delay(100).WaitAsync(token);
-            await readerService.ReadChipPublic().WaitAsync(token);
+            await Task.Delay(100);
+            await readerService.ReadChipPublic();
 
             while (readerService.GenericChip == null && !NextStepCanExecute)
             {
-                if (isCancelled)
-                {
-                    return;
-                }
-
-                await readerService.ReadChipPublic().WaitAsync(token);
+                await readerService.ReadChipPublic();
 
                 if (readerService.GenericChip != null)
                 {
@@ -737,7 +722,7 @@ public partial class Step2PageViewModel : ObservableRecipient, INavigationAware
                 }
                 else
                 {
-                    await Task.Delay(1500).WaitAsync(token);
+                    await Task.Delay(1500);
                 }
             }
 
@@ -755,75 +740,48 @@ public partial class Step2PageViewModel : ObservableRecipient, INavigationAware
     }
 
     /// <summary>
-    /// 
+    /// Is the Chip removed to test in LSM?
     /// </summary>
     /// <param name="sender"></param>
     /// <param name="e"></param>
     private async void ScanChipEvent(object? sender, object e)
     {
-        if (!isCancelled)
+        try
         {
-            try
+            scanChipTimer.Stop();
+
+            using (var readerService = ReaderService.Instance)
             {
-                scanChipTimer.Stop();
-
-                using (ReaderService readerService = ReaderService.Instance)
+                if (!NavigateNextStepCommand.IsRunning)
                 {
-                    if (!NavigateNextStepCommand.IsRunning)
-                    {
-                        await readerService.ReadChipPublic();
-                    }
+                    await readerService.ReadChipPublic();
+                }
 
-                    if (readerService.MoreThanOneReaderFound)
-                    {
-                        NextStepCanExecute = false;
-                    }
+                if (readerService.MoreThanOneReaderFound)
+                {
+                    NextStepCanExecute = false;
+                }
 
-                    else
+                else
+                {
+                    if (readerService.GenericChip != null && !NextStepCanExecute && !NavigateNextStepCommand.IsRunning)
                     {
-                        if (readerService.GenericChip != null && !NextStepCanExecute && !NavigateNextStepCommand.IsRunning)
+                        try
                         {
-                            try
-                            {
-                                await ChipIsRemoved(readerService).WaitAsync(token);
+                            await ChipIsRemoved(readerService);
 
-                                ReaderHasNoChipInfoBarIsVisible = true;
+                            ReaderHasNoChipInfoBarIsVisible = true;
 
-                                await ChipIsPlacedAgain(readerService).WaitAsync(token);
+                            await ChipIsPlacedAgain(readerService);
 
-                                var ChipInfoMessage = string.Format("Es wurde ein Chip erkannt:\nErkannt 1: {0}", 
-                                    readerService.GenericChip.TCard.SecondaryType == MifareChipSubType.Unspecified ?
-                                    readerService.GenericChip.TCard.PrimaryType.ToString() :
-                                    readerService.GenericChip.TCard.SecondaryType.ToString() ?? "");
-
-                                if (!isCancelled && readerService.GenericChip?.Childs != null)
-                                {
-                                    ChipInfoMessage += string.Format("\nErkannt 2: {0}",
-                                        readerService.GenericChip.Childs[0].TCard.SecondaryType == MifareChipSubType.Unspecified ?
-                                        readerService.GenericChip.Childs[0].TCard.PrimaryType.ToString() :
-                                        readerService.GenericChip.Childs[0].TCard.SecondaryType.ToString());
-                                }
-
-                                NextStepCanExecute = true;
-                            }
-                            catch (Exception ae)
-                            {
-                            }
-                        }
-
-                        if (!isCancelled && readerService.GenericChip != null && NextStepCanExecute && !NavigateNextStepCommand.IsRunning)
-                        {
-
-                            ReaderHasNoChipInfoBarIsVisible = false;
-
-                            var ChipInfoMessage = string.Format("Es wurde ein Chip erkannt:\nErkannt 1: {0}", 
+                            var ChipInfoMessage = string.Format("Es wurde ein Chip erkannt:\nErkannt 1: {0}",
                                 readerService.GenericChip.TCard.SecondaryType == MifareChipSubType.Unspecified ?
                                 readerService.GenericChip.TCard.PrimaryType.ToString() :
-                                readerService.GenericChip.TCard.SecondaryType.ToString());
+                                readerService.GenericChip.TCard.SecondaryType.ToString() ?? "");
 
-                            if (readerService.GenericChip?.Childs[0] != null)
+                            if (readerService.GenericChip?.Childs != null)
                             {
-                                ChipInfoMessage += string.Format("\nErkannt 2: {0}", 
+                                ChipInfoMessage += string.Format("\nErkannt 2: {0}",
                                     readerService.GenericChip.Childs[0].TCard.SecondaryType == MifareChipSubType.Unspecified ?
                                     readerService.GenericChip.Childs[0].TCard.PrimaryType.ToString() :
                                     readerService.GenericChip.Childs[0].TCard.SecondaryType.ToString());
@@ -831,39 +789,63 @@ public partial class Step2PageViewModel : ObservableRecipient, INavigationAware
 
                             NextStepCanExecute = true;
                         }
-
-                        else if (!isCancelled && readerService.GenericChip == null && !NavigateNextStepCommand.IsRunning)
+                        catch
                         {
-                            NextStepCanExecute = true;
-                            ReaderHasNoChipInfoBarIsVisible = true;
+                            // No Chip found
                         }
                     }
+
+                    if (readerService.GenericChip != null && NextStepCanExecute && !NavigateNextStepCommand.IsRunning)
+                    {
+
+                        ReaderHasNoChipInfoBarIsVisible = false;
+
+                        var ChipInfoMessage = string.Format("Es wurde ein Chip erkannt:\nErkannt 1: {0}",
+                            readerService.GenericChip.TCard.SecondaryType == MifareChipSubType.Unspecified ?
+                            readerService.GenericChip.TCard.PrimaryType.ToString() :
+                            readerService.GenericChip.TCard.SecondaryType.ToString());
+
+                        if (readerService.GenericChip?.Childs[0] != null)
+                        {
+                            ChipInfoMessage += string.Format("\nErkannt 2: {0}",
+                                readerService.GenericChip.Childs[0].TCard.SecondaryType == MifareChipSubType.Unspecified ?
+                                readerService.GenericChip.Childs[0].TCard.PrimaryType.ToString() :
+                                readerService.GenericChip.Childs[0].TCard.SecondaryType.ToString());
+                        }
+
+                        NextStepCanExecute = true;
+                    }
+
+                    else if (readerService.GenericChip == null && !NavigateNextStepCommand.IsRunning)
+                    {
+                        NextStepCanExecute = true;
+                        ReaderHasNoChipInfoBarIsVisible = true;
+                    }
                 }
-
-                scanChipTimer.Start();
             }
 
-            catch (Exception ex)
-            {
-                await App.MainRoot.MessageDialogAsync(
-                    "Fehler",
-                    string.Format("Bitte melde den folgenden Fehler an mich:\n{0}", ex.Message));
-
-                eventLog.WriteEntry(ex.Message, EventLogEntryType.Error);
-            }
+            scanChipTimer.Start();
         }
 
+        catch (Exception ex)
+        {
+            await App.MainRoot.MessageDialogAsync(
+                "Fehler",
+                string.Format("Bitte melde den folgenden Fehler an mich:\n{0}", ex.Message));
+
+            eventLog.WriteEntry(ex.Message, EventLogEntryType.Error);
+        }
     }
 
     /// <summary>
-    /// 
+    /// Disconnect Reader before RFIDGear Execution
     /// </summary>
     /// <returns></returns>
     public async Task PostPageLoadedCommand_Executed()
     {
         try
         {
-            ReaderService reader = ReaderService.Instance;
+            var reader = ReaderService.Instance;
             await reader.Disconnect();
 
             scanChipTimer.Stop();
@@ -884,13 +866,13 @@ public partial class Step2PageViewModel : ObservableRecipient, INavigationAware
     }
 
     /// <summary>
-    /// 
+    /// Edit PDF Prior next Step
     /// </summary>
     private async Task OpenReportCommand_Executed()
     {
         try
         {
-            using SettingsReaderWriter settings = new SettingsReaderWriter();
+            using var settings = new SettingsReaderWriter();
             IsReportOpen = true;
             settings.ReadSettings();
 
@@ -926,13 +908,13 @@ public partial class Step2PageViewModel : ObservableRecipient, INavigationAware
     }
 
     /// <summary>
-    /// 
+    /// Show Project Directory prior next Step
     /// </summary>
     private async Task OpenReportPathCommand_Executed()
     {
         try
         {
-            using SettingsReaderWriter settings = new SettingsReaderWriter();
+            using var settings = new SettingsReaderWriter();
             settings.ReadSettings();
 
             var p = new Process();
@@ -959,31 +941,18 @@ public partial class Step2PageViewModel : ObservableRecipient, INavigationAware
 
     #endregion
 
-    public void OnNavigatedTo(object parameter)
-    {
-        // Run code when the app navigates to this page
-    }
-
-    public void OnNavigatedFrom()
-    {
-        // Run code when the app navigates away from this page
-    }
-
     /// <summary>
-    /// 
+    /// finalize PDF prior next Step
     /// </summary>
     /// <returns></returns>
     private async Task NavigateNextStepCommand_Executed()
     {
         try
         {
-            using ReaderService readerService = ReaderService.Instance;
-            await readerService.Disconnect();
-
             scanChipTimer.Stop();
             scanChipTimer.Tick -= ScanChipEvent;
 
-            using SettingsReaderWriter settings = new SettingsReaderWriter();
+            using var settings = new SettingsReaderWriter();
             settings.ReadSettings();
 
             var finalPath =
@@ -1007,7 +976,7 @@ public partial class Step2PageViewModel : ObservableRecipient, INavigationAware
                 + CheckProcessService.CurrentCardCheckProcess.ChipNumber
                 + ".pdf";
 
-            using ReportReaderWriterService reportReader = new ReportReaderWriterService();
+            using var reportReader = new ReportReaderWriterService();
 
             if (TextBlockCheckFinishedAndResultIsSuppOnlyIsVisible)
             {
@@ -1015,7 +984,7 @@ public partial class Step2PageViewModel : ObservableRecipient, INavigationAware
                 reportReader.ReportOutputPath = finalPath;
                 reportReader.SetReadOnlyOnAllFields(true);
 
-                List<CardCheckProcess> cardChecks = SQLDBService.Instance.CardChecks;
+                var cardChecks = SQLDBService.Instance.CardChecks;
 
                 var fileName = finalPath;
                 var fileStream = File.Open(fileName, FileMode.Open);
@@ -1032,7 +1001,7 @@ public partial class Step2PageViewModel : ObservableRecipient, INavigationAware
                 reportReader.ReportOutputPath = finalPath;
                 reportReader.SetReadOnlyOnAllFields(true);
 
-                List<CardCheckProcess> cardChecks = SQLDBService.Instance.CardChecks;
+                var cardChecks = SQLDBService.Instance.CardChecks;
 
                 var fileName = finalPath;
                 var fileStream = File.Open(fileName, FileMode.Open);
@@ -1128,20 +1097,17 @@ public partial class Step2PageViewModel : ObservableRecipient, INavigationAware
     }
 
     /// <summary>
-    /// 
+    /// Disconnect Reader prior GoBack
     /// </summary>
     private async Task NavigateBackCommand_Executed()
     {
         try
         {
-            ReaderService reader = ReaderService.Instance;
+            var reader = ReaderService.Instance;
 
             scanChipTimer.Stop();
             scanChipTimer.Tick -= ScanChipEvent;
 
-            source.Cancel();
-
-            await Task.Delay(1000);
             await reader.Disconnect();
 
             (App.MainRoot.XamlRoot.Content as ShellPage)?.ViewModel.NavigationService.NavigateTo(typeof(Step1PageViewModel).FullName ?? "");
@@ -1154,5 +1120,29 @@ public partial class Step2PageViewModel : ObservableRecipient, INavigationAware
 
             eventLog.WriteEntry(ex.Message, EventLogEntryType.Error);
         }
+    }
+
+    /// <summary>
+    /// INavigation Aware Event. Close Connection If Open
+    /// </summary>
+    /// <param name="parameter"></param>
+    public async void OnNavigatedTo(object parameter)
+    {
+        // Run code when the app navigates to this page
+        using var reader = ReaderService.Instance;
+
+        await reader.Disconnect();
+
+    }
+
+    /// <summary>
+    /// INavigation Aware Event. Close Connection If Open
+    /// </summary>
+    public async void OnNavigatedFrom()
+    {
+        // Run code when the app navigates away from this page
+        using var reader = ReaderService.Instance;
+
+        await reader.Disconnect();
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Linq;
 using System.Reflection;
 using System.Xml;
 using GemBox.Pdf;
@@ -103,9 +104,9 @@ public class ReportReaderWriterService : IDisposable
     {
         try
         {
-            if (!String.IsNullOrWhiteSpace(ReportOutputPath))
+            if (!string.IsNullOrWhiteSpace(ReportOutputPath))
             {
-                using PdfDocument pdfDoc = PdfDocument.Load(ReportTemplatePath);
+                using var pdfDoc = PdfDocument.Load(ReportTemplatePath);
                 
                 try
                 {
@@ -117,7 +118,10 @@ public class ReportReaderWriterService : IDisposable
 
                         foreach (var _field in form.Fields)
                         {
-                            pdfDoc.Form.Fields[_field.Name].ReadOnly = isReadOnly;
+                            if (pdfDoc?.Form.Fields[_field.Name] != null)
+                            {
+                                pdfDoc.Form.Fields[_field.Name].ReadOnly = isReadOnly;
+                            }
                         }
 
                         pdfDoc.Save(ReportOutputPath);
@@ -148,9 +152,9 @@ public class ReportReaderWriterService : IDisposable
     {
         try
         {
-            if (!String.IsNullOrWhiteSpace(ReportOutputPath))
+            if (!string.IsNullOrWhiteSpace(ReportOutputPath))
             {
-                using PdfDocument pdfDoc = PdfDocument.Load(ReportTemplatePath); 
+                using var pdfDoc = PdfDocument.Load(ReportTemplatePath); 
                 
                 try
                 {
@@ -191,7 +195,7 @@ public class ReportReaderWriterService : IDisposable
     {
         try
         {
-            if (!String.IsNullOrWhiteSpace(ReportOutputPath))
+            if (!string.IsNullOrWhiteSpace(ReportOutputPath))
             {
                 ReportTemplatePath = System.IO.Path.Combine(appDataPath, reportTemplateTempFileName);
 
@@ -233,7 +237,7 @@ public class ReportReaderWriterService : IDisposable
         {
             var result = "";
 
-            if (!String.IsNullOrWhiteSpace(ReportTemplatePath) && File.Exists(ReportTemplatePath))
+            if (!string.IsNullOrWhiteSpace(ReportTemplatePath) && File.Exists(ReportTemplatePath))
             {
                 using var pdfDoc = PdfDocument.Load(ReportTemplatePath);
 

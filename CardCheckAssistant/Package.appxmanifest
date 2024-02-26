@@ -13,7 +13,7 @@
   <Identity
     Name="b32df1d6-93dc-4949-9295-9469e8a3c85e"
     Publisher="CN=Steven Hansen"
-    Version="1.0.37.0" />
+    Version="1.0.38.0" />
     
   <mp:PhoneIdentity PhoneProductId="b32df1d6-93dc-4949-9295-9469e8a3c85e" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
     

@@ -275,7 +275,7 @@ public partial class SettingsPageViewModel : ObservableRecipient
         set
         {
             SetProperty(ref _removeTemporaryReportsIsEnabled, value);
-            using SettingsReaderWriter settings = new SettingsReaderWriter();
+            using var settings = new SettingsReaderWriter();
 
             settings.DefaultSettings.RemoveTemporaryReportsIsEnabled = value;
             settings.SaveSettings();
@@ -292,7 +292,7 @@ public partial class SettingsPageViewModel : ObservableRecipient
         set
         {
             SetProperty(ref _createSubdirectoryIsEnabled, value);
-            using SettingsReaderWriter settings = new SettingsReaderWriter();
+            using var settings = new SettingsReaderWriter();
 
             settings.DefaultSettings.CreateSubdirectoryIsEnabled = value;
             settings.SaveSettings();
@@ -315,7 +315,7 @@ public partial class SettingsPageViewModel : ObservableRecipient
         set
         {
             SetProperty(ref _rFiDGearIsAutoRunEnabled, value);
-            using SettingsReaderWriter settings = new SettingsReaderWriter();
+            using var settings = new SettingsReaderWriter();
 
             settings.DefaultSettings.AutoLoadProjectOnStart = value;
             settings.SaveSettings();
@@ -423,12 +423,12 @@ public partial class SettingsPageViewModel : ObservableRecipient
 
     private async Task DBConnectionTest_Executed()
     {
-        using SettingsReaderWriter settings = new SettingsReaderWriter();
+        using var settings = new SettingsReaderWriter();
 
         // Connect to DB Async
         if (settings.DefaultSettings.CardCheckUseMSSQL ?? false)
         {
-            using SQLDBService dbService = new SQLDBService(
+            using var dbService = new SQLDBService(
                 settings.DefaultSettings.SelectedDBServerName,
                 settings.DefaultSettings.SelectedDBName,
                 settings.DefaultSettings.SelectedDBTableName,
@@ -438,7 +438,7 @@ public partial class SettingsPageViewModel : ObservableRecipient
         }
         else
         {
-            using SQLDBService dbService = new SQLDBService();
+            using var dbService = new SQLDBService();
 
             await dbService.GetCardChecksFromSQLLiteAsync();
         }
@@ -509,8 +509,8 @@ public partial class SettingsPageViewModel : ObservableRecipient
     {
         try
         {
-            using SettingsReaderWriter settings = new SettingsReaderWriter();
-            using ReaderService reader = ReaderService.Instance;
+            using var settings = new SettingsReaderWriter();
+            using var reader = ReaderService.Instance;
 
             await reader.Disconnect();
 
@@ -572,7 +572,7 @@ public partial class SettingsPageViewModel : ObservableRecipient
             }
         }
 
-        private byte[] EncryptStringToBytes(string plainText, byte[] Key, byte[] IV)
+        private static byte[] EncryptStringToBytes(string plainText, byte[] Key, byte[] IV)
         {
             // Check arguments.
             if (plainText == null || plainText.Length <= 0)
@@ -593,19 +593,19 @@ public partial class SettingsPageViewModel : ObservableRecipient
             byte[] encrypted;
             // Create an Rijndael object
             // with the specified key and IV.
-            using (Rijndael rijAlg = Rijndael.Create())
+            using (var rijAlg = Rijndael.Create())
             {
                 rijAlg.Key = Key;
                 rijAlg.IV = IV;
 
                 // Create an encryptor to perform the stream transform.
-                ICryptoTransform encryptor = rijAlg.CreateEncryptor(rijAlg.Key, rijAlg.IV);
+                var encryptor = rijAlg.CreateEncryptor(rijAlg.Key, rijAlg.IV);
 
                 // Create the streams used for encryption.
-                using MemoryStream msEncrypt = new MemoryStream();
-                using CryptoStream csEncrypt = new CryptoStream(msEncrypt, encryptor, CryptoStreamMode.Write);
+                using var msEncrypt = new MemoryStream();
+                using var csEncrypt = new CryptoStream(msEncrypt, encryptor, CryptoStreamMode.Write);
 
-                using (StreamWriter swEncrypt = new StreamWriter(csEncrypt))
+                using (var swEncrypt = new StreamWriter(csEncrypt))
                 {
                     //Write all data to the stream.
                     swEncrypt.Write(plainText);
@@ -617,7 +617,7 @@ public partial class SettingsPageViewModel : ObservableRecipient
             return encrypted;
         }
 
-        private string DecryptStringFromBytes(byte[] cipherText, byte[] Key, byte[] IV)
+        private static string DecryptStringFromBytes(byte[] cipherText, byte[] Key, byte[] IV)
         {
             // Check arguments.
             if (cipherText == null || cipherText.Length <= 0)
@@ -641,18 +641,18 @@ public partial class SettingsPageViewModel : ObservableRecipient
 
             // Create an Rijndael object
             // with the specified key and IV.
-            using (Rijndael rijAlg = Rijndael.Create())
+            using (var rijAlg = Rijndael.Create())
             {
                 rijAlg.Key = Key;
                 rijAlg.IV = IV;
 
                 // Create a decryptor to perform the stream transform.
-                ICryptoTransform decryptor = rijAlg.CreateDecryptor(rijAlg.Key, rijAlg.IV);
+                var decryptor = rijAlg.CreateDecryptor(rijAlg.Key, rijAlg.IV);
 
                 // Create the streams used for decryption.
-                using MemoryStream msDecrypt = new MemoryStream(cipherText);
-                using CryptoStream csDecrypt = new CryptoStream(msDecrypt, decryptor, CryptoStreamMode.Read);
-                using StreamReader srDecrypt = new StreamReader(csDecrypt);
+                using var msDecrypt = new MemoryStream(cipherText);
+                using var csDecrypt = new CryptoStream(msDecrypt, decryptor, CryptoStreamMode.Read);
+                using var srDecrypt = new StreamReader(csDecrypt);
 
                 // Read the decrypted bytes from the decrypting stream
                 // and place them in a string.
