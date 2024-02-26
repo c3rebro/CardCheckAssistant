@@ -29,7 +29,7 @@ public class AppNotificationService : IAppNotificationService
         AppNotificationManager.Default.Register();
     }
 
-    public void OnNotificationInvoked(AppNotificationManager sender, AppNotificationActivatedEventArgs args)
+    public static void OnNotificationInvoked(AppNotificationManager sender, AppNotificationActivatedEventArgs args)
     {
         // TODO: Handle notification invocations when your app is already running.
 

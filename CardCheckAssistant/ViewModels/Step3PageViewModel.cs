@@ -103,7 +103,7 @@ public partial class Step3PageViewModel : ObservableRecipient
     /// <summary>
     /// 
     /// </summary>
-    public string ReportLanguage => string.Format("{0}", CheckProcessService.CurrentCardCheckProcess.ReportLanguage);
+    public static string ReportLanguage => string.Format("{0}", CheckProcessService.CurrentCardCheckProcess.ReportLanguage);
 
     /// <summary>
     /// 
@@ -161,8 +161,8 @@ public partial class Step3PageViewModel : ObservableRecipient
     {
         try
         {
-            using SettingsReaderWriter settings = new SettingsReaderWriter();
-            using ReportReaderWriterService reportReader = new ReportReaderWriterService();
+            using var settings = new SettingsReaderWriter();
+            using var reportReader = new ReportReaderWriterService();
             settings.ReadSettings();
 
             await Task.Delay(1000);
@@ -298,7 +298,7 @@ public partial class Step3PageViewModel : ObservableRecipient
     {
         try
         {
-            using SettingsReaderWriter settings = new SettingsReaderWriter();
+            using var settings = new SettingsReaderWriter();
             settings.ReadSettings();
 
             var p = new Process();
@@ -335,7 +335,7 @@ public partial class Step3PageViewModel : ObservableRecipient
     {
         try
         {
-            using SettingsReaderWriter settings = new SettingsReaderWriter();
+            using var settings = new SettingsReaderWriter();
             settings.ReadSettings();
 
             var p = new Process();
@@ -374,9 +374,9 @@ public partial class Step3PageViewModel : ObservableRecipient
     {
         try
         {
-            using SettingsReaderWriter settings = new SettingsReaderWriter();
-            using ReportReaderWriterService reportReader = new ReportReaderWriterService();
-            using ReaderService readerService = ReaderService.Instance;
+            using var settings = new SettingsReaderWriter();
+            using var reportReader = new ReportReaderWriterService();
+            using var readerService = ReaderService.Instance;
 
             await readerService.Disconnect();
 
@@ -454,7 +454,7 @@ public partial class Step3PageViewModel : ObservableRecipient
     {
         try
         {
-            ReaderService readerService = ReaderService.Instance;
+            var readerService = ReaderService.Instance;
             await readerService.Disconnect();
 
             (App.MainRoot.XamlRoot.Content as ShellPage)?.ViewModel.NavigationService.NavigateTo(typeof(Step1PageViewModel).FullName ?? "");

@@ -1,21 +1,14 @@
-﻿using CardCheckAssistant.Services;
-using CardCheckAssistant.Views;
-
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Reflection;
 using System.Windows.Input;
-
+using CardCheckAssistant.Contracts.ViewModels;
+using CardCheckAssistant.Services;
+using CardCheckAssistant.Views;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-
 using Elatec.NET;
-
 using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Documents;
-
-using CardCheckAssistant.Contracts.ViewModels;
-using System.Reflection;
-using ColorCode.Common;
 
 
 namespace CardCheckAssistant.ViewModels;
@@ -33,16 +26,16 @@ public partial class Step1PageViewModel : ObservableRecipient, INavigationAware
     {
         try
         {
-            Process[] processlist = Process.GetProcesses();
+            var processlist = Process.GetProcesses();
 
-            foreach (Process p in processlist)
+            foreach (var p in processlist)
             {
                 Console.WriteLine("Process: {0} ID: {1}", p.ProcessName, p.Id);
             }
         }
         catch (Exception ex)
         {
-
+            //TODO: Let the User know if MADA SW is running
         }
 
         scanChipTimer = new DispatcherTimer();
@@ -218,92 +211,90 @@ public partial class Step1PageViewModel : ObservableRecipient, INavigationAware
 
     private async Task UpdateChip()
     {
-        using (ReaderService readerService = ReaderService.Instance)
+        using var readerService = ReaderService.Instance;
+
+        try
         {
-            try
+            // ReadChipPublic != 0  is an Error
+            await readerService.ReadChipPublic();
+
+            if (readerService.IsConnected == null)
             {
-                // ReadChipPublic != 0  is an Error
-                await readerService.ReadChipPublic();
+                NextStepCanExecute = false;
+                NoReaderFound = true;
+                await readerService.Connect();
+                scanChipTimer.Start();
 
-                if (readerService.IsConnected == null)
+                return;
+            }
+
+            else if (readerService?.MoreThanOneReaderFound == true)
+            {
+                HasTwoReadersInfoBarIsVisible = true;
+                ChipDetectedInfoBarIsVisible = false;
+                NoChipDetectedInfoBarIsVisible = false;
+
+                NextStepCanExecute = false;
+            }
+
+            else
+            {
+                HasTwoReadersInfoBarIsVisible = false;
+                NoReaderFound = false;
+
+                if (readerService?.GenericChip != null)
                 {
-                    NextStepCanExecute = false;
-                    NoReaderFound = true;
-                    await readerService.Connect();
-                    scanChipTimer.Start();
-
-                    return;
-                }
-
-                else if (readerService?.MoreThanOneReaderFound == true)
-                {
-                    HasTwoReadersInfoBarIsVisible = true;
-                    ChipDetectedInfoBarIsVisible = false;
                     NoChipDetectedInfoBarIsVisible = false;
+                    ChipDetectedInfoBarIsVisible = true;
 
-                    NextStepCanExecute = false;
+                    if (readerService.GenericChip.TCard.SecondaryType.ToString().ToLower().Contains("classic"))
+                    {
+                        AskClassicKeysIsVisible = true;
+                        AskPICCMKIsVisible = false;
+                    }
+                    else if (readerService.GenericChip.TCard.SecondaryType.ToString().ToLower().Contains("desfire"))
+                    {
+                        AskClassicKeysIsVisible = false;
+                        AskPICCMKIsVisible = true;
+                    }
+
+                    NextStepCanExecute = true;
+
+                    ChipInfoMessage = string.Format("Es wurde ein Chip erkannt:\nErkannt 1: {0}",
+                        readerService.GenericChip.TCard.SecondaryType == MifareChipSubType.Unspecified ?
+                        readerService.GenericChip.TCard.PrimaryType.ToString() :
+                        readerService.GenericChip.TCard.SecondaryType.ToString());
+
+                    if (readerService.GenericChip.Childs != null && readerService.GenericChip.Childs.Count > 0)
+                    {
+                        ChipInfoMessage = ChipInfoMessage + string.Format("\nErkannt 2: {0}",
+                            readerService.GenericChip.Childs[0].TCard.SecondaryType == MifareChipSubType.Unspecified ?
+                            readerService.GenericChip.Childs[0].TCard.PrimaryType.ToString() :
+                            readerService.GenericChip.Childs[0].TCard.SecondaryType.ToString());
+                    }
                 }
 
                 else
                 {
-                    HasTwoReadersInfoBarIsVisible = false;
-                    NoReaderFound = false;
+                    ChipDetectedInfoBarIsVisible = false;
+                    NoChipDetectedInfoBarIsVisible = true;
 
-                    if (readerService.GenericChip != null)
-                    {
-                        NoChipDetectedInfoBarIsVisible = false;
-                        ChipDetectedInfoBarIsVisible = true;
+                    AskClassicKeysIsVisible = false;
+                    AskPICCMKIsVisible = false;
 
-                        if (readerService.GenericChip.TCard.SecondaryType.ToString().ToLower().Contains("classic"))
-                        {
-                            AskClassicKeysIsVisible = true;
-                            AskPICCMKIsVisible = false;
-                        }
-                        else if (readerService.GenericChip.TCard.SecondaryType.ToString().ToLower().Contains("desfire"))
-                        {
-                            AskClassicKeysIsVisible = false;
-                            AskPICCMKIsVisible = true;
-                        }
-
-                        NextStepCanExecute = true;
-
-                        ChipInfoMessage = string.Format("Es wurde ein Chip erkannt:\nErkannt 1: {0}",
-                            readerService.GenericChip.TCard.SecondaryType == MifareChipSubType.Unspecified ?
-                            readerService.GenericChip.TCard.PrimaryType.ToString() :
-                            readerService.GenericChip.TCard.SecondaryType.ToString());
-
-                        if (readerService.GenericChip.Childs != null && readerService.GenericChip.Childs.Count > 0)
-                        {
-                            ChipInfoMessage = ChipInfoMessage + string.Format("\nErkannt 2: {0}",
-                                readerService.GenericChip.Childs[0].TCard.SecondaryType == MifareChipSubType.Unspecified ?
-                                readerService.GenericChip.Childs[0].TCard.PrimaryType.ToString() :
-                                readerService.GenericChip.Childs[0].TCard.SecondaryType.ToString());
-                        }
-                    }
-
-                    else
-                    {
-                        ChipDetectedInfoBarIsVisible = false;
-                        NoChipDetectedInfoBarIsVisible = true;
-
-                        AskClassicKeysIsVisible = false;
-                        AskPICCMKIsVisible = false;
-
-                        NextStepCanExecute = true;
-                    }
+                    NextStepCanExecute = true;
                 }
             }
+        }
 
-            catch
-            {
-                NextStepCanExecute = false;
-                NoReaderFound = true;
+        catch
+        {
+            NextStepCanExecute = false;
+            NoReaderFound = true;
 
-                HasTwoReadersInfoBarIsVisible = false;
-                ChipDetectedInfoBarIsVisible = false;
-                NoChipDetectedInfoBarIsVisible = false;
-            }
-
+            HasTwoReadersInfoBarIsVisible = false;
+            ChipDetectedInfoBarIsVisible = false;
+            NoChipDetectedInfoBarIsVisible = false;
         }
     }
 
@@ -317,31 +308,28 @@ public partial class Step1PageViewModel : ObservableRecipient, INavigationAware
     {
         try
         {
-            using SettingsReaderWriter settings = new SettingsReaderWriter();
-            using ReaderService reader = ReaderService.Instance;
+            using var settings = new SettingsReaderWriter();
 
             scanChipTimer.Stop();
             scanChipTimer.Tick -= ScanChipEvent;
-            await Task.Delay(1000);
-            await reader.Disconnect();
 
             settings.ReadSettings();
 
-            FileInfo finalPath = new FileInfo(
+            var finalPath = new FileInfo(
                 settings.DefaultSettings.DefaultProjectOutputPath + "\\"
                 + (settings.DefaultSettings.CreateSubdirectoryIsEnabled == true ? CheckProcessService.CurrentCardCheckProcess.JobNr + "\\" : string.Empty)
                 + CheckProcessService.CurrentCardCheckProcess.JobNr + "-"
                 + CheckProcessService.CurrentCardCheckProcess.ChipNumber
                 + "_final.pdf");
 
-            FileInfo semiFinalPath = new FileInfo(
+            var semiFinalPath = new FileInfo(
                 settings.DefaultSettings.DefaultProjectOutputPath + "\\"
                 + (settings.DefaultSettings.CreateSubdirectoryIsEnabled == true ? CheckProcessService.CurrentCardCheckProcess.JobNr + "\\" : string.Empty)
                 + CheckProcessService.CurrentCardCheckProcess.JobNr + "-"
                 + CheckProcessService.CurrentCardCheckProcess.ChipNumber
                 + "_.pdf");
 
-            FileInfo preFinalPath = new FileInfo(
+            var preFinalPath = new FileInfo(
                 settings.DefaultSettings.DefaultProjectOutputPath + "\\"
                 + (settings.DefaultSettings.CreateSubdirectoryIsEnabled == true ? CheckProcessService.CurrentCardCheckProcess.JobNr + "\\" : string.Empty)
                 + CheckProcessService.CurrentCardCheckProcess.JobNr + "-"
@@ -359,7 +347,7 @@ public partial class Step1PageViewModel : ObservableRecipient, INavigationAware
                     try
                     {
                         // try to overwrite the file
-                        FileStream fs = preFinalPath.Open(FileMode.Create);
+                        var fs = preFinalPath.Open(FileMode.Create);
                         fs.Close();
                         preFinalPath.Delete();
 
@@ -411,10 +399,6 @@ public partial class Step1PageViewModel : ObservableRecipient, INavigationAware
     {
         try
         {
-            using ReaderService reader = ReaderService.Instance;
-
-            await reader.Disconnect();
-
             scanChipTimer.Stop();
             scanChipTimer.Tick -= ScanChipEvent;
 
@@ -427,14 +411,28 @@ public partial class Step1PageViewModel : ObservableRecipient, INavigationAware
 
     }
 
-    public void OnNavigatedTo(object parameter)
+    /// <summary>
+    /// INavigation Aware Event. Close Connection If Open
+    /// </summary>
+    /// <param name="parameter"></param>
+    public async void OnNavigatedTo(object parameter)
     {
         // Run code when the app navigates to this page
+        using var reader = ReaderService.Instance;
+
+        await reader.Disconnect();
+
     }
 
-    public void OnNavigatedFrom()
+    /// <summary>
+    /// INavigation Aware Event. Close Connection If Open
+    /// </summary>
+    public async void OnNavigatedFrom()
     {
         // Run code when the app navigates away from this page
+        using var reader = ReaderService.Instance;
+
+        await reader.Disconnect();
     }
 
     protected void Dispose(bool disposing)

@@ -88,7 +88,7 @@ public class SQLDBService : IDisposable
     {
         try
         {
-            using (SQLiteConnection sqlLiteConnection = new SQLiteConnection("Data Source=" +
+            using (var sqlLiteConnection = new SQLiteConnection("Data Source=" +
                 dbName + ".db; Version = 3; New = True; Compress = True; "))
             {
                 // Open the connection:
@@ -115,13 +115,13 @@ public class SQLDBService : IDisposable
     {
         try
         {
-            SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder();
+            var builder = new SqlConnectionStringBuilder();
             builder.DataSource = serverName;
             builder.IntegratedSecurity = true;
             builder.InitialCatalog = dbName;
             builder.ApplicationName = serverName.Split('\\')[1];
 
-            using SqlConnection sqlConnection = new SqlConnection(builder.ConnectionString);
+            using var sqlConnection = new SqlConnection(builder.ConnectionString);
 
             await sqlConnection.OpenAsync();
 
@@ -148,7 +148,7 @@ public class SQLDBService : IDisposable
             CardCheckProcess cardCheckProcess;
             CardChecks = new List<CardCheckProcess>();
 
-            SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder();
+            var builder = new SqlConnectionStringBuilder();
             builder.DataSource = serverName;
             builder.IntegratedSecurity = true;
             builder.InitialCatalog = dbName;
@@ -157,7 +157,7 @@ public class SQLDBService : IDisposable
             builder.ConnectTimeout = 30;
             builder.ApplicationName = serverName.Split('\\')[1];
 
-            using SqlConnection sqlConnection = new SqlConnection(builder.ConnectionString);
+            using var sqlConnection = new SqlConnection(builder.ConnectionString);
 
             if (sqlConnection != null)
             {
@@ -167,11 +167,11 @@ public class SQLDBService : IDisposable
                     IsConnected = true;
                 }
 
-                using (SqlCommand sql_cmd = sqlConnection.CreateCommand())
+                using (var sql_cmd = sqlConnection.CreateCommand())
                 {
                     sql_cmd.CommandText = "SELECT [CC-ID], [CC-JobNumber], [CC-CardNumber], [CC-CreationDate], [CC-Customername], [CC-EditorName], [CC-Status], [CC-DealerName], [CC-SalesName], [CC-ChangedDate] FROM " + tableName;
 
-                    using SqlDataReader sql_datareader = await sql_cmd.ExecuteReaderAsync();
+                    using var sql_datareader = await sql_cmd.ExecuteReaderAsync();
 
                     while (await sql_datareader.ReadAsync())
                     {
@@ -217,9 +217,9 @@ public class SQLDBService : IDisposable
         try
         {
             CardCheckProcess cardCheckProcess;
-            List<CardCheckProcess> cardChecks = new List<CardCheckProcess>();
+            var cardChecks = new List<CardCheckProcess>();
 
-            using SQLiteConnection sqlLiteConnection = new SQLiteConnection("Data Source=" +
+            using var sqlLiteConnection = new SQLiteConnection("Data Source=" +
                     dbName + ".db; Version = 3; Pooling = False; New = True; Compress = True; Timeout = 5");
 
             if (sqlLiteConnection != null)
@@ -229,11 +229,11 @@ public class SQLDBService : IDisposable
                     await sqlLiteConnection.OpenAsync();
                 }
 
-                using SQLiteCommand sqlite_cmd = sqlLiteConnection.CreateCommand();
+                using var sqlite_cmd = sqlLiteConnection.CreateCommand();
 
                 sqlite_cmd.CommandText = "SELECT * FROM " + tableName;
 
-                using SQLiteDataReader sqlite_datareader = sqlite_cmd.ExecuteReader();
+                using var sqlite_datareader = sqlite_cmd.ExecuteReader();
 
                 while (await sqlite_datareader.ReadAsync())
                 {
@@ -266,12 +266,12 @@ public class SQLDBService : IDisposable
     {
         try
         {
-            using SettingsReaderWriter settings = new SettingsReaderWriter();
+            using var settings = new SettingsReaderWriter();
             settings.ReadSettings();
 
             var tmpFilePath = settings.DefaultSettings.DefaultProjectOutputPath + "\\" + "downloadedReport.pdf";
 
-            SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder();
+            var builder = new SqlConnectionStringBuilder();
             builder.DataSource = serverName;
             builder.IntegratedSecurity = true;
             builder.InitialCatalog = dbName;
@@ -280,7 +280,7 @@ public class SQLDBService : IDisposable
             builder.ConnectTimeout = 30;
             builder.ApplicationName = serverName.Split('\\')[1];
 
-            using SqlConnection sqlConnection = new SqlConnection(builder.ConnectionString);
+            using var sqlConnection = new SqlConnection(builder.ConnectionString);
 
             if (sqlConnection != null)
             {
@@ -290,7 +290,7 @@ public class SQLDBService : IDisposable
                     IsConnected = true;
                 }
 
-                using SqlCommand sql_cmd = sqlConnection.CreateCommand();
+                using var sql_cmd = sqlConnection.CreateCommand();
 
                 sql_cmd.CommandText = "SELECT [CC-ReportBase64] FROM " + tableName + " Where [CC-ID] = @id";
 
@@ -298,13 +298,13 @@ public class SQLDBService : IDisposable
 
                 // The reader needs to be executed with the SequentialAccess behavior to enable network streaming
                 // Otherwise ReadAsync will buffer the entire BLOB into memory which can cause scalability issues or even OutOfMemoryExceptions
-                using SqlDataReader reader = await sql_cmd.ExecuteReaderAsync(CommandBehavior.SequentialAccess);
+                using var reader = await sql_cmd.ExecuteReaderAsync(CommandBehavior.SequentialAccess);
 
                 if (await reader.ReadAsync())
                 {
                     if (!(await reader.IsDBNullAsync(0)))
                     {
-                        using FileStream file = File.Create(tmpFilePath);
+                        using var file = File.Create(tmpFilePath);
 
                         var data = ConvertFromBase64(reader.GetString(0));
 
@@ -361,7 +361,7 @@ public class SQLDBService : IDisposable
         {
             CardChecks = new List<CardCheckProcess>();
 
-            SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder();
+            var builder = new SqlConnectionStringBuilder();
             builder.DataSource = serverName;
             builder.IntegratedSecurity = true;
             builder.InitialCatalog = dbName;
@@ -370,7 +370,7 @@ public class SQLDBService : IDisposable
             builder.ConnectTimeout = 30;
             builder.ApplicationName = serverName.Split('\\')[1];
 
-            using SqlConnection sqlConnection = new SqlConnection(builder.ConnectionString);
+            using var sqlConnection = new SqlConnection(builder.ConnectionString);
 
             if (sqlConnection != null)
             {
@@ -380,7 +380,7 @@ public class SQLDBService : IDisposable
                     IsConnected = true;
                 }
 
-                using SqlCommand sql_cmd = sqlConnection.CreateCommand();
+                using var sql_cmd = sqlConnection.CreateCommand();
 
                 sql_cmd.CommandText = "UPDATE " + tableName + " SET [CC-ReportBase64] = @data Where [CC-ID] = @id";
 
@@ -424,7 +424,7 @@ public class SQLDBService : IDisposable
         {
             CardChecks = new List<CardCheckProcess>();
 
-            SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder();
+            var builder = new SqlConnectionStringBuilder();
             builder.DataSource = serverName;
             builder.IntegratedSecurity = true;
             builder.InitialCatalog = dbName;
@@ -434,7 +434,7 @@ public class SQLDBService : IDisposable
             builder.PacketSize = 512;
             builder.ApplicationName = serverName.Split('\\')[1];
 
-            using SqlConnection sqlConnection = new SqlConnection(builder.ConnectionString);
+            using var sqlConnection = new SqlConnection(builder.ConnectionString);
 
             if (sqlConnection != null)
             {
@@ -444,7 +444,7 @@ public class SQLDBService : IDisposable
                     IsConnected = true;
                 }
 
-                using SqlCommand sql_cmd = sqlConnection.CreateCommand();
+                using var sql_cmd = sqlConnection.CreateCommand();
 
                 sql_cmd.CommandText = string.Format("UPDATE {0} SET [{1}] = @status Where [CC-ID] = @id", tableName, columnID);
 
@@ -462,7 +462,7 @@ public class SQLDBService : IDisposable
         }
     }
 
-    private void InsertData(SQLiteConnection conn)
+    private static void InsertData(SQLiteConnection conn)
     {
         SQLiteCommand sqlite_cmd;
         sqlite_cmd = conn.CreateCommand();
@@ -471,7 +471,7 @@ public class SQLDBService : IDisposable
          sqlite_cmd.ExecuteNonQuery();
     }
 
-    private void ReadData(SQLiteConnection conn)
+    private static void ReadData(SQLiteConnection conn)
     {
         SQLiteDataReader sqlite_datareader;
         SQLiteCommand sqlite_cmd;
@@ -498,8 +498,8 @@ public class SQLDBService : IDisposable
             "SELECT name FROM sqlite_master WHERE type='table' AND name='" + tableName + "';";
             if (conn.State == System.Data.ConnectionState.Open)
             {
-                SQLiteCommand command = new SQLiteCommand(sql, conn);
-                SQLiteDataReader reader = command.ExecuteReader();
+                var command = new SQLiteCommand(sql, conn);
+                var reader = command.ExecuteReader();
                 if (reader.HasRows)
                 {
                     return true;
@@ -519,14 +519,14 @@ public class SQLDBService : IDisposable
 
     }
 
-    private bool TableExists(SqlConnection conn, string dbName, string tableName)
+    private static bool TableExists(SqlConnection conn, string dbName, string tableName)
     {
         var sql =
         "SELECT name FROM " + dbName + " WHERE type='table' AND name='" + tableName + "';";
         if (conn.State == System.Data.ConnectionState.Open)
         {
-            SqlCommand command = new SqlCommand(sql, conn);
-            SqlDataReader reader = command.ExecuteReader();
+            var command = new SqlCommand(sql, conn);
+            var reader = command.ExecuteReader();
             if (reader.HasRows)
             {
                 return true;
@@ -539,7 +539,7 @@ public class SQLDBService : IDisposable
         }
     }
 
-    private string ConvertToBase64(Stream stream)
+    private static string ConvertToBase64(Stream stream)
     {
         byte[] bytes;
         using (var memoryStream = new MemoryStream())
@@ -551,7 +551,7 @@ public class SQLDBService : IDisposable
         return Convert.ToBase64String(bytes);
     }
 
-    private byte[] ConvertFromBase64(string base64)
+    private static byte[] ConvertFromBase64(string base64)
     {
         return Convert.FromBase64String(base64);
     }

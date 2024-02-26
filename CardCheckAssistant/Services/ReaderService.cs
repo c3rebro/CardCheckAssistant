@@ -16,7 +16,7 @@ namespace CardCheckAssistant.Services
 {
     internal class ReaderService : IDisposable
     {
-        private readonly List<TWN4ReaderDevice>? readerList;
+        private readonly List<TWN4ReaderDevice>? readerList = new();
         private readonly EventLog eventLog = new("Application", ".", Assembly.GetEntryAssembly().GetName().Name);
 
         private TWN4ReaderDevice? readerDevice;
@@ -59,7 +59,7 @@ namespace CardCheckAssistant.Services
         {
             try
             {
-                var readerList = TWN4ReaderDevice.Instance;
+                readerList = TWN4ReaderDevice.Instance;
 
                 if (readerList != null && readerList.Count > 0)
                 {
@@ -160,7 +160,7 @@ namespace CardCheckAssistant.Services
                         return 1;
                     }
 
-                    if (!string.IsNullOrWhiteSpace(hfTag?.UID) && !(GenericChip?.UID == hfTag.UID))
+                    if (!string.IsNullOrWhiteSpace(hfTag?.UID) && (GenericChip?.UID != hfTag.UID))
                     {
                         GenericChip = new GenericChipModel();
 
@@ -186,9 +186,7 @@ namespace CardCheckAssistant.Services
                     }
                     if(hfTag == null && lfTag == null && legicTag == null)
                     {
-                        await readerDevice.BeepAsync(1, 25, 600, 100);
-                        //await readerDevice.RedLEDAsync(true);
-                        //await readerDevice.GreenLEDAsync(false);
+                        await readerDevice.BeepAsync(10, 2500, 50, 0);
                         GenericChip = null;
 
                         return 3;
