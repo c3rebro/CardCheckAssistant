@@ -2,6 +2,8 @@
 using Microsoft.UI.Xaml.Controls;
 using System;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
+using System.Reflection;
 using System.Threading.Tasks;
 using Windows.UI.Core;
 
@@ -12,6 +14,7 @@ namespace CardCheckAssistant.Services
     /// </summary>
     public static class ModalView
     {
+        private static readonly EventLog eventLog = new("Application", ".", Assembly.GetEntryAssembly().GetName().Name);
         public static ObservableCollection<ContentDialog> Dialogs { get; set; }
 
         public static async Task MessageDialogAsync(this FrameworkElement element, string title, string message)
@@ -43,11 +46,18 @@ namespace CardCheckAssistant.Services
                 RequestedTheme = element.ActualTheme
             };
 
-            Dialogs.Add(dialog);
+            try
+            {
+                Dialogs.Add(dialog);
 
-            await dialog.ShowAsync();
+                await dialog.ShowAsync();
 
-            Dialogs.Remove(dialog);
+                Dialogs.Remove(dialog);
+            }
+            catch (Exception e)
+            {
+                eventLog.WriteEntry(e.Message, EventLogEntryType.Error);
+            }  
         }
 
         public static async Task<bool?> ConfirmationDialogAsync(this FrameworkElement element, string title, string message)

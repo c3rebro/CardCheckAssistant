@@ -12,6 +12,7 @@ using CommunityToolkit.Mvvm.Input;
 
 using Microsoft.UI.Xaml.Controls;
 using System.Reflection.PortableExecutable;
+using Windows.Foundation.Diagnostics;
 
 namespace CardCheckAssistant.ViewModels;
 
@@ -212,6 +213,10 @@ public partial class Step3PageViewModel : ObservableRecipient
                 if (File.Exists(finalPath))
                 {
                     File.Copy(finalPath, semiFinalPath, true);
+                }
+                else if (File.Exists(semiFinalPath))
+                {
+                    File.Copy(semiFinalPath, finalPath, true);
                 }
             };
 

@@ -10,17 +10,19 @@ namespace CardCheckAssistant.Models
     {
         public GenericChipModel()
         {
-
+            Childs = new List<GenericChipModel>();
         }
 
         public GenericChipModel(string uid, ChipType cardType)
         {
+            Childs = new List<GenericChipModel>();
             UID = uid;
             TCard = new CType() { PrimaryType = cardType, SecondaryType = MifareChipSubType.Unspecified };
         }
 
         public GenericChipModel(string uid, ChipType cardType, string sak, string rats)
         {
+            Childs = new List<GenericChipModel>();
             UID = uid;
             TCard = new CType() { PrimaryType = cardType, SecondaryType = MifareChipSubType.Unspecified };
             SAK = sak;
@@ -29,6 +31,7 @@ namespace CardCheckAssistant.Models
 
         public GenericChipModel(string uid, MifareChipSubType cardType, string sak, string rats)
         {
+            Childs = new List<GenericChipModel>();
             UID = uid;
             TCard = new CType() { PrimaryType = ChipType.MIFARE, SecondaryType = cardType };
             SAK = sak;
@@ -37,6 +40,7 @@ namespace CardCheckAssistant.Models
 
         public GenericChipModel(string uid, ChipType cardType, string sak, string rats, string versionL4)
         {
+            Childs = new List<GenericChipModel>();
             UID = uid;
             TCard = new CType() { PrimaryType = cardType, SecondaryType = MifareChipSubType.Unspecified };
             SAK = sak;
@@ -46,6 +50,7 @@ namespace CardCheckAssistant.Models
 
         public GenericChipModel(string uid, MifareChipSubType cardType, string sak, string rats, string versionL4)
         {
+            Childs = new List<GenericChipModel>();
             UID = uid;
             TCard = new CType() { PrimaryType = ChipType.MIFARE, SecondaryType = cardType };
             SAK = sak;
@@ -55,6 +60,7 @@ namespace CardCheckAssistant.Models
 
         public GenericChipModel(GenericChipModel chip)
         {
+            Childs = new List<GenericChipModel>();
             UID = chip.UID;
             TCard = new CType() { PrimaryType = chip.TCard.PrimaryType, SecondaryType = chip.TCard.SecondaryType };
             SAK = chip.SAK;
@@ -62,7 +68,7 @@ namespace CardCheckAssistant.Models
             VersionL4 = chip.VersionL4;
         }
 
-        public bool? HasChilds => Childs?.Count > 0;
+        public bool? HasChilds => Childs?.Any() ?? false;
 
         public List<GenericChipModel> Childs
         {

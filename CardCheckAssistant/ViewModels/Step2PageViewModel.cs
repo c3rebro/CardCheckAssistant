@@ -353,9 +353,10 @@ public partial class Step2PageViewModel : ObservableRecipient, INavigationAware
         set
         {
 
-            if ((CheckBoxChipProgrammableNo || CheckBoxChipProgrammableYes) &&
+            if (TextBlockCheckFinishedAndResultIsNotSuppIsVisible ||
+                ((CheckBoxChipProgrammableNo || CheckBoxChipProgrammableYes) &&
                 (CheckBoxTestOnLockFailed || CheckBoxTestOnLockSuccess) &&
-                (CheckBoxTestOnLockLimitedNo || CheckBoxTestOnLockLimitedYes) && chipWasRemovedAndPlacedAgain)
+                (CheckBoxTestOnLockLimitedNo || CheckBoxTestOnLockLimitedYes) && chipWasRemovedAndPlacedAgain))
             {
                 SetProperty(ref _nextStepCanExecute, value);
             }
@@ -435,8 +436,8 @@ public partial class Step2PageViewModel : ObservableRecipient, INavigationAware
     /// <summary>
     /// launch rfidgear to test the chip and create a report
     /// </summary>
-    /// <returns></returns>
-    private async Task ExecuteRFIDGearCommand()
+    /// <returns>false on NoChipFound, true otherwise</returns>
+    private async Task<bool> ExecuteRFIDGearCommand()
     {
         try
         {
@@ -582,17 +583,16 @@ public partial class Step2PageViewModel : ObservableRecipient, INavigationAware
                     ? LsmCardTemplates.FirstOrDefault(y => y.TemplateText.Contains("MC1000L_AV")) ?? new LSMCardTemplate()
                     : LsmCardTemplates.FirstOrDefault() ?? new LSMCardTemplate();
 
-
-            if (!supported)
+            if (!programmable)
             {
-                Debug.WriteLine("supported only");
+                scanChipTimer.Stop();
+                scanChipTimer.Tick -= ScanChipEvent;
 
                 TextBlockCheckFinishedAndResultIsNotSuppIsVisible = true;
                 HyperlinkButtonReportIsVisible = true;
-
-                NextStepButtonContent = "Fertigstellen";
-                NextStepCanExecute = true;
                 TextBlockCheckFinishedIsVisible = true;
+
+                return false;
             }
 
             else if (supported && !programmable && !notEnoughFreeMemory)
@@ -603,8 +603,7 @@ public partial class Step2PageViewModel : ObservableRecipient, INavigationAware
                 TextBlockCheckFinishedAndResultIsMissingPICCKeyIsVisible = true;
                 HyperlinkButtonReportIsVisible = true;
 
-                NextStepCanExecute = true;
-                NextStepButtonContent = "Fertigstellen";
+                return false;
             }
 
             else if (supported && !programmable && notEnoughFreeMemory || (supported && programmable && notEnoughFreeMemory))
@@ -615,7 +614,7 @@ public partial class Step2PageViewModel : ObservableRecipient, INavigationAware
                 TextBlockCheckFinishedAndResultIsNotEnoughMemoryIsVisible = true;
                 HyperlinkButtonReportIsVisible = true;
 
-                NextStepButtonContent = "Fertigstellen";
+                return false;
             }
 
             else if (supported && programmable)
@@ -653,6 +652,8 @@ public partial class Step2PageViewModel : ObservableRecipient, INavigationAware
 
             throw new InvalidOperationException(e.Message);
         }
+
+        return true;
     }
 
     /// <summary>
@@ -779,7 +780,7 @@ public partial class Step2PageViewModel : ObservableRecipient, INavigationAware
                                 readerService.GenericChip.TCard.PrimaryType.ToString() :
                                 readerService.GenericChip.TCard.SecondaryType.ToString() ?? "");
 
-                            if (readerService.GenericChip?.Childs != null)
+                            if (readerService.GenericChip?.HasChilds == true)
                             {
                                 ChipInfoMessage += string.Format("\nErkannt 2: {0}",
                                     readerService.GenericChip.Childs[0].TCard.SecondaryType == MifareChipSubType.Unspecified ?
@@ -805,7 +806,7 @@ public partial class Step2PageViewModel : ObservableRecipient, INavigationAware
                             readerService.GenericChip.TCard.PrimaryType.ToString() :
                             readerService.GenericChip.TCard.SecondaryType.ToString());
 
-                        if (readerService.GenericChip?.Childs[0] != null)
+                        if (readerService.GenericChip?.HasChilds == true)
                         {
                             ChipInfoMessage += string.Format("\nErkannt 2: {0}",
                                 readerService.GenericChip.Childs[0].TCard.SecondaryType == MifareChipSubType.Unspecified ?
@@ -845,16 +846,23 @@ public partial class Step2PageViewModel : ObservableRecipient, INavigationAware
     {
         try
         {
-            var reader = ReaderService.Instance;
-            await reader.Disconnect();
-
             scanChipTimer.Stop();
             scanChipTimer.Tick -= ScanChipEvent;
 
-            await ExecuteRFIDGearCommand();
+            var reader = ReaderService.Instance;
+            await reader.Disconnect();
 
-            scanChipTimer.Tick += ScanChipEvent;
-            scanChipTimer.Start();
+            if (await ExecuteRFIDGearCommand())
+            {
+                scanChipTimer.Tick += ScanChipEvent;
+                scanChipTimer.Start();
+            }
+            else
+            {
+                NextStepCanExecute = true;
+                NextStepButtonContent = "Fertigstellen";
+                TextBlockCheckFinishedAndResultIsNotSuppIsVisible = true;
+            }
         }
         catch (Exception ex)
         {

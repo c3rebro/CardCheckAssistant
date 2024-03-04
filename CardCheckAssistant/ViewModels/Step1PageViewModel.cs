@@ -418,6 +418,9 @@ public partial class Step1PageViewModel : ObservableRecipient, INavigationAware
     public async void OnNavigatedTo(object parameter)
     {
         // Run code when the app navigates to this page
+        scanChipTimer.Stop();
+        scanChipTimer.Tick -= ScanChipEvent;
+
         using var reader = ReaderService.Instance;
 
         await reader.Disconnect();
@@ -430,6 +433,9 @@ public partial class Step1PageViewModel : ObservableRecipient, INavigationAware
     public async void OnNavigatedFrom()
     {
         // Run code when the app navigates away from this page
+        scanChipTimer.Stop();
+        scanChipTimer.Tick -= ScanChipEvent;
+
         using var reader = ReaderService.Instance;
 
         await reader.Disconnect();

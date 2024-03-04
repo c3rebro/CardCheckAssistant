@@ -18,6 +18,7 @@ using CardCheckAssistant.Helpers;
 using Windows.ApplicationModel.Store;
 using Microsoft.UI.Windowing;
 using CardCheckAssistant.Contracts.ViewModels;
+using Windows.Foundation.Diagnostics;
 
 namespace CardCheckAssistant.ViewModels;
 
@@ -26,6 +27,7 @@ public partial class HomePageViewModel : ObservableRecipient, INavigationAware
     private readonly EventLog eventLog = new("Application", ".", Assembly.GetEntryAssembly().GetName().Name);
     private readonly Microsoft.UI.Xaml.DispatcherTimer scanDBTimer;
     private SQLDBService dbService;
+    private readonly bool isCreateEventLogSourceErr;
 
     private ObservableCollection<CardCheckProcess> cardCheckProcessesFromCache;
 
@@ -34,12 +36,20 @@ public partial class HomePageViewModel : ObservableRecipient, INavigationAware
     /// </summary>
     public HomePageViewModel()
     {
-        if (!EventLog.SourceExists(Assembly.GetEntryAssembly().GetName().Name))
+        try
         {
-            EventLog.CreateEventSource(new EventSourceCreationData(Assembly.GetEntryAssembly().GetName().Name, "Application"));
+            if (!EventLog.SourceExists(Assembly.GetEntryAssembly()?.GetName()?.Name))
+            {
+                EventLog.CreateEventSource(new EventSourceCreationData(Assembly.GetEntryAssembly().GetName().Name, "Application"));
+                isCreateEventLogSourceErr = false;
+            }
+        }
+        catch
+        {
+            isCreateEventLogSourceErr = true;
         }
 
-        eventLog.Source = Assembly.GetEntryAssembly().GetName().Name;
+        eventLog.Source = Assembly.GetEntryAssembly()?.GetName()?.Name;
 
         DataGridItemCollection = new ObservableCollection<CardCheckProcess>();
         SetSortAscending = false;
@@ -453,6 +463,15 @@ public partial class HomePageViewModel : ObservableRecipient, INavigationAware
     {
         try
         {
+            if(isCreateEventLogSourceErr)
+            {
+                await App.MainRoot.MessageDialogAsync(
+                    "Fehler.",
+                    "Es konnte keine Lagdatei erzeugt werden.\n" +
+                    "Bitte das Programm einmal mit Adminrechten starten...");
+            }
+
+
             await CheckForUpdates();
 
             using var settings = new SettingsReaderWriter();

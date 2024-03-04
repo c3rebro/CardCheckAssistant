@@ -21,10 +21,11 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using CardCheckAssistant.Views;
 using System.Diagnostics;
+using CardCheckAssistant.Contracts.ViewModels;
 
 namespace CardCheckAssistant.ViewModels;
 
-public partial class SettingsPageViewModel : ObservableRecipient
+public partial class SettingsPageViewModel : ObservableRecipient, INavigationAware
 {
     private readonly IThemeSelectorService _themeSelectorService;
     private readonly EventLog eventLog = new("Application", ".", Assembly.GetEntryAssembly().GetName().Name);
@@ -77,6 +78,7 @@ public partial class SettingsPageViewModel : ObservableRecipient
             CardCheckUseSQLLite = settings.DefaultSettings.CardCheckUseMSSQL == true ? true : false;
             CreateSubdirectoryIsEnabled = settings.DefaultSettings.CreateSubdirectoryIsEnabled == true ? true : false;
             RemoveTemporaryReportsIsEnabled = settings.DefaultSettings.RemoveTemporaryReportsIsEnabled == true ? true : false;
+            ReaderVolume = settings.DefaultSettings.ReaderVolume ?? 0;
 
             SelectedDBUserPwd = enc.Decrypt(settings?.DefaultSettings?.SelectedDBUserPwd ?? "NoPWD");
 
@@ -346,6 +348,24 @@ public partial class SettingsPageViewModel : ObservableRecipient
     /// </summary>
     [ObservableProperty]
     private CardCheckTextTemplate _selectedTextTemplate;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public int ReaderVolume
+    {
+        get => _readerVolume;
+        set
+        {
+            SetProperty(ref _readerVolume, value);
+            using var settings = new SettingsReaderWriter();
+
+            settings.DefaultSettings.ReaderVolume = value;
+            settings.SaveSettings();
+        }
+    }
+    private int _readerVolume;
+
     #endregion
 
     #region Commands
@@ -362,6 +382,8 @@ public partial class SettingsPageViewModel : ObservableRecipient
     public ICommand SelectProjectFolderCommand => new AsyncRelayCommand(SelectProjectFolder_Executed);
 
     public ICommand SelectRFIDGearCustomProjectCommand => new AsyncRelayCommand(SelectRFIDGearCustomProjectCommand_Executed);
+
+    public ICommand ReaderConnectionTestCommand => new AsyncRelayCommand(ReaderConnectionTestCommand_Executed);
     #endregion
 
     private async Task CreateNewTextTemplate_Executed()
@@ -503,6 +525,35 @@ public partial class SettingsPageViewModel : ObservableRecipient
         {
             SelectedProjectFolder = file.Path.ToString();
         }
+    }
+
+    private async Task ReaderConnectionTestCommand_Executed()
+    {
+    
+    }
+
+    /// <summary>
+    /// INavigation Aware Event. Close Connection If Open
+    /// </summary>
+    /// <param name="parameter"></param>
+    public async void OnNavigatedTo(object parameter)
+    {
+        // Run code when the app navigates to this page
+        using var reader = ReaderService.Instance;
+
+        await reader.Disconnect();
+
+    }
+
+    /// <summary>
+    /// INavigation Aware Event. Close Connection If Open
+    /// </summary>
+    public async void OnNavigatedFrom()
+    {
+        // Run code when the app navigates away from this page
+        using var reader = ReaderService.Instance;
+
+        await reader.Disconnect();
     }
 
     private async Task NavigateBackCommand_Executed()

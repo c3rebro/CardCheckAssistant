@@ -114,6 +114,8 @@ namespace CardCheckAssistant.Services
         {
             try
             {
+                using SettingsReaderWriter settings = new SettingsReaderWriter();
+
                 if (readerDevice != null)
                 {
                     if (!readerDevice.IsConnected)
@@ -186,7 +188,7 @@ namespace CardCheckAssistant.Services
                     }
                     if(hfTag == null && lfTag == null && legicTag == null)
                     {
-                        await readerDevice.BeepAsync(40, 2500, 50, 0);
+                        await readerDevice.BeepAsync((byte)(settings.DefaultSettings.ReaderVolume ?? 0), 2500, 50, 0);
 
                         GenericChip = null;
 

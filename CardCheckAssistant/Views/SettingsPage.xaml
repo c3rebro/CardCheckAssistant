@@ -70,11 +70,11 @@
                             ContentAlignment="Left">
                             <StackPanel Orientation="Vertical">
                                 <controls:SettingsExpander 
-                                    IsExpanded="True"
+                                    IsExpanded="False"
                                     Header="RFiDGear Programmdatei"
                                     Description="Bitte die RFiDGear.exe auswählen...">
                                     <controls:SettingsExpander.HeaderIcon>
-                                        <FontIcon Glyph="&#xE1A5;"/>
+                                        <FontIcon Glyph="&#xECAA;"/>
                                     </controls:SettingsExpander.HeaderIcon>
                                     <controls:SettingsExpander.Content>
                                         <Button Content="Datei öffnen..." Command="{x:Bind ViewModel.SelectRFIDGearExeCommand}"/>
@@ -83,18 +83,18 @@
                                         <controls:SettingsCard  
                                             Header="Pfad zu RFiDGear:">
                                             <controls:SettingsCard.Content>
-                                                <TextBlock Text="{x:Bind ViewModel.SelectedRFIDGearPath}" />
+                                                <TextBlock Text="{x:Bind ViewModel.SelectedRFIDGearPath, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" />
                                             </controls:SettingsCard.Content>
                                         </controls:SettingsCard>
                                     </controls:SettingsExpander.Items>
                                 </controls:SettingsExpander>
 
                                 <controls:SettingsExpander 
-                                    IsExpanded="True"
+                                    IsExpanded="False"
                                     Header="Projekt-Pfad"
                                     Description="Projektpfad für Kartenprüfungen">
                                     <controls:SettingsExpander.HeaderIcon>
-                                        <FontIcon Glyph="&#xE1A5;"/>
+                                        <FontIcon Glyph="&#xED25;"/>
                                     </controls:SettingsExpander.HeaderIcon>
                                     <controls:SettingsExpander.Content>
                                         <Button Content="Ordner wählen..." Command="{x:Bind ViewModel.SelectProjectFolderCommand}"/>
@@ -103,14 +103,14 @@
                                         <controls:SettingsCard  
                                     Header="Pfad zu RFiDGear:" Description="Unterhalb dieses Ordners werden alle Prüfberichte angelegt.">
                                             <controls:SettingsCard.Content>
-                                                <TextBlock Text="{x:Bind ViewModel.SelectedProjectFolder}" />
+                                                <TextBlock Text="{x:Bind ViewModel.SelectedProjectFolder, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" />
                                             </controls:SettingsCard.Content>
                                         </controls:SettingsCard>
                                     </controls:SettingsExpander.Items>
                                 </controls:SettingsExpander>
 
                                 <controls:SettingsExpander 
-                                    IsExpanded="True"
+                                    IsExpanded="False"
                                     Header="RFiDGear *.rfprj Datei"
                                     Description="Pfad zu RFIDGear Speicherauslese-Projektdatei">
                                     <controls:SettingsExpander.HeaderIcon>
@@ -123,20 +123,14 @@
                                         <controls:SettingsCard  
                                     Header="Pfad zu RFiDGear:" Description="Mit dieser Projektdatei wird der freie Speicher ausgelesen.">
                                             <controls:SettingsCard.Content>
-                                                <TextBlock Text="{x:Bind ViewModel.SelectedCustomProjectFolder}" />
+                                                <TextBlock Text="{x:Bind ViewModel.SelectedCustomProjectFolder, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" />
                                             </controls:SettingsCard.Content>
                                         </controls:SettingsCard>
                                     </controls:SettingsExpander.Items>
                                 </controls:SettingsExpander>
                             </StackPanel>
-
                         </controls:SettingsCard>
-
-
-
-
                     </controls:SettingsExpander.Items>
-
                 </controls:SettingsExpander>
 
                 <controls:SettingsExpander 
@@ -145,7 +139,7 @@
                     HorizontalContentAlignment="Stretch"
                     HorizontalAlignment="Stretch">
                     <controls:SettingsExpander.HeaderIcon>
-                        <FontIcon Glyph="&#xE1A5;"/>
+                        <FontIcon Glyph="&#xED0E;"/>
                     </controls:SettingsExpander.HeaderIcon>
                     <controls:SettingsExpander.Content>
                         <ToggleSwitch IsOn="{x:Bind ViewModel.CreateSubdirectoryIsEnabled, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
@@ -157,7 +151,7 @@
                     Description="Prüfvorgang automatisch Starten"                    
                     Header="RFiDGear Automatisch starten">
                     <controls:SettingsExpander.HeaderIcon>
-                        <FontIcon Glyph="&#xE1A5;"/>
+                        <FontIcon Glyph="&#xE777;"/>
                     </controls:SettingsExpander.HeaderIcon>
                     <controls:SettingsExpander.Content>
                         <ToggleSwitch IsOn="{x:Bind ViewModel.RFiDGearIsAutoRunEnabled, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
@@ -170,7 +164,7 @@
                     HorizontalContentAlignment="Stretch"
                     HorizontalAlignment="Stretch">
                     <controls:SettingsExpander.HeaderIcon>
-                        <FontIcon Glyph="&#xE1A5;"/>
+                        <FontIcon Glyph="&#xE74D;"/>
                     </controls:SettingsExpander.HeaderIcon>
                     <controls:SettingsExpander.Content>
                         <ToggleSwitch IsOn="{x:Bind ViewModel.RemoveTemporaryReportsIsEnabled, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
@@ -264,7 +258,7 @@
                     Description="Verbindungseinstellungen"
                     Header="Datenbankeinstellungen">
                     <controls:SettingsExpander.HeaderIcon>
-                        <FontIcon Glyph="&#xE1A5;"/>
+                        <FontIcon Glyph="&#xEE94;"/>
                     </controls:SettingsExpander.HeaderIcon>
                     <controls:SettingsExpander.Items>
                         <controls:SettingsCard
@@ -329,13 +323,32 @@
                     </controls:SettingsExpander.Items>
                 </controls:SettingsExpander>
 
+                <TextBlock Margin="8,8,0,8" Text="Leser Optionen" Style="{ThemeResource SubtitleTextBlockStyle }" />
+                <controls:SettingsExpander HorizontalContentAlignment="Stretch"
+                    IsExpanded="False"
+                    Description="Lautstärke, Port"
+                    Header="Lesereinstellungen">
+                    <controls:SettingsExpander.HeaderIcon>
+                        <FontIcon Glyph="&#xE189;"/>
+                    </controls:SettingsExpander.HeaderIcon>
+                    <controls:SettingsExpander.Content>
+                        <TextBlock x:Name="readerSettings" HorizontalAlignment="Stretch" Text="Leseroptionen"/>
+                    </controls:SettingsExpander.Content>
+                    <controls:SettingsExpander.Items>
+                        <controls:SettingsCard Header="Lautstärke:">
+                            <Slider Value="{x:Bind ViewModel.ReaderVolume, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" Header="Lautstärke" Minimum="0" Maximum="100"/>
+                        </controls:SettingsCard>
+                    </controls:SettingsExpander.Items>
+
+                </controls:SettingsExpander>
+                
                 <TextBlock Margin="8,8,0,8" x:Uid="Settings_Personalization" Style="{ThemeResource SubtitleTextBlockStyle}" />
                 <controls:SettingsExpander 
                     IsExpanded="False"
                     Description="Ansichteinstellungen"
                     Header="Thema">
                     <controls:SettingsExpander.HeaderIcon>
-                        <FontIcon Glyph="&#xE1A5;"/>
+                        <FontIcon Glyph="&#xE771;"/>
                     </controls:SettingsExpander.HeaderIcon>
                     <controls:SettingsExpander.Items>
                         <controls:SettingsCard 
