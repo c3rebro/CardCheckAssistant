@@ -23,7 +23,7 @@ namespace CardCheckAssistant.Services
         {
             try
             {
-                readerDevice = TWN4ReaderDevice.Instance;
+                readerDevice = TWN4ReaderDevice.Instance ?? new TWN4ReaderDevice(0);
             }
             catch (Exception e)
             {
@@ -31,7 +31,7 @@ namespace CardCheckAssistant.Services
             }
         }
 
-        public bool MoreThanOneReaderFound; // => readerDevice?.MoreThanOneReader ?? true;
+        public bool MoreThanOneReaderFound => readerDevice?.MoreThanOneReader ?? true;
 
         public bool ReaderPortBusy => readerDevice?.PortAccessDenied ?? true;
 

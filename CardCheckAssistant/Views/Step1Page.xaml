@@ -6,7 +6,6 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:svc="using:CardCheckAssistant.Services"
     xmlns:viewmodels="using:CardCheckAssistant.ViewModels"
-    xmlns:ctWinUIEnum="using:CommunityToolkit.WinUI"
     xmlns:ctWinUI="using:CommunityToolkit.WinUI.UI.Controls"
     xmlns:ctWinUIConv="using:CommunityToolkit.WinUI.UI.Converters"
     mc:Ignorable="d"
@@ -198,14 +197,13 @@
             Visibility="{x:Bind ViewModel.AskClassicKeysIsVisible, Converter={StaticResource boolean}, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
             VerticalAlignment="Center" >
         </TextBox>
-        <!--            ItemsSource="{ctWinUIEnum:EnumValues Type=models:LsmCardTemplates}"-->
         <ComboBox 
             Margin="8,8"
             Grid.ColumnSpan="1" 
             Grid.Column="2" 
             Grid.Row="3" 
             VerticalAlignment="Center" 
-            ItemsSource="{x:Bind ViewModel.Languages}"
+            ItemsSource="{x:Bind ViewModel.Languages}" 
             SelectedItem="{x:Bind ViewModel.SelectedReportLaguage, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
         <Button 
             Grid.Row="7"

@@ -239,6 +239,7 @@ public class SQLDBService : IDisposable
                 {
                     cardCheckProcess = new CardCheckProcess
                     {
+
                         ID = sqlite_datareader.GetString(0),
                         ChipNumber = sqlite_datareader.GetString(2),
                         CName = sqlite_datareader.GetString(5),

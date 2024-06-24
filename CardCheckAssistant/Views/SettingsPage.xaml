@@ -139,43 +139,43 @@
 
                 </controls:SettingsExpander>
 
-                <controls:SettingsCard 
+                <controls:SettingsExpander 
                     Header="Unterverzeichnis für Berichte anlegen"
                     Description="Legt für jede Jobnummer ein extra Unterverzeichnis unterhalb von &quot;Projekt-Pfad&quot; an"
                     HorizontalContentAlignment="Stretch"
-                    HorizontalAlignment="Stretch"
-                    >
-                    <controls:SettingsCard.HeaderIcon>
+                    HorizontalAlignment="Stretch">
+                    <controls:SettingsExpander.HeaderIcon>
                         <FontIcon Glyph="&#xE1A5;"/>
-                    </controls:SettingsCard.HeaderIcon>
-                    <controls:SettingsCard.Content>
+                    </controls:SettingsExpander.HeaderIcon>
+                    <controls:SettingsExpander.Content>
                         <ToggleSwitch IsOn="{x:Bind ViewModel.CreateSubdirectoryIsEnabled, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
-                    </controls:SettingsCard.Content>
-                </controls:SettingsCard>
+                    </controls:SettingsExpander.Content>
+                </controls:SettingsExpander>
 
-                <controls:SettingsCard 
+                <controls:SettingsExpander 
+                    IsExpanded="False" 
                     Description="Prüfvorgang automatisch Starten"                    
                     Header="RFiDGear Automatisch starten">
-                    <controls:SettingsCard.HeaderIcon>
+                    <controls:SettingsExpander.HeaderIcon>
                         <FontIcon Glyph="&#xE1A5;"/>
-                    </controls:SettingsCard.HeaderIcon>
-                    <controls:SettingsCard.Content>
+                    </controls:SettingsExpander.HeaderIcon>
+                    <controls:SettingsExpander.Content>
                         <ToggleSwitch IsOn="{Binding RFiDGearIsAutoRunEnabled, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
-                    </controls:SettingsCard.Content>
-                </controls:SettingsCard>
+                    </controls:SettingsExpander.Content>
+                </controls:SettingsExpander>
 
-                <controls:SettingsCard 
+                <controls:SettingsExpander 
                     Header="Temporäre PDF-Berichte nach der Fertigstellung löschen"
                     Description="Entfernt alle *_.pdf und *.pdf Dateien aus dem Bericht-Ablageverzeichnis und behält nur die *_final.pdf Dateien bei."
                     HorizontalContentAlignment="Stretch"
                     HorizontalAlignment="Stretch">
-                    <controls:SettingsCard.HeaderIcon>
+                    <controls:SettingsExpander.HeaderIcon>
                         <FontIcon Glyph="&#xE1A5;"/>
-                    </controls:SettingsCard.HeaderIcon>
-                    <controls:SettingsCard.Content>
+                    </controls:SettingsExpander.HeaderIcon>
+                    <controls:SettingsExpander.Content>
                         <ToggleSwitch IsOn="{x:Bind ViewModel.RemoveTemporaryReportsIsEnabled, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
-                    </controls:SettingsCard.Content>
-                </controls:SettingsCard>
+                    </controls:SettingsExpander.Content>
+                </controls:SettingsExpander>
 
                 <controls:SettingsExpander 
                     IsExpanded="False" 
@@ -270,35 +270,23 @@
                         <controls:SettingsCard
                             HorizontalContentAlignment="Stretch"
                             ContentAlignment="Left">
-                            <StackPanel Orientation="Vertical">
+                            <StackPanel Orientation="Vertical" HorizontalAlignment="Stretch">
                                 <controls:SettingsExpander 
                                     HorizontalContentAlignment="Stretch" 
                                     Header="MS-SQL verwenden?" 
                                     IsExpanded="{Binding IsOn, ElementName=useSQL}">
                                     <controls:SettingsExpander.Content>
-                                        <ToggleSwitch 
-                                            x:Name="useSQL" 
-                                            IsOn="{x:Bind ViewModel.CardCheckUseSQLLite, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
+                                        <ToggleSwitch x:Name="useSQL" HorizontalAlignment="Stretch" IsOn="{x:Bind ViewModel.CardCheckUseSQLLite, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
                                     </controls:SettingsExpander.Content>
                                     <controls:SettingsExpander.Items>
-                                        <controls:SettingsCard 
-                                            Header="Servername:">
-                                            <TextBox 
-                                                Visibility="{Binding IsOn, ElementName=useSQL}" 
-                                                Text="{x:Bind ViewModel.SelectedDBServerName, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" 
-                                                PlaceholderText="localhost"/>
+                                        <controls:SettingsCard Header="Servername:">
+                                            <TextBox Visibility="{Binding IsOn, ElementName=useSQL}" Text="{x:Bind ViewModel.SelectedDBServerName, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" PlaceholderText="localhost"/>
                                         </controls:SettingsCard>
                                         <controls:SettingsCard Header="Port:">
-                                            <TextBox 
-                                                Visibility="{Binding IsOn, ElementName=useSQL}" 
-                                                Text="{x:Bind ViewModel.SelectedDBServerPort, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" 
-                                                PlaceholderText="3306"/>
+                                            <TextBox Visibility="{Binding IsOn, ElementName=useSQL}" Text="{x:Bind ViewModel.SelectedDBServerPort, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" PlaceholderText="3306"/>
                                         </controls:SettingsCard>
                                         <controls:SettingsCard Header="DB Name:">
-                                            <TextBox 
-                                                Visibility="{Binding IsOn, ElementName=useSQL}" 
-                                                Text="{x:Bind ViewModel.SelectedDBName, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" 
-                                                PlaceholderText="database"/>
+                                            <TextBox Visibility="{Binding IsOn, ElementName=useSQL}" Text="{x:Bind ViewModel.SelectedDBName, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" PlaceholderText="database"/>
                                         </controls:SettingsCard>
                                     </controls:SettingsExpander.Items>
                                 </controls:SettingsExpander>
@@ -312,24 +300,13 @@
                                     </controls:SettingsExpander.Content>
                                     <controls:SettingsExpander.Items>
                                         <controls:SettingsCard Header="Servername:">
-                                            <TextBox 
-                                                Visibility="{Binding IsOn, ElementName=useWinLoginToggleSwitch}" 
-                                                Header="Datenbankbenutzer:" 
-                                                Text="{x:Bind ViewModel.SelectedDBUsername, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" 
-                                                PlaceholderText="johndoe"/>
+                                            <TextBox Visibility="{Binding IsOn, ElementName=useWinLoginToggleSwitch}" Header="Datenbankbenutzer:" Text="{x:Bind ViewModel.SelectedDBUsername, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" PlaceholderText="johndoe"/>
                                         </controls:SettingsCard>
                                         <controls:SettingsCard Header="Port:">
-                                            <PasswordBox 
-                                                Visibility="{Binding IsOn, ElementName=useWinLoginToggleSwitch}" 
-                                                Header="Benutzerpasswort:" 
-                                                Password="{x:Bind ViewModel.SelectedDBUserPwd, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"  
-                                                PlaceholderText="12345678"/>
+                                            <PasswordBox Visibility="{Binding IsOn, ElementName=useWinLoginToggleSwitch}" Header="Benutzerpasswort:" Password="{x:Bind ViewModel.SelectedDBUserPwd, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"  PlaceholderText="12345678"/>
                                         </controls:SettingsCard>
                                         <controls:SettingsCard Header="DB Name:">
-                                            <TextBox 
-                                                Visibility="{Binding IsOn, ElementName=useWinLoginToggleSwitch}" 
-                                                Text="{x:Bind ViewModel.SelectedDBName, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" 
-                                                PlaceholderText="database"/>
+                                            <TextBox Visibility="{Binding IsOn, ElementName=useWinLoginToggleSwitch}" Text="{x:Bind ViewModel.SelectedDBName, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" PlaceholderText="database"/>
                                         </controls:SettingsCard>
                                     </controls:SettingsExpander.Items>
                                 </controls:SettingsExpander>

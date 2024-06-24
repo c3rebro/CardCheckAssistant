@@ -188,7 +188,7 @@
   <data name="Button_HomePage_OpenReport.Content" xml:space="preserve">
     <value>Open Report...</value>
   </data>
-  <data name="Button_HomePage_StartCheck_Select" xml:space="preserve">
+  <data name="Button_HomePage_StartCheck" xml:space="preserve">
     <value>Select Entry...</value>
   </data>
   <data name="DataGrid_Header_ChipNr.Header" xml:space="preserve">
@@ -247,8 +247,5 @@
   </data>
   <data name="ToggleMenuFlyoutItem_SortBy_HomePage_Ascending.Text" xml:space="preserve">
     <value>Ascending</value>
-  </data>
-  <data name="Button_HomePage_StartCheck_Begin" xml:space="preserve">
-    <value>Start Check...</value>
   </data>
 </root>
