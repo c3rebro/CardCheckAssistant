@@ -28,11 +28,6 @@ public partial class HomePageViewModel : ObservableRecipient, INavigationAware
     private SQLDBService dbService;
 
     private ObservableCollection<CardCheckProcess> cardCheckProcessesFromCache;
-#if DEBUG
-    private const string DBNAME = "OT_CardCheck_Test";
-#else
-    private const string DBNAME = "OT_CardCheck";
-#endif
 
     /// <summary>
     /// 
@@ -52,14 +47,10 @@ public partial class HomePageViewModel : ObservableRecipient, INavigationAware
         SelectedFilter = "InProgress";
         SelectedSort = "JobNumber";
 
-        ButtonStartCheckContent = "Button_HomePage_StartCheck".GetLocalized();
+        ButtonStartCheckContent = "Button_HomePage_StartCheck_Select".GetLocalized();
         WelcomeScreenText = "TextBlock_HomePage_WelcomeScreenText".GetLocalized();
 
         NumberOfChecksText = "";
-
-#if DEBUG
-
-#endif
 
         // Select First "InProgress" Job... if any
         if (DataGridItemCollection != null && _dataGridItemCollection.Any())
@@ -151,7 +142,7 @@ public partial class HomePageViewModel : ObservableRecipient, INavigationAware
             if (value == null)
             {
                 StartCheckCanExecute = false;
-                ButtonStartCheckContent = "Vorgang auswählen";
+                ButtonStartCheckContent = "Button_HomePage_StartCheck_Select".GetLocalized();
             }
             else
             {
@@ -167,7 +158,7 @@ public partial class HomePageViewModel : ObservableRecipient, INavigationAware
                 {
                     case "InProgress":
                         StartCheckCanExecute = true;
-                        ButtonStartCheckContent = "Prüfvorgang starten";
+                        ButtonStartCheckContent = "Button_HomePage_StartCheck_Begin".GetLocalized();
                         break;
                     case "CheckFinished":
                         StartCheckCanExecute = true;
@@ -175,7 +166,7 @@ public partial class HomePageViewModel : ObservableRecipient, INavigationAware
                         break;
                     default:
                         StartCheckCanExecute = false;
-                        ButtonStartCheckContent = "Vorgang auswählen";
+                        ButtonStartCheckContent = "Button_HomePage_StartCheck_Select".GetLocalized();
                         break;
                 }
             }

@@ -78,6 +78,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\Log4CSharp\Log4CSharp.csproj" />
     <ProjectReference Include="..\CardCheckAssistant.Core\CardCheckAssistant.Core.csproj" />
     <ProjectReference Include="H:\Seafile\Elatec.NET\Elatec.NET.csproj" />
   </ItemGroup>

@@ -191,7 +191,7 @@
   <data name="Button_HomePage_OpenReport.Content" xml:space="preserve">
     <value>PDF öffnen...</value>
   </data>
-  <data name="Button_HomePage_StartCheck" xml:space="preserve">
+  <data name="Button_HomePage_StartCheck_Select" xml:space="preserve">
     <value>Vorgang auswählen...</value>
   </data>
   <data name="DataGrid_Header_ChipNr.Header" xml:space="preserve">
@@ -250,5 +250,8 @@
   </data>
   <data name="ToggleMenuFlyoutItem_SortBy_HomePage_Ascending.Text" xml:space="preserve">
     <value>Aufsteigend</value>
+  </data>
+  <data name="Button_HomePage_StartCheck_Begin" xml:space="preserve">
+    <value>Prüfvorgang starten</value>
   </data>
 </root>
