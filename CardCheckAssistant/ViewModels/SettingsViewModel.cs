@@ -8,8 +8,6 @@ using CardCheckAssistant.Services;
 using CardCheckAssistant.Helpers;
 using CardCheckAssistant.Models;
 
-using Log4CSharp;
-
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
@@ -22,12 +20,15 @@ using Org.BouncyCastle.Crypto.Engines;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using CardCheckAssistant.Views;
+using System.Diagnostics;
+using CardCheckAssistant.Contracts.ViewModels;
 
 namespace CardCheckAssistant.ViewModels;
 
-public partial class SettingsPageViewModel : ObservableRecipient
+public partial class SettingsPageViewModel : ObservableRecipient, INavigationAware
 {
     private readonly IThemeSelectorService _themeSelectorService;
+    private readonly EventLog eventLog = new("Application", ".", Assembly.GetEntryAssembly().GetName().Name);
 
     [ObservableProperty]
     private ElementTheme _elementTheme;
@@ -44,6 +45,8 @@ public partial class SettingsPageViewModel : ObservableRecipient
     {
         try
         {
+            
+
             using var settings = new SettingsReaderWriter();
             using var enc = new RijndaelEnc();
 
@@ -68,12 +71,14 @@ public partial class SettingsPageViewModel : ObservableRecipient
             SelectedRFIDGearPath = settings.DefaultSettings.DefaultRFIDGearExePath ?? string.Empty;
             RFiDGearIsAutoRunEnabled = settings.DefaultSettings.AutoLoadProjectOnStart == true ? true : false;
             SelectedDBName = settings.DefaultSettings.SelectedDBName ?? string.Empty;
+            SelectedDBTableName = settings.DefaultSettings.SelectedDBTableName ?? string.Empty;
             SelectedDBServerName = settings.DefaultSettings.SelectedDBServerName ?? string.Empty;
             SelectedDBServerPort = settings.DefaultSettings.SelectedDBServerPort ?? string.Empty;
             SelectedDBUsername = settings.DefaultSettings.SelectedDBUsername ?? string.Empty;
             CardCheckUseSQLLite = settings.DefaultSettings.CardCheckUseMSSQL == true ? true : false;
             CreateSubdirectoryIsEnabled = settings.DefaultSettings.CreateSubdirectoryIsEnabled == true ? true : false;
             RemoveTemporaryReportsIsEnabled = settings.DefaultSettings.RemoveTemporaryReportsIsEnabled == true ? true : false;
+            ReaderVolume = settings.DefaultSettings.ReaderVolume ?? 0;
 
             SelectedDBUserPwd = enc.Decrypt(settings?.DefaultSettings?.SelectedDBUserPwd ?? "NoPWD");
 
@@ -96,12 +101,15 @@ public partial class SettingsPageViewModel : ObservableRecipient
         }
         catch (Exception ex)
         {
-            LogWriter.CreateLogEntry(ex);
+            eventLog.WriteEntry(ex.Message, EventLogEntryType.Error);
         }
     }
 
     #region ObservableObjects
 
+    /// <summary>
+    /// 
+    /// </summary>
     public bool CardCheckUseSQLLite
     {
         get => _cardCheckUseSQLLite ?? false;
@@ -146,6 +154,22 @@ public partial class SettingsPageViewModel : ObservableRecipient
         }
     }
     private string? _selectedDBServerPort;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public string SelectedDBTableName
+    {
+        get => _selectedDBTableName ?? string.Empty;
+        set
+        {
+            using var settings = new SettingsReaderWriter();
+            settings.DefaultSettings.SelectedDBTableName = value;
+            settings.SaveSettings();
+            SetProperty(ref _selectedDBTableName, value);
+        }
+    }
+    private string? _selectedDBTableName;
 
     /// <summary>
     /// 
@@ -253,7 +277,7 @@ public partial class SettingsPageViewModel : ObservableRecipient
         set
         {
             SetProperty(ref _removeTemporaryReportsIsEnabled, value);
-            using SettingsReaderWriter settings = new SettingsReaderWriter();
+            using var settings = new SettingsReaderWriter();
 
             settings.DefaultSettings.RemoveTemporaryReportsIsEnabled = value;
             settings.SaveSettings();
@@ -270,7 +294,7 @@ public partial class SettingsPageViewModel : ObservableRecipient
         set
         {
             SetProperty(ref _createSubdirectoryIsEnabled, value);
-            using SettingsReaderWriter settings = new SettingsReaderWriter();
+            using var settings = new SettingsReaderWriter();
 
             settings.DefaultSettings.CreateSubdirectoryIsEnabled = value;
             settings.SaveSettings();
@@ -293,7 +317,7 @@ public partial class SettingsPageViewModel : ObservableRecipient
         set
         {
             SetProperty(ref _rFiDGearIsAutoRunEnabled, value);
-            using SettingsReaderWriter settings = new SettingsReaderWriter();
+            using var settings = new SettingsReaderWriter();
 
             settings.DefaultSettings.AutoLoadProjectOnStart = value;
             settings.SaveSettings();
@@ -324,6 +348,24 @@ public partial class SettingsPageViewModel : ObservableRecipient
     /// </summary>
     [ObservableProperty]
     private CardCheckTextTemplate _selectedTextTemplate;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public int ReaderVolume
+    {
+        get => _readerVolume;
+        set
+        {
+            SetProperty(ref _readerVolume, value);
+            using var settings = new SettingsReaderWriter();
+
+            settings.DefaultSettings.ReaderVolume = value;
+            settings.SaveSettings();
+        }
+    }
+    private int _readerVolume;
+
     #endregion
 
     #region Commands
@@ -333,13 +375,15 @@ public partial class SettingsPageViewModel : ObservableRecipient
 
     public ICommand DeleteTextTemplate => new AsyncRelayCommand(DeleteTextTemplate_Executed);
 
-    public ICommand NavigateBackCommand => new RelayCommand(NavigateBackCommand_Executed);
+    public IAsyncRelayCommand NavigateBackCommand => new AsyncRelayCommand(NavigateBackCommand_Executed);
 
     public ICommand SelectRFIDGearExeCommand => new AsyncRelayCommand(SelectRFIDGearExe_Executed);
 
     public ICommand SelectProjectFolderCommand => new AsyncRelayCommand(SelectProjectFolder_Executed);
 
     public ICommand SelectRFIDGearCustomProjectCommand => new AsyncRelayCommand(SelectRFIDGearCustomProjectCommand_Executed);
+
+    public ICommand ReaderConnectionTestCommand => new AsyncRelayCommand(ReaderConnectionTestCommand_Executed);
     #endregion
 
     private async Task CreateNewTextTemplate_Executed()
@@ -369,7 +413,7 @@ public partial class SettingsPageViewModel : ObservableRecipient
                 "Fehler",
                 string.Format("Bitte melde den folgenden Fehler an mich:\n{0}", ex.Message));
 
-            LogWriter.CreateLogEntry(ex);
+            eventLog.WriteEntry(ex.Message, EventLogEntryType.Error);
         }
     }
 
@@ -394,28 +438,29 @@ public partial class SettingsPageViewModel : ObservableRecipient
                 "Fehler",
                 string.Format("Bitte melde den folgenden Fehler an mich:\n{0}", ex.Message));
 
-            LogWriter.CreateLogEntry(ex);
+            eventLog.WriteEntry(ex.Message, EventLogEntryType.Error);
         }
 
     }
 
     private async Task DBConnectionTest_Executed()
     {
-        using SettingsReaderWriter settings = new SettingsReaderWriter();
+        using var settings = new SettingsReaderWriter();
 
         // Connect to DB Async
         if (settings.DefaultSettings.CardCheckUseMSSQL ?? false)
         {
-            using SQLDBService dbService = new SQLDBService(
+            using var dbService = new SQLDBService(
                 settings.DefaultSettings.SelectedDBServerName,
                 settings.DefaultSettings.SelectedDBName,
+                settings.DefaultSettings.SelectedDBTableName,
                 settings.DefaultSettings.SelectedDBUsername,
                 settings.DefaultSettings.SelectedDBUserPwd);
             await dbService.GetCardChecksFromMSSQLAsync();
         }
         else
         {
-            using SQLDBService dbService = new SQLDBService("");
+            using var dbService = new SQLDBService();
 
             await dbService.GetCardChecksFromSQLLiteAsync();
         }
@@ -482,11 +527,43 @@ public partial class SettingsPageViewModel : ObservableRecipient
         }
     }
 
-    private void NavigateBackCommand_Executed()
+    private async Task ReaderConnectionTestCommand_Executed()
+    {
+    
+    }
+
+    /// <summary>
+    /// INavigation Aware Event. Close Connection If Open
+    /// </summary>
+    /// <param name="parameter"></param>
+    public async void OnNavigatedTo(object parameter)
+    {
+        // Run code when the app navigates to this page
+        using var reader = ReaderService.Instance;
+
+        await reader.Disconnect();
+
+    }
+
+    /// <summary>
+    /// INavigation Aware Event. Close Connection If Open
+    /// </summary>
+    public async void OnNavigatedFrom()
+    {
+        // Run code when the app navigates away from this page
+        using var reader = ReaderService.Instance;
+
+        await reader.Disconnect();
+    }
+
+    private async Task NavigateBackCommand_Executed()
     {
         try
         {
-            using SettingsReaderWriter settings = new SettingsReaderWriter();
+            using var settings = new SettingsReaderWriter();
+            using var reader = ReaderService.Instance;
+
+            await reader.Disconnect();
 
             settings.DefaultSettings.CardCheckTextTemplates = TextTemplates;
 
@@ -502,11 +579,14 @@ public partial class SettingsPageViewModel : ObservableRecipient
     private class RijndaelEnc : IDisposable
     {
         private bool _disposed;
+        private readonly EventLog eventLog = new("Application", ".", Assembly.GetEntryAssembly().GetName().Name);
+
         private readonly byte[] IV = { 22, 85, 121, 60, 1, 77, 14, 69, 210, 10, 41, 22, 91, 6, 32, 4 };
         private readonly byte[] KEY = { 12, 122, 12, 72, 9, 1, 53, 72, 11, 94, 66, 84, 26, 110, 210, 44, 109, 10, 9, 100, 31, 201, 11, 23, 75, 91, 12, 83, 22, 19, 33, 3 };
 
         public RijndaelEnc()
         {
+            
         }
 
         public string Encrypt(string source)
@@ -517,7 +597,7 @@ public partial class SettingsPageViewModel : ObservableRecipient
             }
             catch (Exception ex)
             {
-                Log4CSharp.LogWriter.CreateLogEntry(ex);
+                eventLog.WriteEntry(ex.Message, EventLogEntryType.Error);
                 return "";
             }
         }
@@ -538,12 +618,12 @@ public partial class SettingsPageViewModel : ObservableRecipient
             }
             catch (Exception ex)
             {
-                Log4CSharp.LogWriter.CreateLogEntry(ex);
+                eventLog.WriteEntry(ex.Message, EventLogEntryType.Error);
                 return "";
             }
         }
 
-        private byte[] EncryptStringToBytes(string plainText, byte[] Key, byte[] IV)
+        private static byte[] EncryptStringToBytes(string plainText, byte[] Key, byte[] IV)
         {
             // Check arguments.
             if (plainText == null || plainText.Length <= 0)
@@ -564,19 +644,19 @@ public partial class SettingsPageViewModel : ObservableRecipient
             byte[] encrypted;
             // Create an Rijndael object
             // with the specified key and IV.
-            using (Rijndael rijAlg = Rijndael.Create())
+            using (var rijAlg = Rijndael.Create())
             {
                 rijAlg.Key = Key;
                 rijAlg.IV = IV;
 
                 // Create an encryptor to perform the stream transform.
-                ICryptoTransform encryptor = rijAlg.CreateEncryptor(rijAlg.Key, rijAlg.IV);
+                var encryptor = rijAlg.CreateEncryptor(rijAlg.Key, rijAlg.IV);
 
                 // Create the streams used for encryption.
-                using MemoryStream msEncrypt = new MemoryStream();
-                using CryptoStream csEncrypt = new CryptoStream(msEncrypt, encryptor, CryptoStreamMode.Write);
+                using var msEncrypt = new MemoryStream();
+                using var csEncrypt = new CryptoStream(msEncrypt, encryptor, CryptoStreamMode.Write);
 
-                using (StreamWriter swEncrypt = new StreamWriter(csEncrypt))
+                using (var swEncrypt = new StreamWriter(csEncrypt))
                 {
                     //Write all data to the stream.
                     swEncrypt.Write(plainText);
@@ -588,7 +668,7 @@ public partial class SettingsPageViewModel : ObservableRecipient
             return encrypted;
         }
 
-        private string DecryptStringFromBytes(byte[] cipherText, byte[] Key, byte[] IV)
+        private static string DecryptStringFromBytes(byte[] cipherText, byte[] Key, byte[] IV)
         {
             // Check arguments.
             if (cipherText == null || cipherText.Length <= 0)
@@ -612,18 +692,18 @@ public partial class SettingsPageViewModel : ObservableRecipient
 
             // Create an Rijndael object
             // with the specified key and IV.
-            using (Rijndael rijAlg = Rijndael.Create())
+            using (var rijAlg = Rijndael.Create())
             {
                 rijAlg.Key = Key;
                 rijAlg.IV = IV;
 
                 // Create a decryptor to perform the stream transform.
-                ICryptoTransform decryptor = rijAlg.CreateDecryptor(rijAlg.Key, rijAlg.IV);
+                var decryptor = rijAlg.CreateDecryptor(rijAlg.Key, rijAlg.IV);
 
                 // Create the streams used for decryption.
-                using MemoryStream msDecrypt = new MemoryStream(cipherText);
-                using CryptoStream csDecrypt = new CryptoStream(msDecrypt, decryptor, CryptoStreamMode.Read);
-                using StreamReader srDecrypt = new StreamReader(csDecrypt);
+                using var msDecrypt = new MemoryStream(cipherText);
+                using var csDecrypt = new CryptoStream(msDecrypt, decryptor, CryptoStreamMode.Read);
+                using var srDecrypt = new StreamReader(csDecrypt);
 
                 // Read the decrypted bytes from the decrypting stream
                 // and place them in a string.
@@ -647,7 +727,7 @@ public partial class SettingsPageViewModel : ObservableRecipient
 
                     catch (Exception e)
                     {
-                        LogWriter.CreateLogEntry(e);
+                        eventLog.WriteEntry(e.Message, EventLogEntryType.Error);
                     }
                 }
 

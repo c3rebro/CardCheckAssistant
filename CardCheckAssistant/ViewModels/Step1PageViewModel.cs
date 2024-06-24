@@ -1,27 +1,22 @@
-﻿using CardCheckAssistant.Services;
-using CardCheckAssistant.Views;
-
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
+using System.Diagnostics;
+using System.Reflection;
 using System.Windows.Input;
-
+using CardCheckAssistant.Contracts.ViewModels;
+using CardCheckAssistant.Services;
+using CardCheckAssistant.Views;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-
 using Elatec.NET;
-
 using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Documents;
-
-using Log4CSharp;
-
-using System.Diagnostics;
-using CardCheckAssistant.Contracts.ViewModels;
 
 
 namespace CardCheckAssistant.ViewModels;
 
 public partial class Step1PageViewModel : ObservableRecipient, INavigationAware
 {
+    private readonly EventLog eventLog = new("Application", ".", Assembly.GetEntryAssembly().GetName().Name);
+
     /// <summary>
     /// 
     /// </summary>
@@ -31,16 +26,16 @@ public partial class Step1PageViewModel : ObservableRecipient, INavigationAware
     {
         try
         {
-            Process[] processlist = Process.GetProcesses();
+            var processlist = Process.GetProcesses();
 
-            foreach (Process p in processlist)
+            foreach (var p in processlist)
             {
                 Console.WriteLine("Process: {0} ID: {1}", p.ProcessName, p.Id);
             }
         }
         catch (Exception ex)
         {
-
+            //TODO: Let the User know if MADA SW is running
         }
 
         scanChipTimer = new DispatcherTimer();
@@ -170,7 +165,7 @@ public partial class Step1PageViewModel : ObservableRecipient, INavigationAware
     /// <summary>
     /// 
     /// </summary>
-    public ICommand NavigateBackCommand => new RelayCommand(NavigateBackCommand_Executed);
+    public IAsyncRelayCommand NavigateBackCommand => new AsyncRelayCommand(NavigateBackCommand_Executed);
 
     #endregion
 
@@ -189,7 +184,7 @@ public partial class Step1PageViewModel : ObservableRecipient, INavigationAware
         }
         catch (Exception e)
         {
-            LogWriter.CreateLogEntry(e);
+            eventLog.WriteEntry(e.Message, EventLogEntryType.Error);
         }
     }
 
@@ -204,81 +199,102 @@ public partial class Step1PageViewModel : ObservableRecipient, INavigationAware
         {
             scanChipTimer.Stop();
 
-            using (ReaderService readerService = new ReaderService())
-            {
-                // ReadChipPublic != 0  is an Error
-                ReaderAccessDenied = await readerService.ReadChipPublic() < 0;
+            await UpdateChip();
 
-                if (ReaderAccessDenied == true)
-                {
-                    NextStepCanExecute = false;
-                    scanChipTimer.Start();
-                }
-
-                if (!TWN4ReaderDevice.Instance?.IsConnected == true)
-                {
-                    NoReaderFound = true;
-                }
-
-                else if (readerService?.MoreThanOneReaderFound == true)
-                {
-                    HasTwoReadersInfoBarIsVisible = true;
-                    ChipDetectedInfoBarIsVisible = false;
-                    NoChipDetectedInfoBarIsVisible = false;
-
-                    NextStepCanExecute = false;
-                }
-
-                else
-                {
-                    HasTwoReadersInfoBarIsVisible = false;
-                    NoReaderFound = false;
-
-                    if (readerService.GenericChip != null)
-                    {
-                        NoChipDetectedInfoBarIsVisible = false;
-                        ChipDetectedInfoBarIsVisible = true;
-
-                        if (readerService.GenericChip.CardType.ToString().ToLower().Contains("mifare"))
-                        {
-                            AskClassicKeysIsVisible = true;
-                            AskPICCMKIsVisible = false;
-                        }
-                        else if (readerService.GenericChip.CardType.ToString().ToLower().Contains("desfire"))
-                        {
-                            AskClassicKeysIsVisible = false;
-                            AskPICCMKIsVisible = true;
-                        }
-
-                        NextStepCanExecute = true;
-
-                        ChipInfoMessage = string.Format("Es wurde ein Chip erkannt:\nErkannt 1: {0}", readerService.GenericChip.CardType.ToString());
-
-                        if (readerService.GenericChip.Child != null)
-                        {
-                            ChipInfoMessage = ChipInfoMessage + string.Format("\nErkannt 2: {0}", readerService.GenericChip.Child.CardType);
-                        }
-                    }
-
-                    else
-                    {
-                        ChipDetectedInfoBarIsVisible = false;
-                        NoChipDetectedInfoBarIsVisible = true;
-
-                        AskClassicKeysIsVisible = false;
-                        AskPICCMKIsVisible = false;
-
-                        NextStepCanExecute = true;
-                    }
-                }
-
-
-            }
             scanChipTimer.Start();
         }
         catch (Exception ex)
         {
-            LogWriter.CreateLogEntry(ex);
+            eventLog.WriteEntry(ex.Message, EventLogEntryType.Error);
+        }
+    }
+
+    private async Task UpdateChip()
+    {
+        using var readerService = ReaderService.Instance;
+
+        try
+        {
+            // ReadChipPublic != 0  is an Error
+            await readerService.ReadChipPublic();
+
+            if (readerService.IsConnected == null)
+            {
+                NextStepCanExecute = false;
+                NoReaderFound = true;
+                await readerService.Connect();
+                scanChipTimer.Start();
+
+                return;
+            }
+
+            else if (readerService?.MoreThanOneReaderFound == true)
+            {
+                HasTwoReadersInfoBarIsVisible = true;
+                ChipDetectedInfoBarIsVisible = false;
+                NoChipDetectedInfoBarIsVisible = false;
+
+                NextStepCanExecute = false;
+            }
+
+            else
+            {
+                HasTwoReadersInfoBarIsVisible = false;
+                NoReaderFound = false;
+
+                if (readerService?.GenericChip != null)
+                {
+                    NoChipDetectedInfoBarIsVisible = false;
+                    ChipDetectedInfoBarIsVisible = true;
+
+                    if (readerService.GenericChip.TCard.SecondaryType.ToString().ToLower().Contains("classic"))
+                    {
+                        AskClassicKeysIsVisible = true;
+                        AskPICCMKIsVisible = false;
+                    }
+                    else if (readerService.GenericChip.TCard.SecondaryType.ToString().ToLower().Contains("desfire"))
+                    {
+                        AskClassicKeysIsVisible = false;
+                        AskPICCMKIsVisible = true;
+                    }
+
+                    NextStepCanExecute = true;
+
+                    ChipInfoMessage = string.Format("Es wurde ein Chip erkannt:\nErkannt 1: {0}",
+                        readerService.GenericChip.TCard.SecondaryType == MifareChipSubType.Unspecified ?
+                        readerService.GenericChip.TCard.PrimaryType.ToString() :
+                        readerService.GenericChip.TCard.SecondaryType.ToString());
+
+                    if (readerService.GenericChip.Childs != null && readerService.GenericChip.Childs.Count > 0)
+                    {
+                        ChipInfoMessage = ChipInfoMessage + string.Format("\nErkannt 2: {0}",
+                            readerService.GenericChip.Childs[0].TCard.SecondaryType == MifareChipSubType.Unspecified ?
+                            readerService.GenericChip.Childs[0].TCard.PrimaryType.ToString() :
+                            readerService.GenericChip.Childs[0].TCard.SecondaryType.ToString());
+                    }
+                }
+
+                else
+                {
+                    ChipDetectedInfoBarIsVisible = false;
+                    NoChipDetectedInfoBarIsVisible = true;
+
+                    AskClassicKeysIsVisible = false;
+                    AskPICCMKIsVisible = false;
+
+                    NextStepCanExecute = true;
+                }
+            }
+        }
+
+        catch
+        {
+            NextStepCanExecute = false;
+            NoReaderFound = true;
+
+            HasTwoReadersInfoBarIsVisible = false;
+            ChipDetectedInfoBarIsVisible = false;
+            NoChipDetectedInfoBarIsVisible = false;
         }
     }
 
@@ -292,25 +308,28 @@ public partial class Step1PageViewModel : ObservableRecipient, INavigationAware
     {
         try
         {
-            using SettingsReaderWriter settings = new SettingsReaderWriter();
+            using var settings = new SettingsReaderWriter();
+
+            scanChipTimer.Stop();
+            scanChipTimer.Tick -= ScanChipEvent;
 
             settings.ReadSettings();
 
-            FileInfo finalPath = new FileInfo(
+            var finalPath = new FileInfo(
                 settings.DefaultSettings.DefaultProjectOutputPath + "\\"
                 + (settings.DefaultSettings.CreateSubdirectoryIsEnabled == true ? CheckProcessService.CurrentCardCheckProcess.JobNr + "\\" : string.Empty)
                 + CheckProcessService.CurrentCardCheckProcess.JobNr + "-"
                 + CheckProcessService.CurrentCardCheckProcess.ChipNumber
                 + "_final.pdf");
 
-            FileInfo semiFinalPath = new FileInfo(
+            var semiFinalPath = new FileInfo(
                 settings.DefaultSettings.DefaultProjectOutputPath + "\\"
                 + (settings.DefaultSettings.CreateSubdirectoryIsEnabled == true ? CheckProcessService.CurrentCardCheckProcess.JobNr + "\\" : string.Empty)
                 + CheckProcessService.CurrentCardCheckProcess.JobNr + "-"
                 + CheckProcessService.CurrentCardCheckProcess.ChipNumber
                 + "_.pdf");
 
-            FileInfo preFinalPath = new FileInfo(
+            var preFinalPath = new FileInfo(
                 settings.DefaultSettings.DefaultProjectOutputPath + "\\"
                 + (settings.DefaultSettings.CreateSubdirectoryIsEnabled == true ? CheckProcessService.CurrentCardCheckProcess.JobNr + "\\" : string.Empty)
                 + CheckProcessService.CurrentCardCheckProcess.JobNr + "-"
@@ -328,7 +347,7 @@ public partial class Step1PageViewModel : ObservableRecipient, INavigationAware
                     try
                     {
                         // try to overwrite the file
-                        FileStream fs = preFinalPath.Open(FileMode.Create);
+                        var fs = preFinalPath.Open(FileMode.Create);
                         fs.Close();
                         preFinalPath.Delete();
 
@@ -352,7 +371,7 @@ public partial class Step1PageViewModel : ObservableRecipient, INavigationAware
                     }
                     finally
                     {
-                        LogWriter.CreateLogEntry("ioex");
+                        eventLog.WriteEntry("IO.EXception", EventLogEntryType.Error);
                     }
                 }
                 else
@@ -364,24 +383,19 @@ public partial class Step1PageViewModel : ObservableRecipient, INavigationAware
             NextStepCanExecute = false;
             WaitForNextStep = true;
 
-            scanChipTimer.Stop();
-            scanChipTimer.Tick -= ScanChipEvent;
-
-            await Task.Delay(1000);
-
             (App.MainRoot.XamlRoot.Content as ShellPage)?.ViewModel.NavigationService.NavigateTo(typeof(Step2PageViewModel).FullName ?? "");
         }
 
         catch (Exception e)
         {
-            LogWriter.CreateLogEntry(e);
+            eventLog.WriteEntry(e.Message, EventLogEntryType.Error);
         }
     }
 
     /// <summary>
     /// 
     /// </summary>
-    private void NavigateBackCommand_Executed()
+    private async Task NavigateBackCommand_Executed()
     {
         try
         {
@@ -392,19 +406,39 @@ public partial class Step1PageViewModel : ObservableRecipient, INavigationAware
         }
         catch (Exception e)
         {
-            LogWriter.CreateLogEntry(e);
+            eventLog.WriteEntry(e.Message, EventLogEntryType.Error);
         }
 
     }
 
-    public void OnNavigatedTo(object parameter)
+    /// <summary>
+    /// INavigation Aware Event. Close Connection If Open
+    /// </summary>
+    /// <param name="parameter"></param>
+    public async void OnNavigatedTo(object parameter)
     {
         // Run code when the app navigates to this page
+        scanChipTimer.Stop();
+        scanChipTimer.Tick -= ScanChipEvent;
+
+        using var reader = ReaderService.Instance;
+
+        await reader.Disconnect();
+
     }
 
-    public void OnNavigatedFrom()
+    /// <summary>
+    /// INavigation Aware Event. Close Connection If Open
+    /// </summary>
+    public async void OnNavigatedFrom()
     {
         // Run code when the app navigates away from this page
+        scanChipTimer.Stop();
+        scanChipTimer.Tick -= ScanChipEvent;
+
+        using var reader = ReaderService.Instance;
+
+        await reader.Disconnect();
     }
 
     protected void Dispose(bool disposing)

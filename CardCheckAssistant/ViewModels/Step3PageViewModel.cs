@@ -4,21 +4,26 @@ using CardCheckAssistant.Views;
 
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Reflection;
 using System.Windows.Input;
 
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
 using Microsoft.UI.Xaml.Controls;
-
-using Log4CSharp;
+using System.Reflection.PortableExecutable;
+using Windows.Foundation.Diagnostics;
 
 namespace CardCheckAssistant.ViewModels;
 
 public partial class Step3PageViewModel : ObservableRecipient
 {
+    private readonly EventLog eventLog = new("Application", ".", Assembly.GetEntryAssembly().GetName().Name);
+
     public Step3PageViewModel()
     {
+        
+
         RunRFiDGearCommand = new AsyncRelayCommand(ExecuteRFIDGearCommand);
         NavigateNextStepCommand = new AsyncRelayCommand(NavigateNextStepCommand_Executed);
         PostPageLoadedCommand = new AsyncRelayCommand(PostPageLoadedCommand_Executed);
@@ -99,7 +104,7 @@ public partial class Step3PageViewModel : ObservableRecipient
     /// <summary>
     /// 
     /// </summary>
-    public string ReportLanguage => string.Format("{0}", CheckProcessService.CurrentCardCheckProcess.ReportLanguage);
+    public static string ReportLanguage => string.Format("{0}", CheckProcessService.CurrentCardCheckProcess.ReportLanguage);
 
     /// <summary>
     /// 
@@ -129,7 +134,7 @@ public partial class Step3PageViewModel : ObservableRecipient
     /// <summary>
     /// 
     /// </summary>
-    public ICommand NavigateBackCommand => new RelayCommand(NavigateBackCommand_Executed);
+    public IAsyncRelayCommand NavigateBackCommand => new AsyncRelayCommand(NavigateBackCommand_Executed);
 
     /// <summary>
     /// 
@@ -157,8 +162,8 @@ public partial class Step3PageViewModel : ObservableRecipient
     {
         try
         {
-            using SettingsReaderWriter settings = new SettingsReaderWriter();
-            using ReportReaderWriterService reportReader = new ReportReaderWriterService();
+            using var settings = new SettingsReaderWriter();
+            using var reportReader = new ReportReaderWriterService();
             settings.ReadSettings();
 
             await Task.Delay(1000);
@@ -208,6 +213,10 @@ public partial class Step3PageViewModel : ObservableRecipient
                 if (File.Exists(finalPath))
                 {
                     File.Copy(finalPath, semiFinalPath, true);
+                }
+                else if (File.Exists(semiFinalPath))
+                {
+                    File.Copy(semiFinalPath, finalPath, true);
                 }
             };
 
@@ -260,7 +269,7 @@ public partial class Step3PageViewModel : ObservableRecipient
                 "Fehler",
                 string.Format("Bitte melde den folgenden Fehler an mich:\n{0}", ex.Message));
 
-            LogWriter.CreateLogEntry(ex);
+            eventLog.WriteEntry(ex.Message, EventLogEntryType.Error);
         }
     }
 
@@ -283,7 +292,7 @@ public partial class Step3PageViewModel : ObservableRecipient
                 "Fehler",
                 string.Format("Bitte melde den folgenden Fehler an mich:\n{0}", ex.Message));
 
-            LogWriter.CreateLogEntry(ex);
+            eventLog.WriteEntry(ex.Message, EventLogEntryType.Error);
         }
     }
 
@@ -294,7 +303,7 @@ public partial class Step3PageViewModel : ObservableRecipient
     {
         try
         {
-            using SettingsReaderWriter settings = new SettingsReaderWriter();
+            using var settings = new SettingsReaderWriter();
             settings.ReadSettings();
 
             var p = new Process();
@@ -320,7 +329,7 @@ public partial class Step3PageViewModel : ObservableRecipient
                 "Fehler",
                 string.Format("Bitte melde den folgenden Fehler an mich:\n{0}", ex.Message));
 
-            LogWriter.CreateLogEntry(ex);
+            eventLog.WriteEntry(ex.Message, EventLogEntryType.Error);
         }
     }
 
@@ -331,7 +340,7 @@ public partial class Step3PageViewModel : ObservableRecipient
     {
         try
         {
-            using SettingsReaderWriter settings = new SettingsReaderWriter();
+            using var settings = new SettingsReaderWriter();
             settings.ReadSettings();
 
             var p = new Process();
@@ -354,7 +363,7 @@ public partial class Step3PageViewModel : ObservableRecipient
                 "Fehler",
                 string.Format("Bitte melde den folgenden Fehler an mich:\n{0}", ex.Message));
 
-            LogWriter.CreateLogEntry(ex);
+            eventLog.WriteEntry(ex.Message, EventLogEntryType.Error);
         }
     }
 
@@ -370,8 +379,12 @@ public partial class Step3PageViewModel : ObservableRecipient
     {
         try
         {
-            using SettingsReaderWriter settings = new SettingsReaderWriter();
-            using ReportReaderWriterService reportReader = new ReportReaderWriterService();
+            using var settings = new SettingsReaderWriter();
+            using var reportReader = new ReportReaderWriterService();
+            using var readerService = ReaderService.Instance;
+
+            await readerService.Disconnect();
+
 
             settings.ReadSettings();
 
@@ -435,22 +448,25 @@ public partial class Step3PageViewModel : ObservableRecipient
                 "Fehler",
                 string.Format("Bitte melde den folgenden Fehler an mich:\n{0}", ex.Message));
 
-            LogWriter.CreateLogEntry(ex);
+            eventLog.WriteEntry(ex.Message, EventLogEntryType.Error);
         }
     }
 
     /// <summary>
     /// 
     /// </summary>
-    private void NavigateBackCommand_Executed()
+    private async Task NavigateBackCommand_Executed()
     {
         try
         {
+            var readerService = ReaderService.Instance;
+            await readerService.Disconnect();
+
             (App.MainRoot.XamlRoot.Content as ShellPage)?.ViewModel.NavigationService.NavigateTo(typeof(Step1PageViewModel).FullName ?? "");
         }
         catch (Exception e)
         {
-            LogWriter.CreateLogEntry(e);
+            eventLog.WriteEntry(e.Message, EventLogEntryType.Error);
         }
     }
     #endregion

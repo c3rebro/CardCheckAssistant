@@ -573,7 +573,7 @@
             IsEnabled="{x:Bind ViewModel.NextStepCanExecute, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
             Opacity="1"
             Command="{x:Bind ViewModel.NavigateNextStepCommand}"
-            Content="{x:Bind ViewModel.NextStepButtonContent}">
+            Content="{x:Bind ViewModel.NextStepButtonContent, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}">
             <Button.Resources>
                 <ResourceDictionary>
                     <SolidColorBrush

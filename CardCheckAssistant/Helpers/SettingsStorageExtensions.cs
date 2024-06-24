@@ -1,6 +1,7 @@
 ﻿using CardCheckAssistant.Core.Helpers;
 
-using Log4CSharp;
+using System.Diagnostics;
+using System.Reflection;
 
 using Windows.Storage;
 using Windows.Storage.Streams;
@@ -33,6 +34,8 @@ public static class SettingsStorageExtensions
     /// <returns></returns>
     public static async Task SaveAsync<T>(this StorageFolder folder, string name, T content)
     {
+        EventLog eventLog = new("Application", ".", Assembly.GetEntryAssembly().GetName().Name);
+
         try
         {
             var file = await folder.CreateFileAsync(GetFileName(name), CreationCollisionOption.ReplaceExisting);
@@ -42,7 +45,7 @@ public static class SettingsStorageExtensions
         }
         catch (Exception ex)
         {
-            LogWriter.CreateLogEntry(ex);
+            eventLog.WriteEntry(ex.Message, EventLogEntryType.Error);
         }
 
     }
@@ -56,6 +59,8 @@ public static class SettingsStorageExtensions
     /// <returns></returns>
     public static async Task<T?> ReadAsync<T>(this StorageFolder folder, string name)
     {
+        EventLog eventLog = new("Application", ".", Assembly.GetEntryAssembly().GetName().Name);
+
         try
         {
             if (!File.Exists(Path.Combine(folder.Path, GetFileName(name))))
@@ -69,7 +74,7 @@ public static class SettingsStorageExtensions
         }
         catch (Exception ex)
         {
-            LogWriter.CreateLogEntry(ex);
+            eventLog.WriteEntry(ex.Message, EventLogEntryType.Error);
 
             return default;
         }
@@ -85,13 +90,15 @@ public static class SettingsStorageExtensions
     /// <returns></returns>
     public static async Task SaveAsync<T>(this ApplicationDataContainer settings, string key, T value)
     {
+        EventLog eventLog = new("Application", ".", Assembly.GetEntryAssembly().GetName().Name);
+
         try
         {
             settings.SaveString(key, await Json.StringifyAsync(value));
         }
         catch (Exception ex)
         {
-            LogWriter.CreateLogEntry(ex);
+            eventLog.WriteEntry(ex.Message, EventLogEntryType.Error);
         }
     }
 
@@ -103,13 +110,15 @@ public static class SettingsStorageExtensions
     /// <param name="value"></param>
     public static void SaveString(this ApplicationDataContainer settings, string key, string value)
     {
+        EventLog eventLog = new("Application", ".", Assembly.GetEntryAssembly().GetName().Name);
+
         try
         {
             settings.Values[key] = value;
         }
         catch (Exception ex)
         {
-            LogWriter.CreateLogEntry(ex);
+            eventLog.WriteEntry(ex.Message, EventLogEntryType.Error);
         } 
     }
 
@@ -122,6 +131,8 @@ public static class SettingsStorageExtensions
     /// <returns></returns>
     public static async Task<T?> ReadAsync<T>(this ApplicationDataContainer settings, string key)
     {
+        EventLog eventLog = new("Application", ".", Assembly.GetEntryAssembly().GetName().Name);
+
         try
         {
             object? obj;
@@ -134,7 +145,7 @@ public static class SettingsStorageExtensions
         }
         catch (Exception ex)
         {
-            LogWriter.CreateLogEntry(ex);
+            eventLog.WriteEntry(ex.Message, EventLogEntryType.Error);
             return default;
         }
     }
@@ -151,6 +162,8 @@ public static class SettingsStorageExtensions
     /// <exception cref="ArgumentException"></exception>
     public static async Task<StorageFile> SaveFileAsync(this StorageFolder folder, byte[] content, string fileName, CreationCollisionOption options = CreationCollisionOption.ReplaceExisting)
     {
+        EventLog eventLog = new("Application", ".", Assembly.GetEntryAssembly().GetName().Name);
+
         try
         {
             if (content == null)
@@ -169,7 +182,7 @@ public static class SettingsStorageExtensions
         }
         catch (Exception ex)
         {
-            LogWriter.CreateLogEntry(ex);
+            eventLog.WriteEntry(ex.Message, EventLogEntryType.Error);
 
             return default;
         }
@@ -183,6 +196,8 @@ public static class SettingsStorageExtensions
     /// <returns></returns>
     public static async Task<byte[]?> ReadFileAsync(this StorageFolder folder, string fileName)
     {
+        EventLog eventLog = new("Application", ".", Assembly.GetEntryAssembly().GetName().Name);
+
         try
         {
             var item = await folder.TryGetItemAsync(fileName).AsTask().ConfigureAwait(false);
@@ -198,7 +213,7 @@ public static class SettingsStorageExtensions
         }
         catch (Exception ex)
         {
-            LogWriter.CreateLogEntry(ex);
+            eventLog.WriteEntry(ex.Message, EventLogEntryType.Error);
 
             return default;
         }
@@ -211,6 +226,8 @@ public static class SettingsStorageExtensions
     /// <returns></returns>
     public static async Task<byte[]?> ReadBytesAsync(this StorageFile file)
     {
+        EventLog eventLog = new("Application", ".", Assembly.GetEntryAssembly().GetName().Name);
+
         try
         {
             if (file != null)
@@ -227,7 +244,7 @@ public static class SettingsStorageExtensions
         }
         catch (Exception ex)
         {
-            LogWriter.CreateLogEntry(ex);
+            eventLog.WriteEntry(ex.Message, EventLogEntryType.Error);
 
             return null;
         }
@@ -235,13 +252,15 @@ public static class SettingsStorageExtensions
 
     private static string GetFileName(string name)
     {
+        EventLog eventLog = new("Application", ".", Assembly.GetEntryAssembly().GetName().Name);
+
         try
         {
             return string.Concat(name, FileExtension);
         }
         catch (Exception ex)
         {
-            LogWriter.CreateLogEntry(ex);
+            eventLog.WriteEntry(ex.Message, EventLogEntryType.Error);
 
             return string.Empty;
         }

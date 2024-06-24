@@ -3,16 +3,19 @@ using CommunityToolkit.Mvvm.Input;
 
 using Microsoft.UI.Xaml;
 
+using CardCheckAssistant.Services;
 using CardCheckAssistant.Views;
 
-using Log4CSharp;
-
+using System.Diagnostics;
 using System.Windows.Input;
+using System.Reflection;
 
 namespace CardCheckAssistant.ViewModels;
 
 public class AboutPageViewModel : ObservableRecipient
 {
+    private readonly EventLog eventLog = new("Application", ".", Assembly.GetEntryAssembly().GetName().Name);
+
     /// <summary>
     /// 
     /// </summary>
@@ -63,7 +66,7 @@ public class AboutPageViewModel : ObservableRecipient
     /// <summary>
     /// 
     /// </summary>
-    public ICommand NavigateBackCommand => new RelayCommand(NavigateBackCommand_Executed);
+    public IAsyncRelayCommand NavigateBackCommand => new AsyncRelayCommand(NavigateBackCommand_Executed);
 
     #endregion
 
@@ -81,7 +84,7 @@ public class AboutPageViewModel : ObservableRecipient
         }
         catch (Exception e)
         {
-            LogWriter.CreateLogEntry(e);
+            eventLog.WriteEntry(e.Message, EventLogEntryType.Error);
         }
     }
 
@@ -95,20 +98,28 @@ public class AboutPageViewModel : ObservableRecipient
     {
         try
         {
+            using var reader = ReaderService.Instance;
+
+            await reader.Disconnect();
+
             (App.MainRoot.XamlRoot.Content as ShellPage)?.ViewModel.NavigationService.NavigateTo(typeof(HomePageViewModel).FullName ?? "");
         }
 
         catch (Exception e)
         {
-            LogWriter.CreateLogEntry(e);
+            eventLog.WriteEntry(e.Message, EventLogEntryType.Error);
         }
     }
 
     /// <summary>
     /// 
     /// </summary>
-    private void NavigateBackCommand_Executed()
+    private async Task NavigateBackCommand_Executed()
     {
+        using var reader = ReaderService.Instance;
+
+        await reader.Disconnect();
+
         (App.MainRoot.XamlRoot.Content as ShellPage)?.ViewModel.NavigationService.NavigateTo(typeof(HomePageViewModel).FullName ?? "");
     }
 }
