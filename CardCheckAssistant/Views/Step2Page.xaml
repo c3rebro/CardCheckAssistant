@@ -1,12 +1,10 @@
 ﻿<Page
     x:Class="CardCheckAssistant.Views.Step2Page"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:svc="using:CardCheckAssistant.Services"
     xmlns:viewmodels="using:CardCheckAssistant.ViewModels"
-    xmlns:ctWinUI="using:CommunityToolkit.WinUI.UI.Controls"
     xmlns:ctWinUIConv="using:CommunityToolkit.WinUI.UI.Converters"
     Loaded="Page_Loaded"
     mc:Ignorable="d">
@@ -311,24 +309,35 @@
             Text="Zusatztextauswahl:"/>
 
         <ComboBox
-            Margin="8,0,8,8" 
-            Grid.ColumnSpan="1" 
-            Grid.Column="4" 
-            Grid.Row="4" 
+            Grid.Row="4"
+            Grid.Column="4"
+            Margin="0,8,8,8"  
             VerticalAlignment="Center" 
             HorizontalAlignment="Stretch"
-            ItemsSource="{Binding TextTemplates}"
+            ItemsSource="{Binding TextTemplates, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
             PlaceholderText="Zusatztext auswählen..."
+            VerticalContentAlignment="Center"
             ToolTipService.ToolTip=""
             Visibility="{x:Bind ViewModel.CheckBoxTestOnLockLimitedYes, Converter={StaticResource boolean}, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
             SelectedItem="{x:Bind ViewModel.SelectedCardCheckTextTemplate, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}">
             <ComboBox.ItemTemplate>
                 <DataTemplate>
-                    <TextBlock ToolTipService.ToolTip="{Binding TemplateToolTip, Mode=OneTime}" Text="{Binding TemplateTextName}"/>
+                    <StackPanel Orientation="Horizontal" 
+                                HorizontalAlignment="Left" 
+                                VerticalAlignment="Center">
+                        <TextBlock 
+                            Text="&gt;" 
+                            HorizontalTextAlignment="Left" 
+                            VerticalAlignment="Center"/>
+                        <TextBlock Margin="10,0" 
+                                    HorizontalAlignment="Left" 
+                                    VerticalAlignment="Center" 
+                                    ToolTipService.ToolTip="{Binding TemplateToolTip, Mode=OneTime}" 
+                                    Text="{Binding TemplateTextName}"/>
+                    </StackPanel>
                 </DataTemplate>
             </ComboBox.ItemTemplate>
         </ComboBox>
-
         <CheckBox
             Margin="8,0,0,8" 
             Grid.ColumnSpan="1" 

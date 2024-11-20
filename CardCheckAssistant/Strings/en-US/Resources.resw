@@ -248,4 +248,7 @@
   <data name="ToggleMenuFlyoutItem_SortBy_HomePage_Ascending.Text" xml:space="preserve">
     <value>Ascending</value>
   </data>
+  <data name="ButtonContent_Step2Page_CreateNewTextTemplate.Content" xml:space="preserve">
+    <value>Add new Entry</value>
+  </data>
 </root>

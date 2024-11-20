@@ -169,7 +169,7 @@ public class SQLDBService : IDisposable
 
                 using (var sql_cmd = sqlConnection.CreateCommand())
                 {
-                    sql_cmd.CommandText = "SELECT [CC-ID], [CC-JobNumber], [CC-CardNumber], [CC-CreationDate], [CC-Customername], [CC-EditorName], [CC-Status], [CC-DealerName], [CC-SalesName], [CC-ChangedDate] FROM " + tableName;
+                    sql_cmd.CommandText = "SELECT [CC-ID], [CC-JobNumber], [CC-CardNumber], [CC-CreationDate], [CC-ChangedDate], [CC-Customername], [CC-EditorName], [CC-Status], [CC-DealerName], [CC-SalesName] FROM " + tableName;
 
                     using var sql_datareader = await sql_cmd.ExecuteReaderAsync();
 
@@ -179,17 +179,16 @@ public class SQLDBService : IDisposable
                         {
                             cardCheckProcess = new CardCheckProcess
                             {
-                                ID = await sql_datareader.IsDBNullAsync(2) ? "" : sql_datareader.GetString(0),
+                                ID = await sql_datareader.IsDBNullAsync(0) ? "" : sql_datareader.GetString(0),
                                 JobNr = await sql_datareader.IsDBNullAsync(1) ? "" : sql_datareader.GetString(1),
                                 ChipNumber = await sql_datareader.IsDBNullAsync(2) ? "" : sql_datareader.GetString(2),
                                 DateCreated = await sql_datareader.IsDBNullAsync(3) ? "" : sql_datareader.GetString(3),
-                                DealerName = await sql_datareader.IsDBNullAsync(7) ? "" : sql_datareader.GetString(7),
-                                CName = await sql_datareader.IsDBNullAsync(5) ? "" : sql_datareader.GetString(4),
-                                EditorName = await sql_datareader.IsDBNullAsync(6) ? "" : sql_datareader.GetString(5),
-                                SalesName = await sql_datareader.IsDBNullAsync(8) ? "" : sql_datareader.GetString(8),
-                                DateModified = await sql_datareader.IsDBNullAsync(9) ? "" : sql_datareader.GetString(9),
-                                Status = await sql_datareader.IsDBNullAsync(6) ? "NA" : sql_datareader.GetString(6)
-
+                                DateModified = await sql_datareader.IsDBNullAsync(4) ? "" : sql_datareader.GetString(4),
+                                CName = await sql_datareader.IsDBNullAsync(5) ? "" : sql_datareader.GetString(5),
+                                EditorName = await sql_datareader.IsDBNullAsync(6) ? "" : sql_datareader.GetString(6),
+                                Status = await sql_datareader.IsDBNullAsync(7) ? "NA" : sql_datareader.GetString(7),
+                                DealerName = await sql_datareader.IsDBNullAsync(8) ? "" : sql_datareader.GetString(8),
+                                SalesName = await sql_datareader.IsDBNullAsync(9) ? "" : sql_datareader.GetString(9)
                             };
                             CardChecks.Add(cardCheckProcess);
                             CardChecks = CardChecks.OrderByDescending(x => x.DateCreated).ToList();
