@@ -19,6 +19,7 @@ using Windows.ApplicationModel.Store;
 using Microsoft.UI.Windowing;
 using CardCheckAssistant.Contracts.ViewModels;
 using Windows.Foundation.Diagnostics;
+using Elatec.NET;
 
 namespace CardCheckAssistant.ViewModels;
 
@@ -654,6 +655,7 @@ public partial class HomePageViewModel : ObservableRecipient, INavigationAware
                     if (!cardCheckProcessesFromCache.Any(x => x.ID == itemFromDB.ID))
                     {
                         newJobs = true;
+                        cardCheckProcessesFromCache = new ObservableCollection<CardCheckProcess> (cardCheckProcessesFromDB);
                     }
                 }
 
@@ -786,11 +788,7 @@ public partial class HomePageViewModel : ObservableRecipient, INavigationAware
     /// <param name="parameter"></param>
     public async void OnNavigatedTo(object parameter)
     {
-        // Run code when the app navigates to this page
-        using var reader = ReaderService.Instance;
-
-        await reader.Disconnect();
-
+        await TWN4ReaderDevice.Instance[0].DisconnectAsync();
     }
 
     /// <summary>
@@ -800,9 +798,7 @@ public partial class HomePageViewModel : ObservableRecipient, INavigationAware
     {
         // Run code when the app navigates away from this page
         scanDBTimer.Tick -= OnTimedEvent;
-        using var reader = ReaderService.Instance;
-
-        await reader.Disconnect();
+        await TWN4ReaderDevice.Instance[0].DisconnectAsync();
     }
 
     protected void Dispose(bool disposing)

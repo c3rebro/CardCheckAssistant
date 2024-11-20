@@ -22,6 +22,7 @@ using Microsoft.Extensions.Hosting;
 using CardCheckAssistant.Views;
 using System.Diagnostics;
 using CardCheckAssistant.Contracts.ViewModels;
+using Elatec.NET;
 
 namespace CardCheckAssistant.ViewModels;
 
@@ -539,9 +540,7 @@ public partial class SettingsPageViewModel : ObservableRecipient, INavigationAwa
     public async void OnNavigatedTo(object parameter)
     {
         // Run code when the app navigates to this page
-        using var reader = ReaderService.Instance;
-
-        await reader.Disconnect();
+        await TWN4ReaderDevice.Instance[0].DisconnectAsync();
 
     }
 
@@ -551,9 +550,7 @@ public partial class SettingsPageViewModel : ObservableRecipient, INavigationAwa
     public async void OnNavigatedFrom()
     {
         // Run code when the app navigates away from this page
-        using var reader = ReaderService.Instance;
-
-        await reader.Disconnect();
+        await TWN4ReaderDevice.Instance[0].DisconnectAsync();
     }
 
     private async Task NavigateBackCommand_Executed()
@@ -561,9 +558,7 @@ public partial class SettingsPageViewModel : ObservableRecipient, INavigationAwa
         try
         {
             using var settings = new SettingsReaderWriter();
-            using var reader = ReaderService.Instance;
-
-            await reader.Disconnect();
+            await TWN4ReaderDevice.Instance[0].DisconnectAsync();
 
             settings.DefaultSettings.CardCheckTextTemplates = TextTemplates;
 

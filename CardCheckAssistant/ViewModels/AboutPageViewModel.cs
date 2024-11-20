@@ -1,6 +1,8 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
+using Elatec.NET;
+
 using Microsoft.UI.Xaml;
 
 using CardCheckAssistant.Services;
@@ -98,9 +100,7 @@ public class AboutPageViewModel : ObservableRecipient
     {
         try
         {
-            using var reader = ReaderService.Instance;
-
-            await reader.Disconnect();
+            await TWN4ReaderDevice.Instance[0].DisconnectAsync();
 
             (App.MainRoot.XamlRoot.Content as ShellPage)?.ViewModel.NavigationService.NavigateTo(typeof(HomePageViewModel).FullName ?? "");
         }
@@ -116,9 +116,7 @@ public class AboutPageViewModel : ObservableRecipient
     /// </summary>
     private async Task NavigateBackCommand_Executed()
     {
-        using var reader = ReaderService.Instance;
-
-        await reader.Disconnect();
+        await TWN4ReaderDevice.Instance[0].DisconnectAsync();
 
         (App.MainRoot.XamlRoot.Content as ShellPage)?.ViewModel.NavigationService.NavigateTo(typeof(HomePageViewModel).FullName ?? "");
     }

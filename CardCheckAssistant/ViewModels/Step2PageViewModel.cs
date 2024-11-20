@@ -442,10 +442,10 @@ public partial class Step2PageViewModel : ObservableRecipient, INavigationAware
         try
         {
             NextStepCanExecute = false;
-            using var reader = ReaderService.Instance;
+            using var reader = TWN4ReaderDevice.Instance[0];
 
             await Task.Delay(1000);
-            await reader.Disconnect();
+            await reader.DisconnectAsync();
 
             var amountOfFreeMemory = 0;
             var freeMemField = "N/A";
@@ -669,16 +669,17 @@ public partial class Step2PageViewModel : ObservableRecipient, INavigationAware
 
             if (await readerService.ReadChipPublic() >= 0)
             {
-                while (readerService.GenericChip != null)
+                while (readerService.DetectedChips != null && readerService.DetectedChips.Count > 0)
                 {
                     await readerService.ReadChipPublic();
-                    if (readerService.GenericChip != null && chipWasRemovedAndPlacedAgain)
+
+                    if (readerService.DetectedChips != null && readerService.DetectedChips.Count > 0 && chipWasRemovedAndPlacedAgain)
                     {
                         await Task.Delay(500);
                         break;
                     }
 
-                    if (readerService.GenericChip == null)
+                    if (readerService.DetectedChips == null || readerService.DetectedChips.Count == 0)
                     {
                         continue;
                     }
@@ -690,9 +691,7 @@ public partial class Step2PageViewModel : ObservableRecipient, INavigationAware
             }
 
             scanChipTimer.Start();
-
         }
-
         catch (Exception e)
         {
             eventLog.WriteEntry(e.Message, EventLogEntryType.Error);
@@ -713,11 +712,11 @@ public partial class Step2PageViewModel : ObservableRecipient, INavigationAware
             await Task.Delay(100);
             await readerService.ReadChipPublic();
 
-            while (readerService.GenericChip == null && !NextStepCanExecute)
+            while ((readerService.DetectedChips == null || readerService.DetectedChips.Count == 0) && !NextStepCanExecute)
             {
                 await readerService.ReadChipPublic();
 
-                if (readerService.GenericChip != null)
+                if (readerService.DetectedChips != null && readerService.DetectedChips.Count > 0)
                 {
                     continue;
                 }
@@ -732,7 +731,6 @@ public partial class Step2PageViewModel : ObservableRecipient, INavigationAware
 
             scanChipTimer.Start();
         }
-
         catch (Exception e)
         {
             eventLog.WriteEntry(e.Message, EventLogEntryType.Error);
@@ -740,18 +738,20 @@ public partial class Step2PageViewModel : ObservableRecipient, INavigationAware
         }
     }
 
+
     /// <summary>
     /// Is the Chip removed to test in LSM?
     /// </summary>
     /// <param name="sender"></param>
     /// <param name="e"></param>
+    /*
     private async void ScanChipEvent(object? sender, object e)
     {
         try
         {
             scanChipTimer.Stop();
 
-            using (var readerService = ReaderService.Instance)
+            using (var readerService = new ReaderService())
             {
                 if (!NavigateNextStepCommand.IsRunning)
                 {
@@ -837,6 +837,89 @@ public partial class Step2PageViewModel : ObservableRecipient, INavigationAware
             eventLog.WriteEntry(ex.Message, EventLogEntryType.Error);
         }
     }
+    */
+
+    /// <summary>
+    /// Is the Chip removed to test in LSM?
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
+    private async void ScanChipEvent(object? sender, object e)
+    {
+        try
+        {
+            scanChipTimer.Stop();
+
+            using (var readerService = new ReaderService())
+            {
+                if (!NavigateNextStepCommand.IsRunning)
+                {
+                    await readerService.ReadChipPublic();
+                }
+
+                if (readerService.MoreThanOneReaderFound)
+                {
+                    NextStepCanExecute = false;
+                }
+                else
+                {
+                    var detectedChips = readerService.DetectedChips;
+
+                    if (detectedChips != null && detectedChips.Count > 0 && !NextStepCanExecute && !NavigateNextStepCommand.IsRunning)
+                    {
+                        try
+                        {
+                            await ChipIsRemoved(readerService);
+
+                            ReaderHasNoChipInfoBarIsVisible = true;
+
+                            await ChipIsPlacedAgain(readerService);
+
+                            var ChipInfoMessage = "Es wurden folgende Chips erkannt:";
+                            foreach (var chip in detectedChips)
+                            {
+                                ChipInfoMessage += $"\n{chip.ChipType}";
+                            }
+
+                            NextStepCanExecute = true;
+                        }
+                        catch
+                        {
+                            // No Chip found
+                        }
+                    }
+
+                    if (detectedChips != null && detectedChips.Count > 0 && NextStepCanExecute && !NavigateNextStepCommand.IsRunning)
+                    {
+                        ReaderHasNoChipInfoBarIsVisible = false;
+
+                        var ChipInfoMessage = "Es wurden folgende Chips erkannt:";
+                        foreach (var chip in detectedChips)
+                        {
+                            ChipInfoMessage += $"\n{chip.ChipType}";
+                        }
+
+                        NextStepCanExecute = true;
+                    }
+                    else if ((detectedChips == null || detectedChips.Count == 0) && !NavigateNextStepCommand.IsRunning)
+                    {
+                        NextStepCanExecute = true;
+                        ReaderHasNoChipInfoBarIsVisible = true;
+                    }
+                }
+            }
+
+            scanChipTimer.Start();
+        }
+        catch (Exception ex)
+        {
+            await App.MainRoot.MessageDialogAsync(
+                "Fehler",
+                $"Bitte melde den folgenden Fehler an mich:\n{ex.Message}");
+
+            eventLog.WriteEntry(ex.Message, EventLogEntryType.Error);
+        }
+    }
 
     /// <summary>
     /// Disconnect Reader before RFIDGear Execution
@@ -849,8 +932,8 @@ public partial class Step2PageViewModel : ObservableRecipient, INavigationAware
             scanChipTimer.Stop();
             scanChipTimer.Tick -= ScanChipEvent;
 
-            var reader = ReaderService.Instance;
-            await reader.Disconnect();
+            var reader = TWN4ReaderDevice.Instance[0];
+            await reader.DisconnectAsync();
 
             if (await ExecuteRFIDGearCommand())
             {
@@ -1111,12 +1194,12 @@ public partial class Step2PageViewModel : ObservableRecipient, INavigationAware
     {
         try
         {
-            var reader = ReaderService.Instance;
+            var reader = TWN4ReaderDevice.Instance;
 
             scanChipTimer.Stop();
             scanChipTimer.Tick -= ScanChipEvent;
 
-            await reader.Disconnect();
+            await reader[0].DisconnectAsync();
 
             (App.MainRoot.XamlRoot.Content as ShellPage)?.ViewModel.NavigationService.NavigateTo(typeof(Step1PageViewModel).FullName ?? "");
         }
@@ -1137,9 +1220,9 @@ public partial class Step2PageViewModel : ObservableRecipient, INavigationAware
     public async void OnNavigatedTo(object parameter)
     {
         // Run code when the app navigates to this page
-        using var reader = ReaderService.Instance;
+        using var reader = TWN4ReaderDevice.Instance[0];
 
-        await reader.Disconnect();
+        await reader.DisconnectAsync();
 
     }
 
@@ -1148,9 +1231,9 @@ public partial class Step2PageViewModel : ObservableRecipient, INavigationAware
     /// </summary>
     public async void OnNavigatedFrom()
     {
-        // Run code when the app navigates away from this page
-        using var reader = ReaderService.Instance;
+        // Run code when the app navigates to this page
+        using var reader = TWN4ReaderDevice.Instance[0];
 
-        await reader.Disconnect();
+        await reader.DisconnectAsync();
     }
 }

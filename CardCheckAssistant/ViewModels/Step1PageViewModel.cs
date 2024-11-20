@@ -39,7 +39,7 @@ public partial class Step1PageViewModel : ObservableRecipient, INavigationAware
         }
 
         scanChipTimer = new DispatcherTimer();
-        scanChipTimer.Interval = new TimeSpan(0, 0, 0, 0, 1000);
+        scanChipTimer.Interval = new TimeSpan(0, 00, 0, 0, 1000);
         scanChipTimer.Stop();
 
         WaitForNextStep = false;
@@ -211,23 +211,21 @@ public partial class Step1PageViewModel : ObservableRecipient, INavigationAware
 
     private async Task UpdateChip()
     {
-        using var readerService = ReaderService.Instance;
+        using var readerService = new ReaderService();
 
         try
         {
-            // ReadChipPublic != 0  is an Error
+            // ReadChipPublic != 0 is an Error
             await readerService.ReadChipPublic();
 
             if (readerService.IsConnected == null)
             {
                 NextStepCanExecute = false;
                 NoReaderFound = true;
-                await readerService.Connect();
                 scanChipTimer.Start();
 
                 return;
             }
-
             else if (readerService?.MoreThanOneReaderFound == true)
             {
                 HasTwoReadersInfoBarIsVisible = true;
@@ -236,44 +234,38 @@ public partial class Step1PageViewModel : ObservableRecipient, INavigationAware
 
                 NextStepCanExecute = false;
             }
-
             else
             {
                 HasTwoReadersInfoBarIsVisible = false;
                 NoReaderFound = false;
 
-                if (readerService?.GenericChip != null)
-                {
-                    NoChipDetectedInfoBarIsVisible = false;
-                    ChipDetectedInfoBarIsVisible = true;
+                var detectedChips = readerService.DetectedChips;
 
-                    if (readerService.GenericChip.TCard.SecondaryType.ToString().ToLower().Contains("classic"))
+                if (detectedChips != null && detectedChips.Count > 0)
+                {
+                    AskClassicKeysIsVisible = false;
+                    AskPICCMKIsVisible = false;
+
+                    ChipInfoMessage = "Es wurden folgende Chips erkannt:";
+
+                    foreach (var chip in detectedChips)
                     {
-                        AskClassicKeysIsVisible = true;
-                        AskPICCMKIsVisible = false;
-                    }
-                    else if (readerService.GenericChip.TCard.SecondaryType.ToString().ToLower().Contains("desfire"))
-                    {
-                        AskClassicKeysIsVisible = false;
-                        AskPICCMKIsVisible = true;
+                        ChipInfoMessage += $"\n{chip.ChipType}";
+
+                        if (ByteArrayConverter.IsMifareClassic(chip.ChipType))
+                        {
+                            AskClassicKeysIsVisible = true;
+                        }
+                        else if (ByteArrayConverter.IsMifareDesfire(chip.ChipType))
+                        {
+                            AskPICCMKIsVisible = true;
+                        }
                     }
 
                     NextStepCanExecute = true;
-
-                    ChipInfoMessage = string.Format("Es wurde ein Chip erkannt:\nErkannt 1: {0}",
-                        readerService.GenericChip.TCard.SecondaryType == MifareChipSubType.Unspecified ?
-                        readerService.GenericChip.TCard.PrimaryType.ToString() :
-                        readerService.GenericChip.TCard.SecondaryType.ToString());
-
-                    if (readerService.GenericChip.Childs != null && readerService.GenericChip.Childs.Count > 0)
-                    {
-                        ChipInfoMessage = ChipInfoMessage + string.Format("\nErkannt 2: {0}",
-                            readerService.GenericChip.Childs[0].TCard.SecondaryType == MifareChipSubType.Unspecified ?
-                            readerService.GenericChip.Childs[0].TCard.PrimaryType.ToString() :
-                            readerService.GenericChip.Childs[0].TCard.SecondaryType.ToString());
-                    }
+                    ChipDetectedInfoBarIsVisible = true;
+                    NoChipDetectedInfoBarIsVisible = false;
                 }
-
                 else
                 {
                     ChipDetectedInfoBarIsVisible = false;
@@ -286,7 +278,6 @@ public partial class Step1PageViewModel : ObservableRecipient, INavigationAware
                 }
             }
         }
-
         catch
         {
             NextStepCanExecute = false;
@@ -421,9 +412,7 @@ public partial class Step1PageViewModel : ObservableRecipient, INavigationAware
         scanChipTimer.Stop();
         scanChipTimer.Tick -= ScanChipEvent;
 
-        using var reader = ReaderService.Instance;
-
-        await reader.Disconnect();
+        await TWN4ReaderDevice.Instance[0].DisconnectAsync();
 
     }
 
@@ -436,9 +425,7 @@ public partial class Step1PageViewModel : ObservableRecipient, INavigationAware
         scanChipTimer.Stop();
         scanChipTimer.Tick -= ScanChipEvent;
 
-        using var reader = ReaderService.Instance;
-
-        await reader.Disconnect();
+        await TWN4ReaderDevice.Instance[0].DisconnectAsync();
     }
 
     protected void Dispose(bool disposing)

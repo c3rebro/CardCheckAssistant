@@ -16,7 +16,7 @@
     <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
     <GenerateAppInstallerFile>True</GenerateAppInstallerFile>
     <AppxPackageSigningEnabled>True</AppxPackageSigningEnabled>
-    <PackageCertificateThumbprint>17473166A3D5B4DDF7BEC28DA037402A7C1601F8</PackageCertificateThumbprint>
+    <PackageCertificateThumbprint>6DEC2E76FAFB6366CF5FCDE1BC867396A215849E</PackageCertificateThumbprint>
     <AppxPackageSigningTimestampDigestAlgorithm>SHA256</AppxPackageSigningTimestampDigestAlgorithm>
     <AppxAutoIncrementPackageRevision>False</AppxAutoIncrementPackageRevision>
     <AppxSymbolPackageEnabled>False</AppxSymbolPackageEnabled>
@@ -38,6 +38,9 @@
     <PackageIcon>Logo.png</PackageIcon>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageReleaseNotes>https://github.com/c3rebro/CardCheckAssistant/releases</PackageReleaseNotes>
+    <AssemblyOriginatorKeyFile>C:\MessgeraetetechnikHansen.pfx</AssemblyOriginatorKeyFile>
+    <UserSecretsId>714ac69f-6267-41a2-af9a-05450d500801</UserSecretsId>
+    <DelaySign>True</DelaySign>
   </PropertyGroup>
   <ItemGroup>
     <Compile Remove="Services\ResourceLoaderService.cs" />
@@ -63,7 +66,6 @@
     <PackageReference Include="CommunityToolkit.WinUI.UI.Behaviors" Version="7.1.2" />
     <PackageReference Include="CommunityToolkit.WinUI.UI.Controls" Version="7.1.2" />
     <PackageReference Include="CommunityToolkit.WinUI.UI.Controls.DataGrid" Version="7.1.2" />
-    <PackageReference Include="Elatec.NET" Version="0.4.1" />
     <PackageReference Include="GemBox.Pdf" Version="17.0.1300" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="6.0.1" />
     <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.4.231008000" />
@@ -71,7 +73,7 @@
     <PackageReference Include="SkiaSharp" Version="2.88.6" />
     <PackageReference Include="System.Data.SqlClient" Version="4.8.5" />
     <PackageReference Include="System.Data.SQLite" Version="1.0.118" />
-    <PackageReference Include="System.IO.Ports" Version="7.0.0" />
+    <PackageReference Include="System.IO.Ports" Version="8.0.0" />
     <PackageReference Include="System.Net.Http" Version="4.3.4" />
     <PackageReference Include="System.Text.RegularExpressions" Version="4.3.1" />
     <PackageReference Include="System.Windows.Extensions" Version="7.0.0" />
@@ -79,8 +81,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\Elatec.NET\Elatec.NET.csproj" />
     <ProjectReference Include="..\CardCheckAssistant.Core\CardCheckAssistant.Core.csproj" />
-    <ProjectReference Include="H:\Seafile\Elatec.NET\Elatec.NET.csproj" />
   </ItemGroup>
 
   <ItemGroup>

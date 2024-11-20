@@ -7,12 +7,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CardCheckAssistant", "CardC
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CardCheckAssistant.Core", "CardCheckAssistant.Core\CardCheckAssistant.Core.csproj", "{9B83362C-4C65-4F38-B109-4469979AAD52}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Elatec.NET", "H:\Seafile\Elatec.NET\Elatec.NET.csproj", "{53FBD2F3-638E-4892-9F09-9A372C8F76D2}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Projektmappenelemente", "Projektmappenelemente", "{77782D26-5B61-48A6-9525-80EC418393AF}"
 	ProjectSection(SolutionItems) = preProject
 		README.md = README.md
 	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Elatec.NET", "..\Elatec.NET\Elatec.NET.csproj", "{DC21C96C-AF7C-430D-84B4-893AFE31C254}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -66,22 +66,22 @@ Global
 		{9B83362C-4C65-4F38-B109-4469979AAD52}.Release|x64.Build.0 = Release|x64
 		{9B83362C-4C65-4F38-B109-4469979AAD52}.Release|x86.ActiveCfg = Release|x86
 		{9B83362C-4C65-4F38-B109-4469979AAD52}.Release|x86.Build.0 = Release|x86
-		{53FBD2F3-638E-4892-9F09-9A372C8F76D2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{53FBD2F3-638E-4892-9F09-9A372C8F76D2}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{53FBD2F3-638E-4892-9F09-9A372C8F76D2}.Debug|arm64.ActiveCfg = Debug|Any CPU
-		{53FBD2F3-638E-4892-9F09-9A372C8F76D2}.Debug|arm64.Build.0 = Debug|Any CPU
-		{53FBD2F3-638E-4892-9F09-9A372C8F76D2}.Debug|x64.ActiveCfg = Debug|x64
-		{53FBD2F3-638E-4892-9F09-9A372C8F76D2}.Debug|x64.Build.0 = Debug|x64
-		{53FBD2F3-638E-4892-9F09-9A372C8F76D2}.Debug|x86.ActiveCfg = Debug|x86
-		{53FBD2F3-638E-4892-9F09-9A372C8F76D2}.Debug|x86.Build.0 = Debug|x86
-		{53FBD2F3-638E-4892-9F09-9A372C8F76D2}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{53FBD2F3-638E-4892-9F09-9A372C8F76D2}.Release|Any CPU.Build.0 = Release|Any CPU
-		{53FBD2F3-638E-4892-9F09-9A372C8F76D2}.Release|arm64.ActiveCfg = Release|Any CPU
-		{53FBD2F3-638E-4892-9F09-9A372C8F76D2}.Release|arm64.Build.0 = Release|Any CPU
-		{53FBD2F3-638E-4892-9F09-9A372C8F76D2}.Release|x64.ActiveCfg = Release|x64
-		{53FBD2F3-638E-4892-9F09-9A372C8F76D2}.Release|x64.Build.0 = Release|x64
-		{53FBD2F3-638E-4892-9F09-9A372C8F76D2}.Release|x86.ActiveCfg = Release|x86
-		{53FBD2F3-638E-4892-9F09-9A372C8F76D2}.Release|x86.Build.0 = Release|x86
+		{DC21C96C-AF7C-430D-84B4-893AFE31C254}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DC21C96C-AF7C-430D-84B4-893AFE31C254}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DC21C96C-AF7C-430D-84B4-893AFE31C254}.Debug|arm64.ActiveCfg = Debug|Any CPU
+		{DC21C96C-AF7C-430D-84B4-893AFE31C254}.Debug|arm64.Build.0 = Debug|Any CPU
+		{DC21C96C-AF7C-430D-84B4-893AFE31C254}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{DC21C96C-AF7C-430D-84B4-893AFE31C254}.Debug|x64.Build.0 = Debug|Any CPU
+		{DC21C96C-AF7C-430D-84B4-893AFE31C254}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{DC21C96C-AF7C-430D-84B4-893AFE31C254}.Debug|x86.Build.0 = Debug|Any CPU
+		{DC21C96C-AF7C-430D-84B4-893AFE31C254}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DC21C96C-AF7C-430D-84B4-893AFE31C254}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DC21C96C-AF7C-430D-84B4-893AFE31C254}.Release|arm64.ActiveCfg = Release|Any CPU
+		{DC21C96C-AF7C-430D-84B4-893AFE31C254}.Release|arm64.Build.0 = Release|Any CPU
+		{DC21C96C-AF7C-430D-84B4-893AFE31C254}.Release|x64.ActiveCfg = Release|Any CPU
+		{DC21C96C-AF7C-430D-84B4-893AFE31C254}.Release|x64.Build.0 = Release|Any CPU
+		{DC21C96C-AF7C-430D-84B4-893AFE31C254}.Release|x86.ActiveCfg = Release|Any CPU
+		{DC21C96C-AF7C-430D-84B4-893AFE31C254}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

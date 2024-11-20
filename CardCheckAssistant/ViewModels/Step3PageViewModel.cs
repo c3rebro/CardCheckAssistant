@@ -13,6 +13,7 @@ using CommunityToolkit.Mvvm.Input;
 using Microsoft.UI.Xaml.Controls;
 using System.Reflection.PortableExecutable;
 using Windows.Foundation.Diagnostics;
+using Elatec.NET;
 
 namespace CardCheckAssistant.ViewModels;
 
@@ -381,9 +382,9 @@ public partial class Step3PageViewModel : ObservableRecipient
         {
             using var settings = new SettingsReaderWriter();
             using var reportReader = new ReportReaderWriterService();
-            using var readerService = ReaderService.Instance;
+            using var readerService = TWN4ReaderDevice.Instance[0];
 
-            await readerService.Disconnect();
+            await readerService.DisconnectAsync();
 
 
             settings.ReadSettings();
@@ -459,8 +460,8 @@ public partial class Step3PageViewModel : ObservableRecipient
     {
         try
         {
-            var readerService = ReaderService.Instance;
-            await readerService.Disconnect();
+            var readerService = TWN4ReaderDevice.Instance[0];
+            await readerService.DisconnectAsync();
 
             (App.MainRoot.XamlRoot.Content as ShellPage)?.ViewModel.NavigationService.NavigateTo(typeof(Step1PageViewModel).FullName ?? "");
         }

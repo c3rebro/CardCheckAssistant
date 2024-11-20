@@ -74,7 +74,6 @@ public class SQLDBService : IDisposable
 
     public SQLDBService(string _server, string _dbName, string _dbTable, string _userID, string _pwd)
     {
-        
         serverName = _server;
         dbName = _dbName;
         tableName = _dbTable;
