@@ -1,229 +1,167 @@
 ﻿using CardCheckAssistant.Models;
 
 using Elatec.NET;
-using Elatec.NET.Cards;
-using Elatec.NET.Cards.Mifare;
-using Elatec.NET.Helpers.ByteArrayHelper.Extensions;
+using Elatec.NET.Model;
+
+using Log4CSharp;
 
 using System;
-using System.Diagnostics;
-using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace CardCheckAssistant.Services
 {
     internal class ReaderService : IDisposable
     {
-        private readonly List<TWN4ReaderDevice>? readerList = new();
-        private readonly EventLog eventLog = new("Application", ".", Assembly.GetEntryAssembly().GetName().Name);
+        private readonly TWN4ReaderDevice? readerDevice;
 
-        private TWN4ReaderDevice? readerDevice;
-        private GenericChipModel? hfTag;
-        private GenericChipModel? lfTag;
-        private GenericChipModel? legicTag;
+        private ChipModel? hfTag;
+        private ChipModel? lfTag;
+        private ChipModel? legicTag;
 
-        private static object syncRoot = new object();
-        private static ReaderService instance;
-
-        public string ReaderUnitName
-        {
-            get; set;
-        }
-        public string ReaderUnitVersion
-        {
-            get; set;
-        }
-
-        public static ReaderService Instance
-        {
-            get
-            {
-                lock (syncRoot)
-                {
-                    if (instance == null)
-                    {
-                        instance = new ReaderService();
-                        return instance;
-                    }
-                    else
-                    {
-                        return instance;
-                    }
-                }
-            }
-        }
-
-        private ReaderService()
+        public ReaderService()
         {
             try
             {
-                readerList = TWN4ReaderDevice.Instance;
-
-                if (readerList != null && readerList.Count > 0)
-                {
-                    readerDevice = readerList[0];
-                }
-
-                GenericChip ??= new GenericChipModel();
+                readerDevice = TWN4ReaderDevice.Instance ?? new TWN4ReaderDevice(0);
             }
             catch (Exception e)
             {
-                eventLog.WriteEntry(e.Message, EventLogEntryType.Error);
+                LogWriter.CreateLogEntry(e);
             }
         }
 
-        public bool MoreThanOneReaderFound => readerList?.Count > 1;
+        public bool MoreThanOneReaderFound => readerDevice?.MoreThanOneReader ?? true;
 
-        public bool? IsConnected => readerDevice != null ? readerDevice.IsConnected : null;
+        public bool ReaderPortBusy => readerDevice?.PortAccessDenied ?? true;
 
         public GenericChipModel? GenericChip
         {
             get; private set;
         }
 
-        public async Task Disconnect()
-        {
-            if (readerDevice != null && readerDevice.IsConnected)
-            {
-                await readerDevice.DisconnectAsync();
-            }
-        }
-
-        public async Task Connect()
-        {
-            if (readerDevice != null && !readerDevice.IsConnected)
-            {
-                await readerDevice.ConnectAsync();
-            }
-            else if (readerDevice == null)
-            {
-                var readerList = TWN4ReaderDevice.Instance;
-
-                if (readerList != null && readerList.Count > 0)
-                {
-                    readerDevice = readerList[0];
-                }
-
-                GenericChip ??= new GenericChipModel();
-            }
-        }
-
         public async Task<int> ReadChipPublic()
         {
-            try
-            {
-                using SettingsReaderWriter settings = new SettingsReaderWriter();
+            ChipModel tmpTag;
 
-                if (readerDevice != null)
+            return await Task.Run(async () => 
+            {
+                try
                 {
-                    if (!readerDevice.IsConnected)
+                    if (GenericChip != null)
                     {
-                        await readerDevice.ConnectAsync();
+                        GenericChip = new GenericChipModel();
                     }
 
-                    await readerDevice.SetTagTypesAsync(LFTagTypes.NOTAG, HFTagTypes.AllHFTags & ~HFTagTypes.LEGIC);
-                    var tmpTag = await readerDevice.GetSingleChipAsync();
-
-                    if (tmpTag != null && tmpTag.ChipType == ChipType.MIFARE)
+                    if (readerDevice != null)
                     {
-
-                        if ((MifareChipSubType)((byte)(tmpTag as MifareChip).SubType & 0xF0) == MifareChipSubType.MifareClassic)
+                        if (!readerDevice.IsConnected)
                         {
-                            hfTag = new GenericChipModel(tmpTag.UIDHexString, (tmpTag as MifareChip).SubType, ByteArrayConverter.GetStringFrom((tmpTag as MifareChip).SAK), ByteArrayConverter.GetStringFrom((tmpTag as MifareChip).ATS));
+                            await readerDevice.ConnectAsync();
+                            if (readerDevice.PortAccessDenied == true)
+                            {
+                                return -1;
+                            }
                         }
-                        else if ((MifareChipSubType)((byte)(tmpTag as MifareChip).SubType & 0x40) == MifareChipSubType.DESFire)
+                        tmpTag = await readerDevice.GetSingleChipAsync(true);
+
+                        hfTag = new ChipModel(tmpTag.UID, tmpTag.CardType, tmpTag.SAK, tmpTag.RATS, tmpTag.VersionL4);
+
+                        tmpTag = await readerDevice.GetSingleChipAsync(true, true);
+                        legicTag = new ChipModel(tmpTag.UID, tmpTag.CardType);
+
+                        tmpTag = await readerDevice.GetSingleChipAsync(false);
+                        lfTag = new ChipModel(tmpTag.UID, tmpTag.CardType);
+
+                        await readerDevice.GetSingleChipAsync(true);
+
+                        if (
+                                !(
+                                    string.IsNullOrWhiteSpace(hfTag?.UID) &&
+                                    string.IsNullOrWhiteSpace(lfTag?.UID) &&
+                                    string.IsNullOrWhiteSpace(legicTag?.UID)
+                                )
+                            )
                         {
-                            hfTag = new GenericChipModel(tmpTag.UIDHexString, (tmpTag as MifareChip).SubType, ByteArrayConverter.GetStringFrom((tmpTag as MifareChip).SAK), ByteArrayConverter.GetStringFrom((tmpTag as MifareChip).ATS), ByteArrayConverter.GetStringFrom((tmpTag as MifareChip).VersionL4));
+                            try
+                            {
+
+                                await readerDevice.GreenLEDAsync(true);
+                                await readerDevice.RedLEDAsync(false);
+
+
+                                GenericChip = new GenericChipModel(hfTag?.UID ?? "",
+                                    hfTag?.CardType ?? ChipType.NOTAG,
+                                    hfTag?.SAK ?? "",
+                                    hfTag?.RATS ?? "",
+                                    hfTag?.VersionL4 ?? ""
+                                    );
+
+                                if (lfTag != null && lfTag?.CardType != ChipType.NOTAG)
+                                {
+                                    if(GenericChip != null && GenericChip.CardType != ChipType.NOTAG)
+                                    {
+                                        GenericChip.Child = new GenericChipModel(lfTag?.UID ?? "", lfTag?.CardType ?? ChipType.NOTAG);
+                                    }
+                                    else
+                                    {
+                                        GenericChip = new GenericChipModel(lfTag?.UID ?? "", lfTag?.CardType ?? ChipType.NOTAG);
+                                    }
+                                }
+                                else if (legicTag != null && legicTag?.CardType != ChipType.NOTAG)
+                                {
+                                    if (GenericChip != null && GenericChip.CardType != ChipType.NOTAG)
+                                    {
+                                        GenericChip.Child = new GenericChipModel(legicTag?.UID ?? "", legicTag?.CardType ?? ChipType.NOTAG);
+                                    }
+                                    else
+                                    {
+                                        GenericChip = new GenericChipModel(legicTag?.UID ?? "", legicTag?.CardType ?? ChipType.NOTAG);
+                                    }
+                                }
+
+                                return 0;
+                            }
+                            catch (Exception e)
+                            {
+                                LogWriter.CreateLogEntry(e);
+                                return 1;
+                            }
                         }
                         else
                         {
-                            hfTag = new GenericChipModel(tmpTag.UIDHexString, tmpTag.ChipType);
+                            await readerDevice.BeepAsync(1, 25, 600, 100);
+                            await readerDevice.RedLEDAsync(true);
+                            await readerDevice.GreenLEDAsync(false);
+                            GenericChip = null;
+
+                            return 3;
                         }
                     }
-                    else if (tmpTag == null)
-                    {
-                        hfTag = null;
-                    }
 
-                    await readerDevice.SetTagTypesAsync(LFTagTypes.AllLFTags, HFTagTypes.NOTAG);
-                    tmpTag = await readerDevice.GetSingleChipAsync();
-                    lfTag = tmpTag != null ? new GenericChipModel(tmpTag.UIDHexString, tmpTag.ChipType) : null;
-
-                    await readerDevice.SetTagTypesAsync(LFTagTypes.NOTAG, HFTagTypes.LEGIC);
-                    tmpTag = await readerDevice.GetSingleChipAsync();
-                    legicTag = tmpTag != null ? new GenericChipModel(tmpTag.UIDHexString, tmpTag.ChipType) : null;
-
-                    await readerDevice.SetTagTypesAsync(LFTagTypes.NOTAG, HFTagTypes.AllHFTags);
-
-                    if (!string.IsNullOrWhiteSpace(hfTag?.UID) && GenericChip?.UID == hfTag.UID)
+                    else
                     {
                         return 1;
                     }
-
-                    if (!string.IsNullOrWhiteSpace(hfTag?.UID) && (GenericChip?.UID != hfTag.UID))
-                    {
-                        GenericChip = new GenericChipModel();
-
-                        if (!string.IsNullOrWhiteSpace(hfTag?.UID))
-                        {
-                            GenericChip = new GenericChipModel(hfTag);
-
-                            if (GenericChip.Childs == null)
-                            {
-                                GenericChip.Childs = new List<GenericChipModel>();
-                            }
-                        }
-                    }
-
-                    if (!string.IsNullOrEmpty(lfTag?.UID))
-                    {
-                        GenericChip?.Childs.Add(lfTag);
-                    }
-
-                    if (!string.IsNullOrEmpty(legicTag?.UID))
-                    {
-                        GenericChip?.Childs.Add(legicTag);
-                    }
-                    if(hfTag == null && lfTag == null && legicTag == null)
-                    {
-                        await readerDevice.BeepAsync((byte)(settings.DefaultSettings.ReaderVolume ?? 0), 2500, 50, 0);
-
-                        GenericChip = null;
-
-                        return 3;
-                    }
                 }
-
-                else
+                catch (Exception e)
                 {
-                    return 1;
+                    if (readerDevice != null)
+                    {
+                        readerDevice.Dispose();
+                    }
+
+                    LogWriter.CreateLogEntry(e);
+
+                    return 2;
                 }
-            }
-            catch (Exception e)
-            {
-                if (readerDevice != null)
-                {
-                    readerDevice.Dispose();
-                }
-
-                eventLog.WriteEntry(e.Message, EventLogEntryType.Error);
-
-                throw;
-            }
-
-            return 0;
+            });
         }
 
         protected void Dispose(bool disposing)
         {
             if (!_disposed)
             {
-                if (readerDevice != null && readerDevice.IsConnected)
-                {
-                    readerDevice.DisconnectAsync().GetAwaiter().GetResult();
-                }
                 _disposed = true;
             }
         }

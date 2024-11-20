@@ -30,6 +30,11 @@ public partial class HomePageViewModel : ObservableRecipient, INavigationAware
     private readonly bool isCreateEventLogSourceErr;
 
     private ObservableCollection<CardCheckProcess> cardCheckProcessesFromCache;
+#if DEBUG
+    private const string DBNAME = "OT_CardCheck_Test";
+#else
+    private const string DBNAME = "OT_CardCheck";
+#endif
 
     /// <summary>
     /// 
