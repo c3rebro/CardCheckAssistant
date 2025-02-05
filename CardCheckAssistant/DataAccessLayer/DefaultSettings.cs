@@ -35,6 +35,7 @@ public class DefaultSettings : IDisposable
         if(init)
         {
             _defaultLanguage = "english";
+            _defaultReportLanguage = "deutsch";
             _autoCheckForUpdates = true;
             _autoLoadProjectOnStart = false;
             _cardCheckUseSQLLite = true;
@@ -168,12 +169,23 @@ public class DefaultSettings : IDisposable
     /// <summary>
     ///
     /// </summary>
+    public string? DefaultReportLanguage
+    {
+        get => _defaultReportLanguage;
+        set => _defaultReportLanguage = value;
+    }
+    private string? _defaultReportLanguage;
+
+    /// <summary>
+    ///
+    /// </summary>
     public string? DefaultLanguage
     {
         get => _defaultLanguage;
         set => _defaultLanguage = value;
     }
     private string? _defaultLanguage;
+
 
     /// <summary>
     ///
@@ -224,6 +236,16 @@ public class DefaultSettings : IDisposable
         set => _lastUsedCustomProjectPath = value;
     }
     private string? _lastUsedCustomProjectPath;
+
+    /// <summary>
+    ///
+    /// </summary>
+    public string? LastUsedDefaultProject
+    {
+        get => _lastUsedDefaultProject;
+        set => _lastUsedDefaultProject = value;
+    }
+    private string? _lastUsedDefaultProject;
 
     /// <summary>
     ///

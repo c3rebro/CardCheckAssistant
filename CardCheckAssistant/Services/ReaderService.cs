@@ -185,7 +185,10 @@ namespace CardCheckAssistant.Services
             {
                 if (disposing)
                 {
-                    await TWN4ReaderDevice.Instance[0].DisconnectAsync();
+                    if (TWN4ReaderDevice.Instance?.Count > 0 && TWN4ReaderDevice.Instance[0] != null)
+                    {
+                        await TWN4ReaderDevice.Instance[0].DisconnectAsync();
+                    }
                 }
 
                 _disposed = true;

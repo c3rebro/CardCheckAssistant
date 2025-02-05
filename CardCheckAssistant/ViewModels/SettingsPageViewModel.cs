@@ -69,6 +69,7 @@ public partial class SettingsPageViewModel : ObservableRecipient, INavigationAwa
             IsTextBoxCardCheckTextTemplateEnabled = false;
             SelectedProjectFolder = settings.DefaultSettings.DefaultProjectOutputPath ?? string.Empty;
             SelectedCustomProjectFolder = settings.DefaultSettings.LastUsedCustomProjectPath ?? string.Empty;
+            SelectedDefaultProject = settings.DefaultSettings.LastUsedDefaultProject ?? string.Empty; 
             SelectedRFIDGearPath = settings.DefaultSettings.DefaultRFIDGearExePath ?? string.Empty;
             RFiDGearIsAutoRunEnabled = settings.DefaultSettings.AutoLoadProjectOnStart == true ? true : false;
             SelectedDBName = settings.DefaultSettings.SelectedDBName ?? string.Empty;
@@ -240,6 +241,22 @@ public partial class SettingsPageViewModel : ObservableRecipient, INavigationAwa
     /// <summary>
     /// 
     /// </summary>
+    public string SelectedDefaultProject
+    {
+        get => _selectedDefaultProject ?? string.Empty;
+        set
+        {
+            using var settings = new SettingsReaderWriter();
+            settings.DefaultSettings.LastUsedDefaultProject = value?.ToString();
+            settings.SaveSettings();
+            SetProperty(ref _selectedDefaultProject, value);
+        }
+    }
+    private string? _selectedDefaultProject;
+
+    /// <summary>
+    /// 
+    /// </summary>
     public string SelectedProjectFolder
     {
         get => _selectedProjectFolder ?? string.Empty;
@@ -384,6 +401,8 @@ public partial class SettingsPageViewModel : ObservableRecipient, INavigationAwa
 
     public ICommand SelectRFIDGearCustomProjectCommand => new AsyncRelayCommand(SelectRFIDGearCustomProjectCommand_Executed);
 
+    public ICommand SelectRFIDGearDefaultProjectCommand => new AsyncRelayCommand(SelectRFIDGearDefaultProjectCommand_Executed);
+
     public ICommand ReaderConnectionTestCommand => new AsyncRelayCommand(ReaderConnectionTestCommand_Executed);
     #endregion
 
@@ -508,6 +527,27 @@ public partial class SettingsPageViewModel : ObservableRecipient, INavigationAwa
 
     }
 
+    private async Task SelectRFIDGearDefaultProjectCommand_Executed()
+    {
+        var window = App.MainWindow as MainWindow;
+
+        var filePicker = new FileOpenPicker();
+
+        // Get the current window's HWND by passing in the Window object
+        var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(window);
+
+        // Associate the HWND with the file picker
+        WinRT.Interop.InitializeWithWindow.Initialize(filePicker, hwnd);
+
+        filePicker.FileTypeFilter.Add("*");
+        var file = await filePicker.PickSingleFileAsync();
+        if (file != null && !string.IsNullOrEmpty(file.Path.ToString()))
+        {
+            SelectedDefaultProject = file?.Path.ToString();
+        }
+
+    }
+
     private async Task SelectProjectFolder_Executed()
     {
         var window = App.MainWindow as MainWindow;
@@ -540,8 +580,10 @@ public partial class SettingsPageViewModel : ObservableRecipient, INavigationAwa
     public async void OnNavigatedTo(object parameter)
     {
         // Run code when the app navigates to this page
-        await TWN4ReaderDevice.Instance[0].DisconnectAsync();
-
+        if (TWN4ReaderDevice.Instance?.Count > 0 && TWN4ReaderDevice.Instance[0] != null)
+        {
+            await TWN4ReaderDevice.Instance[0].DisconnectAsync();
+        }
     }
 
     /// <summary>
@@ -550,7 +592,10 @@ public partial class SettingsPageViewModel : ObservableRecipient, INavigationAwa
     public async void OnNavigatedFrom()
     {
         // Run code when the app navigates away from this page
-        await TWN4ReaderDevice.Instance[0].DisconnectAsync();
+        if (TWN4ReaderDevice.Instance?.Count > 0 && TWN4ReaderDevice.Instance[0] != null)
+        {
+            await TWN4ReaderDevice.Instance[0].DisconnectAsync();
+        }
     }
 
     private async Task NavigateBackCommand_Executed()
@@ -558,7 +603,10 @@ public partial class SettingsPageViewModel : ObservableRecipient, INavigationAwa
         try
         {
             using var settings = new SettingsReaderWriter();
-            await TWN4ReaderDevice.Instance[0].DisconnectAsync();
+            if (TWN4ReaderDevice.Instance?.Count > 0 && TWN4ReaderDevice.Instance[0] != null)
+            {
+                await TWN4ReaderDevice.Instance[0].DisconnectAsync();
+            }
 
             settings.DefaultSettings.CardCheckTextTemplates = TextTemplates;
 

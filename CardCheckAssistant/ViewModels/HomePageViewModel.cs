@@ -788,7 +788,10 @@ public partial class HomePageViewModel : ObservableRecipient, INavigationAware
     /// <param name="parameter"></param>
     public async void OnNavigatedTo(object parameter)
     {
-        await TWN4ReaderDevice.Instance[0].DisconnectAsync();
+        if(TWN4ReaderDevice.Instance?.Count > 0 && TWN4ReaderDevice.Instance[0] != null)
+        {
+            await TWN4ReaderDevice.Instance[0].DisconnectAsync();
+        }
     }
 
     /// <summary>
@@ -798,7 +801,10 @@ public partial class HomePageViewModel : ObservableRecipient, INavigationAware
     {
         // Run code when the app navigates away from this page
         scanDBTimer.Tick -= OnTimedEvent;
-        await TWN4ReaderDevice.Instance[0].DisconnectAsync();
+        if (TWN4ReaderDevice.Instance?.Count > 0 && TWN4ReaderDevice.Instance[0] != null)
+        {
+            await TWN4ReaderDevice.Instance[0].DisconnectAsync();
+        }
     }
 
     protected void Dispose(bool disposing)

@@ -48,10 +48,11 @@ public partial class Step1PageViewModel : ObservableRecipient, INavigationAware
 
         Languages = new ObservableCollection<string>
         {
-            "Deutsch"
+            "Deutsch",
+            "Englisch"
         };
 
-        SelectedReportLaguage = Languages.FirstOrDefault() ?? "de";
+        SelectedReportLaguage = Languages.FirstOrDefault() ?? "englisch";
 
         NextStepCanExecute = false;
         GoBackCanExecute = true;
@@ -305,6 +306,8 @@ public partial class Step1PageViewModel : ObservableRecipient, INavigationAware
             scanChipTimer.Tick -= ScanChipEvent;
 
             settings.ReadSettings();
+            settings.DefaultSettings.DefaultReportLanguage = SelectedReportLaguage;
+            settings.SaveSettings();
 
             var finalPath = new FileInfo(
                 settings.DefaultSettings.DefaultProjectOutputPath + "\\"
@@ -412,7 +415,10 @@ public partial class Step1PageViewModel : ObservableRecipient, INavigationAware
         scanChipTimer.Stop();
         scanChipTimer.Tick -= ScanChipEvent;
 
-        await TWN4ReaderDevice.Instance[0].DisconnectAsync();
+        if (TWN4ReaderDevice.Instance?.Count > 0 && TWN4ReaderDevice.Instance[0] != null)
+        {
+            await TWN4ReaderDevice.Instance[0].DisconnectAsync();
+        }
 
     }
 
@@ -425,7 +431,10 @@ public partial class Step1PageViewModel : ObservableRecipient, INavigationAware
         scanChipTimer.Stop();
         scanChipTimer.Tick -= ScanChipEvent;
 
-        await TWN4ReaderDevice.Instance[0].DisconnectAsync();
+        if (TWN4ReaderDevice.Instance?.Count > 0 && TWN4ReaderDevice.Instance[0] != null)
+        {
+            await TWN4ReaderDevice.Instance[0].DisconnectAsync();
+        }
     }
 
     protected void Dispose(bool disposing)

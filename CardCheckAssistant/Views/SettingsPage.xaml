@@ -91,19 +91,20 @@
 
                                 <controls:SettingsExpander 
                                     IsExpanded="True"
-                                    Header="Projekt-Pfad"
-                                    Description="Projektpfad für Kartenprüfungen">
+                                    Header="Bericht Ausgabe-Pfad"
+                                    Description="Ergebnisbereichte für Kartenprüfungen">
                                     <controls:SettingsExpander.HeaderIcon>
                                         <FontIcon Glyph="&#xE1A5;"/>
                                     </controls:SettingsExpander.HeaderIcon>
-                                    <controls:SettingsExpander.Content>
-                                        <Button Content="Ordner wählen..." Command="{x:Bind ViewModel.SelectProjectFolderCommand}"/>
-                                    </controls:SettingsExpander.Content>
+
                                     <controls:SettingsExpander.Items>
                                         <controls:SettingsCard  
-                                    Header="Pfad zu RFiDGear:" Description="Unterhalb dieses Ordners werden alle Prüfberichte angelegt.">
+                                            Header="Pfad zu RFiDGear Berichten:" Description="Unterhalb dieses Ordners werden alle Prüfberichte angelegt.">
                                             <controls:SettingsCard.Content>
+                                                <StackPanel Spacing="10" Orientation="Vertical">
+                                                <Button Content="Ordner wählen..." Command="{x:Bind ViewModel.SelectProjectFolderCommand}"/>
                                                 <TextBlock Text="{x:Bind ViewModel.SelectedProjectFolder}" />
+                                                </StackPanel>
                                             </controls:SettingsCard.Content>
                                         </controls:SettingsCard>
                                     </controls:SettingsExpander.Items>
@@ -112,18 +113,35 @@
                                 <controls:SettingsExpander 
                                     IsExpanded="True"
                                     Header="RFiDGear *.rfprj Datei"
-                                    Description="Pfad zu RFIDGear Speicherauslese-Projektdatei">
+                                    Description="Pfad zu RFIDGear's Projektdateien">
                                     <controls:SettingsExpander.HeaderIcon>
                                         <FontIcon Glyph="&#xE1A5;"/>
                                     </controls:SettingsExpander.HeaderIcon>
-                                    <controls:SettingsExpander.Content>
-                                        <Button Content="Datei öffnen..." Command="{x:Bind ViewModel.SelectRFIDGearCustomProjectCommand}"/>
-                                    </controls:SettingsExpander.Content>
                                     <controls:SettingsExpander.Items>
-                                        <controls:SettingsCard  
-                                    Header="Pfad zu RFiDGear:" Description="Mit dieser Projektdatei wird der freie Speicher ausgelesen.">
+                                        <controls:SettingsCard
+                                            Header="Pfad zu RFiDGear Standard-Projekt:"
+                                            Description="Dies ist RFiDGears Standard-Projektdatei. Für Sprachunterstützung bitte die jew. Projektdateien im gleichen Verzeichnis im Format 'Projektdatei.en.rfprj' anlegen.">
                                             <controls:SettingsCard.Content>
-                                                <TextBlock Text="{x:Bind ViewModel.SelectedCustomProjectFolder}" />
+                                                <StackPanel Spacing="10" Margin="10,0,0,0" Orientation="Vertical">
+                                                    <Button Content="Datei öffnen..." Command="{x:Bind ViewModel.SelectRFIDGearDefaultProjectCommand}"/>
+                                                    <TextBlock Text="{x:Bind ViewModel.SelectedDefaultProject}"
+                                                   MaxWidth="300"
+                                                   TextTrimming="CharacterEllipsis"
+                                                   ToolTipService.ToolTip="{x:Bind ViewModel.SelectedDefaultProject}"/>
+                                                </StackPanel>
+                                            </controls:SettingsCard.Content>
+                                        </controls:SettingsCard>
+                                        <controls:SettingsCard  
+                                            Header="Pfad zu RFiDGear Speicher-Ausleseprojekt:"
+                                            Description="Mit dieser Projektdatei wird der freie Speicher ausgelesen.">
+                                            <controls:SettingsCard.Content>
+                                                <StackPanel Spacing="10" Margin="10,0,0,0" Orientation="Vertical">
+                                                    <Button Content="Datei öffnen..." Command="{x:Bind ViewModel.SelectRFIDGearCustomProjectCommand}"/>
+                                                    <TextBlock Text="{x:Bind ViewModel.SelectedCustomProjectFolder}"
+                                                   MaxWidth="300"
+                                                   TextTrimming="CharacterEllipsis"
+                                                   ToolTipService.ToolTip="{x:Bind ViewModel.SelectedCustomProjectFolder}"/>
+                                                </StackPanel>
                                             </controls:SettingsCard.Content>
                                         </controls:SettingsCard>
                                     </controls:SettingsExpander.Items>

@@ -479,20 +479,34 @@ public partial class Step2PageViewModel : ObservableRecipient, INavigationAware
 
             var p = new Process();
 
+            var language = settings.DefaultSettings.DefaultReportLanguage.ToLower();
+            var defaultProjectFile = settings.DefaultSettings.LastUsedDefaultProject;
+            var directory = Path.GetDirectoryName(defaultProjectFile);
+            var filenameWithoutExtension = Path.GetFileNameWithoutExtension(defaultProjectFile);
+            var extension = Path.GetExtension(defaultProjectFile);
+
+            // Construct the language-specific filename
+            var languageSpecificFile = Path.Combine(directory, $"{filenameWithoutExtension}.{language}{extension}");
+
+            // Use the language-specific file if it exists, otherwise use the default
+            var projectFileToUse = File.Exists(languageSpecificFile) ? languageSpecificFile : defaultProjectFile;
+
             var info = new ProcessStartInfo
             {
                 FileName = settings.DefaultSettings.DefaultRFIDGearExePath,
                 Verb = "",
                 Arguments = string.Format(
                     "REPORTTARGETPATH=" + "\"" + "{0}" + "\" " +
-                    "$JOBNUMBER=" + "\"" + "{1}" + "\" " +
-                    "$CHIPNUMBER=" + "\"" + "{2}" + "\" " +
-                    "{3}",
+                    "CUSTOMPROJECTFILE=" + "\"" + "{1}" + "\" " +
+                    "$JOBNUMBER=" + "\"" + "{2}" + "\" " +
+                    "$CHIPNUMBER=" + "\"" + "{3}" + "\" " +
+                    "{4}",
                     settings.DefaultSettings.DefaultProjectOutputPath + "\\"
                     + (settings.DefaultSettings.CreateSubdirectoryIsEnabled == true ? CheckProcessService.CurrentCardCheckProcess.JobNr + "\\" : string.Empty)
                     + CheckProcessService.CurrentCardCheckProcess.JobNr + "-"
                     + CheckProcessService.CurrentCardCheckProcess.ChipNumber
                     + ".pdf",
+                    projectFileToUse,
                     CheckProcessService.CurrentCardCheckProcess.JobNr,
                     CheckProcessService.CurrentCardCheckProcess.ChipNumber,
                     (settings.DefaultSettings.AutoLoadProjectOnStart ?? false) ? "AUTORUN=1" : "AUTORUN=0"),

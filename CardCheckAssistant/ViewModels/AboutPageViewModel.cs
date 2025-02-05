@@ -100,7 +100,10 @@ public class AboutPageViewModel : ObservableRecipient
     {
         try
         {
-            await TWN4ReaderDevice.Instance[0].DisconnectAsync();
+            if (TWN4ReaderDevice.Instance?.Count > 0 && TWN4ReaderDevice.Instance[0] != null)
+            {
+                await TWN4ReaderDevice.Instance[0].DisconnectAsync();
+            }
 
             (App.MainRoot.XamlRoot.Content as ShellPage)?.ViewModel.NavigationService.NavigateTo(typeof(HomePageViewModel).FullName ?? "");
         }
@@ -116,7 +119,10 @@ public class AboutPageViewModel : ObservableRecipient
     /// </summary>
     private async Task NavigateBackCommand_Executed()
     {
-        await TWN4ReaderDevice.Instance[0].DisconnectAsync();
+        if (TWN4ReaderDevice.Instance?.Count > 0 && TWN4ReaderDevice.Instance[0] != null)
+        {
+            await TWN4ReaderDevice.Instance[0].DisconnectAsync();
+        }
 
         (App.MainRoot.XamlRoot.Content as ShellPage)?.ViewModel.NavigationService.NavigateTo(typeof(HomePageViewModel).FullName ?? "");
     }
