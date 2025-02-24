@@ -321,14 +321,14 @@ public partial class Step1PageViewModel : ObservableRecipient, INavigationAware
                 + (settings.DefaultSettings.CreateSubdirectoryIsEnabled == true ? CheckProcessService.CurrentCardCheckProcess.JobNr + "\\" : string.Empty)
                 + CheckProcessService.CurrentCardCheckProcess.JobNr + "-"
                 + CheckProcessService.CurrentCardCheckProcess.ChipNumber
-                + "_.pdf");
+                + ".step2.pdf");
 
             var preFinalPath = new FileInfo(
                 settings.DefaultSettings.DefaultProjectOutputPath + "\\"
                 + (settings.DefaultSettings.CreateSubdirectoryIsEnabled == true ? CheckProcessService.CurrentCardCheckProcess.JobNr + "\\" : string.Empty)
                 + CheckProcessService.CurrentCardCheckProcess.JobNr + "-"
                 + CheckProcessService.CurrentCardCheckProcess.ChipNumber
-                + ".pdf");
+                + ".step1.pdf");
 
             if (preFinalPath.Exists || semiFinalPath.Exists || finalPath.Exists)
             {

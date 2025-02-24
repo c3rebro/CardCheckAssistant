@@ -505,7 +505,7 @@ public partial class Step2PageViewModel : ObservableRecipient, INavigationAware
                     + (settings.DefaultSettings.CreateSubdirectoryIsEnabled == true ? CheckProcessService.CurrentCardCheckProcess.JobNr + "\\" : string.Empty)
                     + CheckProcessService.CurrentCardCheckProcess.JobNr + "-"
                     + CheckProcessService.CurrentCardCheckProcess.ChipNumber
-                    + ".pdf",
+                    + ".step1.pdf",
                     projectFileToUse,
                     CheckProcessService.CurrentCardCheckProcess.JobNr,
                     CheckProcessService.CurrentCardCheckProcess.ChipNumber,
@@ -523,7 +523,7 @@ public partial class Step2PageViewModel : ObservableRecipient, INavigationAware
                 + (settings.DefaultSettings.CreateSubdirectoryIsEnabled == true ? CheckProcessService.CurrentCardCheckProcess.JobNr + "\\" : string.Empty)
                 + CheckProcessService.CurrentCardCheckProcess.JobNr + "-"
                 + CheckProcessService.CurrentCardCheckProcess.ChipNumber
-                + ".pdf";
+                + ".step1.pdf";
 
                 supported = reportReader.GetReportField("CheckBox_isChipSuppYes") != null && reportReader.GetReportField("CheckBox_isChipSuppYes") == "Yes";
                 programmable = reportReader.GetReportField("CheckBox_ChipCanUseYes") != null && reportReader.GetReportField("CheckBox_ChipCanUseYes") == "Yes";
@@ -989,7 +989,7 @@ public partial class Step2PageViewModel : ObservableRecipient, INavigationAware
                 + (settings.DefaultSettings.CreateSubdirectoryIsEnabled == true ? CheckProcessService.CurrentCardCheckProcess.JobNr + "\\" : string.Empty)
                 + CheckProcessService.CurrentCardCheckProcess.JobNr + "-"
                 + CheckProcessService.CurrentCardCheckProcess.ChipNumber
-                + ".pdf",
+                + ".step1.pdf",
                 Verb = "",
                 UseShellExecute = true
             };
@@ -1072,14 +1072,14 @@ public partial class Step2PageViewModel : ObservableRecipient, INavigationAware
                 + (settings.DefaultSettings.CreateSubdirectoryIsEnabled == true ? CheckProcessService.CurrentCardCheckProcess.JobNr + "\\" : string.Empty)
                 + CheckProcessService.CurrentCardCheckProcess.JobNr + "-"
                 + CheckProcessService.CurrentCardCheckProcess.ChipNumber
-                + "_.pdf";
+                + ".step2.pdf";
 
             var preFinalPath =
                 settings.DefaultSettings.DefaultProjectOutputPath + "\\"
                 + (settings.DefaultSettings.CreateSubdirectoryIsEnabled == true ? CheckProcessService.CurrentCardCheckProcess.JobNr + "\\" : string.Empty)
                 + CheckProcessService.CurrentCardCheckProcess.JobNr + "-"
                 + CheckProcessService.CurrentCardCheckProcess.ChipNumber
-                + ".pdf";
+                + ".step1.pdf";
 
             using var reportReader = new ReportReaderWriterService();
 

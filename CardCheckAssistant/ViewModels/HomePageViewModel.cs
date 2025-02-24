@@ -9,6 +9,9 @@ using System.Windows.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.WinUI.Helpers;
+
+using GemBox.Pdf;
+
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml;
 using Windows.ApplicationModel;
@@ -87,11 +90,6 @@ public partial class HomePageViewModel : ObservableRecipient, INavigationAware
                 SelectedCardCheckProcess = DataGridItemCollection.First(x => x.Status == "InProgress");
             }
         }
-    }
-
-    private void OpenReportWritable_Click(object sender, RoutedEventArgs e)
-    {
-        throw new NotImplementedException();
     }
 
     private void RemoveReportFromDB_Click(object sender, RoutedEventArgs e)
@@ -396,30 +394,51 @@ public partial class HomePageViewModel : ObservableRecipient, INavigationAware
     {
         try
         {
+            using var reportReader = new ReportReaderWriterService();
+
             if (CheckProcessService.CurrentCardCheckProcess.Status == "CheckFinished" && CheckProcessService.CurrentCardCheckProcess.IsSelected == true)
             {
                 using var settings = new SettingsReaderWriter();
-
                 settings.ReadSettings();
 
-                var p = new Process();
+                var filePath = settings.DefaultSettings.DefaultProjectOutputPath + "\\" + "downloadedReport_orig.pdf";
+                reportReader.ReportTemplatePath = filePath;
+                reportReader.ReportOutputPath = filePath + "_changed.pdf";
 
+                // Retrieve the report and save it locally
                 await SQLDBService.Instance.GetCardCheckReportFromMSSQLAsync(CheckProcessService.CurrentCardCheckProcess.ID);
 
+                // Open the PDF in writable mode
+
+                // Make sure the PDF fields are not read-only
+                reportReader.SetReadOnlyOnAllFields(false);
+
+                // Open the file with the default PDF viewer
+                var p = new Process();
                 var info = new ProcessStartInfo()
                 {
-                    FileName = settings.DefaultSettings.DefaultProjectOutputPath + "\\" + "downloadedReport.pdf",
+                    FileName = reportReader.ReportOutputPath,
                     Verb = "",
                     UseShellExecute = true
                 };
-
                 p.StartInfo = info;
                 p.Start();
 
-                await p.WaitForExitAsync();
+                await EditReportCmd_Executed();
+
+                if (File.Exists(reportReader.ReportOutputPath))
+                {
+                    File.Copy(reportReader.ReportOutputPath, reportReader.ReportTemplatePath, true);
+                }
+
+                // Make sure the PDF fields are not read-only
+                reportReader.SetReadOnlyOnAllFields(true);
+
+                // After the process exits, save changes back to the database
+                await SaveChangesToDatabase(reportReader.ReportOutputPath, CheckProcessService.CurrentCardCheckProcess.ID);
+                
             }
         }
-
         catch (Exception ex)
         {
             eventLog.WriteEntry(ex.Message, EventLogEntryType.Error);
@@ -442,7 +461,7 @@ public partial class HomePageViewModel : ObservableRecipient, INavigationAware
 
                 var info = new ProcessStartInfo()
                 {
-                    FileName = settings.DefaultSettings.DefaultProjectOutputPath + "\\" + "downloadedReport.pdf",
+                    FileName = settings.DefaultSettings.DefaultProjectOutputPath + "\\" + "downloadedReport_orig.pdf",
                     Verb = "",
                     UseShellExecute = true
                 };
@@ -454,6 +473,19 @@ public partial class HomePageViewModel : ObservableRecipient, INavigationAware
             }
         }
 
+        catch (Exception ex)
+        {
+            eventLog.WriteEntry(ex.Message, EventLogEntryType.Error);
+        }
+    }
+
+    private async Task SaveChangesToDatabase(string filePath, string reportId)
+    {
+        try
+        {
+            using FileStream fs = new FileStream(filePath, FileMode.Open, FileAccess.Read);
+            await SQLDBService.Instance.InsertData(reportId, fs);
+        }
         catch (Exception ex)
         {
             eventLog.WriteEntry(ex.Message, EventLogEntryType.Error);
@@ -473,7 +505,7 @@ public partial class HomePageViewModel : ObservableRecipient, INavigationAware
             {
                 await App.MainRoot.MessageDialogAsync(
                     "Fehler.",
-                    "Es konnte keine Lagdatei erzeugt werden.\n" +
+                    "Es konnte keine Logdatei erzeugt werden.\n" +
                     "Bitte das Programm einmal mit Adminrechten starten...");
             }
 
@@ -560,6 +592,17 @@ public partial class HomePageViewModel : ObservableRecipient, INavigationAware
         "Kehre dann hierher zurück. Der CardCheckAssistant kann geöffnet bleiben und wird automatisch aktualisiert. Falls nicht: Sebastian Hotze hauen.\n" +
         "\n" +
         "Happy CardChecking ;-)");
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <returns></returns>
+    private static async Task EditReportCmd_Executed()
+    {
+        await App.MainRoot.MessageDialogAsync(
+        "Fertig?",
+        "Bitte bestätige den Dialog, wenn Du mit der Bearbeitung des Berichtes fertig bist. Und den Editor geschlossen hast.\nDer Bericht wird dann automatisch zum Server übertragen.");
     }
 
     /// <summary>

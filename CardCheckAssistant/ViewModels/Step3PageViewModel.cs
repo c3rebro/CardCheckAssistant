@@ -174,14 +174,14 @@ public partial class Step3PageViewModel : ObservableRecipient
                 + (settings.DefaultSettings.CreateSubdirectoryIsEnabled == true ? CheckProcessService.CurrentCardCheckProcess.JobNr + "\\" : string.Empty)
                 + CheckProcessService.CurrentCardCheckProcess.JobNr + "-"
                 + CheckProcessService.CurrentCardCheckProcess.ChipNumber
-                + "_final.pdf";
+                + ".step3.pdf";
 
             var semiFinalPath =
                 settings.DefaultSettings.DefaultProjectOutputPath + "\\"
                 + (settings.DefaultSettings.CreateSubdirectoryIsEnabled == true ? CheckProcessService.CurrentCardCheckProcess.JobNr + "\\" : string.Empty)
                 + CheckProcessService.CurrentCardCheckProcess.JobNr + "-"
                 + CheckProcessService.CurrentCardCheckProcess.ChipNumber
-                + "_.pdf";
+                + ".step2.pdf";
 
             var p = new Process();
 
@@ -315,7 +315,7 @@ public partial class Step3PageViewModel : ObservableRecipient
                 + (settings.DefaultSettings.CreateSubdirectoryIsEnabled == true ? CheckProcessService.CurrentCardCheckProcess.JobNr + "\\" : string.Empty)
                 + CheckProcessService.CurrentCardCheckProcess.JobNr + "-"
                 + CheckProcessService.CurrentCardCheckProcess.ChipNumber
-                + "_final.pdf",
+                + ".step3.pdf",
                 Verb = "",
                 UseShellExecute = true
             };
@@ -401,14 +401,14 @@ public partial class Step3PageViewModel : ObservableRecipient
                 + (settings.DefaultSettings.CreateSubdirectoryIsEnabled == true ? CheckProcessService.CurrentCardCheckProcess.JobNr + "\\" : string.Empty)
                 + CheckProcessService.CurrentCardCheckProcess.JobNr + "-"
                 + CheckProcessService.CurrentCardCheckProcess.ChipNumber
-                + "_.pdf";
+                + ".step3.pdf";
 
             var preFinalPath =
                 settings.DefaultSettings.DefaultProjectOutputPath + "\\"
                 + (settings.DefaultSettings.CreateSubdirectoryIsEnabled == true ? CheckProcessService.CurrentCardCheckProcess.JobNr + "\\" : string.Empty)
                 + CheckProcessService.CurrentCardCheckProcess.JobNr + "-"
                 + CheckProcessService.CurrentCardCheckProcess.ChipNumber
-                + ".pdf";
+                + ".step2.pdf";
 
             reportReader.ReportTemplatePath = semiFinalPath;
             reportReader.ReportOutputPath = finalPath;

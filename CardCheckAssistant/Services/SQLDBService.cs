@@ -267,7 +267,7 @@ public class SQLDBService : IDisposable
             using var settings = new SettingsReaderWriter();
             settings.ReadSettings();
 
-            var tmpFilePath = settings.DefaultSettings.DefaultProjectOutputPath + "\\" + "downloadedReport.pdf";
+            var tmpFilePath = settings.DefaultSettings.DefaultProjectOutputPath + "\\" + "downloadedReport_orig.pdf";
 
             var builder = new SqlConnectionStringBuilder();
             builder.DataSource = serverName;
