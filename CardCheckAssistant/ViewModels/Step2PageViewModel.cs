@@ -80,7 +80,7 @@ public partial class Step2PageViewModel : ObservableRecipient, INavigationAware
 
         SelectedLSMCardTemplate = LsmCardTemplates.Single(x => x.TemplateText == "N/A");
 
-        TextBoxSectorsUsed = "2,3,4,5,6,7,8,9,10,11,12";
+        TextBoxSectorsUsed = "";
 
         NextStepButtonContent = "Weiter";
     }

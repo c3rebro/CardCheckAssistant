@@ -118,6 +118,7 @@ public class SQLDBService : IDisposable
             builder.DataSource = serverName;
             builder.IntegratedSecurity = true;
             builder.InitialCatalog = dbName;
+            builder.TrustServerCertificate = true;
             builder.ApplicationName = serverName.Split('\\')[1];
 
             using var sqlConnection = new SqlConnection(builder.ConnectionString);
@@ -154,6 +155,7 @@ public class SQLDBService : IDisposable
             builder.ConnectRetryInterval = 10;
             builder.ConnectRetryCount = 2;
             builder.ConnectTimeout = 30;
+            builder.TrustServerCertificate = true;
             builder.ApplicationName = serverName.Split('\\')[1];
 
             using var sqlConnection = new SqlConnection(builder.ConnectionString);
@@ -276,6 +278,7 @@ public class SQLDBService : IDisposable
             builder.ConnectRetryInterval = 10;
             builder.ConnectRetryCount = 2;
             builder.ConnectTimeout = 30;
+            builder.TrustServerCertificate = true;
             builder.ApplicationName = serverName.Split('\\')[1];
 
             using var sqlConnection = new SqlConnection(builder.ConnectionString);
@@ -366,6 +369,7 @@ public class SQLDBService : IDisposable
             builder.ConnectRetryInterval = 10;
             builder.ConnectRetryCount = 2;
             builder.ConnectTimeout = 30;
+            builder.TrustServerCertificate = true;
             builder.ApplicationName = serverName.Split('\\')[1];
 
             using var sqlConnection = new SqlConnection(builder.ConnectionString);
@@ -430,6 +434,7 @@ public class SQLDBService : IDisposable
             builder.ConnectRetryCount = 2;
             builder.ConnectTimeout = 30;
             builder.PacketSize = 512;
+            builder.TrustServerCertificate = true;
             builder.ApplicationName = serverName.Split('\\')[1];
 
             using var sqlConnection = new SqlConnection(builder.ConnectionString);
