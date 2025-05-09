@@ -9,6 +9,8 @@ namespace CardCheckAssistant.ViewModels;
 
 public partial class ShellViewModel : ObservableRecipient
 {
+    public static bool FirstRun { get; set; }
+
     [ObservableProperty]
     private bool isBackEnabled;
 
@@ -30,6 +32,8 @@ public partial class ShellViewModel : ObservableRecipient
         NavigationService = navigationService;
         NavigationService.Navigated += OnNavigated;
         NavigationViewService = navigationViewService;
+
+        FirstRun = false;
     }
 
     private void OnNavigated(object sender, NavigationEventArgs e)

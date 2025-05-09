@@ -30,7 +30,6 @@ public partial class HomePageViewModel : ObservableRecipient, INavigationAware
 {
     private readonly EventLog eventLog = new("Application", ".", Assembly.GetEntryAssembly().GetName().Name);
     private readonly Microsoft.UI.Xaml.DispatcherTimer scanDBTimer;
-    private bool firstRun = false;
     private SQLDBService dbService;
     private readonly bool isCreateEventLogSourceErr;
 
@@ -510,9 +509,9 @@ public partial class HomePageViewModel : ObservableRecipient, INavigationAware
                     "Bitte das Programm einmal mit Adminrechten starten...");
             }
 
-            if (!firstRun)
+            if (!ShellViewModel.FirstRun)
             {
-                firstRun = true;
+                ShellViewModel.FirstRun = true;
                 await CheckForUpdates();
             }
             

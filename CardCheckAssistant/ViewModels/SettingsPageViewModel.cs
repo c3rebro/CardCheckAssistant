@@ -71,7 +71,7 @@ public partial class SettingsPageViewModel : ObservableRecipient, INavigationAwa
             SelectedCustomProjectFolder = settings.DefaultSettings.LastUsedCustomProjectPath ?? string.Empty;
             SelectedDefaultProject = settings.DefaultSettings.LastUsedDefaultProject ?? string.Empty; 
             SelectedRFIDGearPath = settings.DefaultSettings.DefaultRFIDGearExePath ?? string.Empty;
-            RFiDGearIsAutoRunEnabled = settings.DefaultSettings.AutoLoadProjectOnStart == true ? true : false;
+            RFiDGearIsAutoRunEnabled = settings.DefaultSettings.AutoRunProjectOnStart == true ? true : false;
             SelectedDBName = settings.DefaultSettings.SelectedDBName ?? string.Empty;
             SelectedDBTableName = settings.DefaultSettings.SelectedDBTableName ?? string.Empty;
             SelectedDBServerName = settings.DefaultSettings.SelectedDBServerName ?? string.Empty;
@@ -337,7 +337,7 @@ public partial class SettingsPageViewModel : ObservableRecipient, INavigationAwa
             SetProperty(ref _rFiDGearIsAutoRunEnabled, value);
             using var settings = new SettingsReaderWriter();
 
-            settings.DefaultSettings.AutoLoadProjectOnStart = value;
+            settings.DefaultSettings.AutoRunProjectOnStart = value;
             settings.SaveSettings();
         }
     }

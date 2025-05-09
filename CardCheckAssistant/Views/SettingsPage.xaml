@@ -178,7 +178,7 @@
                         <FontIcon Glyph="&#xE1A5;"/>
                     </controls:SettingsExpander.HeaderIcon>
                     <controls:SettingsExpander.Content>
-                        <ToggleSwitch IsOn="{Binding RFiDGearIsAutoRunEnabled, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
+                        <ToggleSwitch IsOn="{x:Bind ViewModel.RFiDGearIsAutoRunEnabled, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
                     </controls:SettingsExpander.Content>
                 </controls:SettingsExpander>
 
@@ -305,6 +305,9 @@
                                         </controls:SettingsCard>
                                         <controls:SettingsCard Header="DB Name:">
                                             <TextBox Visibility="{Binding IsOn, ElementName=useSQL}" Text="{x:Bind ViewModel.SelectedDBName, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" PlaceholderText="database"/>
+                                        </controls:SettingsCard>
+                                        <controls:SettingsCard Header="DB Table Name:">
+                                            <TextBox Visibility="{Binding IsOn, ElementName=useSQL}" Text="{x:Bind ViewModel.SelectedDBTableName, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" PlaceholderText="database"/>
                                         </controls:SettingsCard>
                                     </controls:SettingsExpander.Items>
                                 </controls:SettingsExpander>

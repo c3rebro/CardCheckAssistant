@@ -201,7 +201,7 @@ public partial class Step3PageViewModel : ObservableRecipient
                     settings.DefaultSettings.LastUsedCustomProjectPath,
                     CheckProcessService.CurrentCardCheckProcess.JobNr,
                     CheckProcessService.CurrentCardCheckProcess.ChipNumber,
-                    (settings.DefaultSettings.AutoLoadProjectOnStart ?? false) ? "AUTORUN=1" : "AUTORUN=0"),
+                    (settings.DefaultSettings.AutoRunProjectOnStart ?? false) ? "AUTORUN=1" : "AUTORUN=0"),
 
                 UseShellExecute = false,
                 WorkingDirectory = settings.DefaultSettings.DefaultProjectOutputPath

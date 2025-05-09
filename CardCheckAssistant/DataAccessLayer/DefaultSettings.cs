@@ -37,7 +37,7 @@ public class DefaultSettings : IDisposable
             _defaultLanguage = "english";
             _defaultReportLanguage = "deutsch";
             _autoCheckForUpdates = true;
-            _autoLoadProjectOnStart = false;
+            _autoRunProjectOnStart = false;
             _cardCheckUseSQLLite = true;
             _lastUsedProjectPath = "";
             _lastUsedCustomProjectPath = "";
@@ -190,12 +190,12 @@ public class DefaultSettings : IDisposable
     /// <summary>
     ///
     /// </summary>
-    public bool? AutoLoadProjectOnStart
+    public bool? AutoRunProjectOnStart
     {
-        get => _autoLoadProjectOnStart;
-        set => _autoLoadProjectOnStart = value;
+        get => _autoRunProjectOnStart;
+        set => _autoRunProjectOnStart = value;
     }
-    private bool? _autoLoadProjectOnStart;
+    private bool? _autoRunProjectOnStart;
 
     /// <summary>
     ///

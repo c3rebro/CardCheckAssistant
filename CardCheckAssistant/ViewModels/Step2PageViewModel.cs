@@ -33,7 +33,6 @@ public partial class Step2PageViewModel : ObservableRecipient, INavigationAware
         using var settings = new SettingsReaderWriter();
         
         chipWasRemovedAndPlacedAgain = false;
-
         NavigateNextStepCommand = new AsyncRelayCommand(NavigateNextStepCommand_Executed);
         PostPageLoadedCommand = new AsyncRelayCommand(PostPageLoadedCommand_Executed);
 
@@ -509,7 +508,7 @@ public partial class Step2PageViewModel : ObservableRecipient, INavigationAware
                     projectFileToUse,
                     CheckProcessService.CurrentCardCheckProcess.JobNr,
                     CheckProcessService.CurrentCardCheckProcess.ChipNumber,
-                    (settings.DefaultSettings.AutoLoadProjectOnStart ?? false) ? "AUTORUN=1" : "AUTORUN=0"),
+                    (settings.DefaultSettings.AutoRunProjectOnStart ?? false) ? "AUTORUN=1" : "AUTORUN=0"),
 
                 UseShellExecute = false,
                 WorkingDirectory = settings.DefaultSettings.DefaultProjectOutputPath
