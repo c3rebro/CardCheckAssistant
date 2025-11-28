@@ -20,35 +20,44 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <Button 
+        <StackPanel
         Grid.Row="0"
         Grid.Column="0"
-        Height="36"
+        Orientation="Horizontal"
         Margin="8,-60,20,8"
-        Padding="30,8"
         VerticalAlignment="Top"
         HorizontalAlignment="Right"
-        Opacity="1"
-        Command="{x:Bind ViewModel.NavigateBackCommand}"
-        Content="Zurück und Speichern">
-            <Button.Resources>
-                <ResourceDictionary x:Key="SettingsPageRessources">
-                    <SolidColorBrush x:Key="ButtonBorderBrushDisabled" Opacity="0.6" Color="#BFBFBF" />
-                    <SolidColorBrush x:Key="ButtonBackground" Color="IndianRed" />
-                    <SolidColorBrush x:Key="ButtonBackgroundDisabled" Color="#73726e" />
-                    <SolidColorBrush x:Key="ButtonBackgroundPressed" Color="#f5fa75" />
-                    <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="#c4c736" />
-                    <SolidColorBrush x:Key="ButtonForegroundDisabled" Color="DarkGray" />
-                    <SolidColorBrush x:Key="ButtonForeground" Color="Black" />
-                    <SolidColorBrush x:Key="ButtonForegroundPointerOver" Color="White" />
-                    <SolidColorBrush x:Key="ButtonBackgroundFocused" Color="LightGreen" />
-                </ResourceDictionary>
-                <!--<SolidColorBrush x:Key="ButtonBorderBrush" Color="White" />-->
-                <!--<SolidColorBrush x:Key="ButtonBorderBrushPointerOver" Color="White" />-->
-                <!--<SolidColorBrush x:Key="ButtonBorderBrushFocused" Color="#ECF542" />-->
-                <!--<SolidColorBrush x:Key="ButtonBorderBrushPressed" Color="#ECF542" />-->
-            </Button.Resources>
-        </Button>
+        Spacing="12">
+            <Button
+            Height="36"
+            Padding="30,8"
+            Command="{x:Bind ViewModel.CancelCommand}"
+            Content="Abbrechen" />
+            <Button
+            Height="36"
+            Padding="30,8"
+            Opacity="1"
+            Command="{x:Bind ViewModel.NavigateBackCommand}"
+            Content="Zurück und Speichern">
+                <Button.Resources>
+                    <ResourceDictionary x:Key="SettingsPageRessources">
+                        <SolidColorBrush x:Key="ButtonBorderBrushDisabled" Opacity="0.6" Color="#BFBFBF" />
+                        <SolidColorBrush x:Key="ButtonBackground" Color="IndianRed" />
+                        <SolidColorBrush x:Key="ButtonBackgroundDisabled" Color="#73726e" />
+                        <SolidColorBrush x:Key="ButtonBackgroundPressed" Color="#f5fa75" />
+                        <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="#c4c736" />
+                        <SolidColorBrush x:Key="ButtonForegroundDisabled" Color="DarkGray" />
+                        <SolidColorBrush x:Key="ButtonForeground" Color="Black" />
+                        <SolidColorBrush x:Key="ButtonForegroundPointerOver" Color="White" />
+                        <SolidColorBrush x:Key="ButtonBackgroundFocused" Color="LightGreen" />
+                    </ResourceDictionary>
+                    <!--<SolidColorBrush x:Key="ButtonBorderBrush" Color="White" />-->
+                    <!--<SolidColorBrush x:Key="ButtonBorderBrushPointerOver" Color="White" />-->
+                    <!--<SolidColorBrush x:Key="ButtonBorderBrushFocused" Color="#ECF542" />-->
+                    <!--<SolidColorBrush x:Key="ButtonBorderBrushPressed" Color="#ECF542" />-->
+                </Button.Resources>
+            </Button>
+        </StackPanel>
 
         <ScrollViewer
         Margin="0,0,0,20">
