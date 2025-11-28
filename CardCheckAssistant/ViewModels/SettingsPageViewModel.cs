@@ -314,6 +314,10 @@ public partial class SettingsPageViewModel : ObservableRecipient, INavigationAwa
 
     public IAsyncRelayCommand CancelCommand => new AsyncRelayCommand(CancelCommand_Executed);
 
+    public IAsyncRelayCommand ExportSettingsCommand => new AsyncRelayCommand(ExportSettings_Executed);
+
+    public IAsyncRelayCommand ImportSettingsCommand => new AsyncRelayCommand(ImportSettings_Executed);
+
     public ICommand SelectRFIDGearExeCommand => new AsyncRelayCommand(SelectRFIDGearExe_Executed);
 
     public ICommand SelectProjectFolderCommand => new AsyncRelayCommand(SelectProjectFolder_Executed);
@@ -599,6 +603,83 @@ public partial class SettingsPageViewModel : ObservableRecipient, INavigationAwa
         if (TWN4ReaderDevice.Instance?.Count > 0 && TWN4ReaderDevice.Instance[0] != null)
         {
             await TWN4ReaderDevice.Instance[0].DisconnectAsync();
+        }
+    }
+
+    private async Task ExportSettings_Executed()
+    {
+        try
+        {
+            var window = App.MainWindow as MainWindow;
+
+            var savePicker = new FileSavePicker();
+            var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(window);
+            WinRT.Interop.InitializeWithWindow.Initialize(savePicker, hwnd);
+
+            savePicker.FileTypeChoices.Add("Einstellungsdatei", new List<string> { ".xml" });
+            savePicker.SuggestedFileName = "settings";
+
+            var file = await savePicker.PickSaveFileAsync();
+            if (file != null)
+            {
+                using var settings = new SettingsReaderWriter();
+                using var enc = new RijndaelEnc();
+
+                ApplyCurrentStateToSettings(settings.DefaultSettings, enc);
+
+                var saveSucceeded = settings.SaveSettings(file.Path);
+                if (!saveSucceeded)
+                {
+                    await App.MainRoot.MessageDialogAsync("Fehler", "Die Einstellungen konnten nicht exportiert werden.");
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            await App.MainRoot.MessageDialogAsync(
+                "Fehler",
+                string.Format("Bitte melde den folgenden Fehler an mich:\n{0}", ex.Message));
+
+            eventLog.WriteEntry(ex.Message, EventLogEntryType.Error);
+        }
+    }
+
+    private async Task ImportSettings_Executed()
+    {
+        try
+        {
+            var window = App.MainWindow as MainWindow;
+
+            var filePicker = new FileOpenPicker();
+            var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(window);
+            WinRT.Interop.InitializeWithWindow.Initialize(filePicker, hwnd);
+
+            filePicker.FileTypeFilter.Add(".xml");
+
+            var file = await filePicker.PickSingleFileAsync();
+            if (file != null)
+            {
+                using var settings = new SettingsReaderWriter();
+                using var enc = new RijndaelEnc();
+
+                var readFailed = settings.ReadSettings(file.Path);
+                if (!readFailed)
+                {
+                    ApplySettingsToView(settings.DefaultSettings, enc);
+                }
+                else
+                {
+                    await App.MainRoot.MessageDialogAsync("Fehler", "Die ausgewählte Einstellungsdatei konnte nicht geladen werden.");
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            await App.MainRoot.MessageDialogAsync(
+                "Fehler",
+                string.Format("Bitte melde den folgenden Fehler an mich:\n{0}", ex.Message));
+
+            eventLog.WriteEntry(ex.Message, EventLogEntryType.Error);
         }
     }
 

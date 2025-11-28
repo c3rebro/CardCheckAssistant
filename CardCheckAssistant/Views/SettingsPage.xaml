@@ -285,6 +285,23 @@
                     </controls:SettingsExpander.Items>
                 </controls:SettingsExpander>
 
+                <controls:SettingsExpander
+                    IsExpanded="False"
+                    Description="Einstellungen sichern oder auf einen anderen Rechner übertragen"
+                    Header="Einstellungen exportieren / importieren">
+                    <controls:SettingsExpander.HeaderIcon>
+                        <FontIcon Glyph="&#xE1A5;"/>
+                    </controls:SettingsExpander.HeaderIcon>
+                    <controls:SettingsExpander.Items>
+                        <controls:SettingsCard>
+                            <StackPanel Orientation="Horizontal" Spacing="10">
+                                <Button Content="Einstellungen exportieren" Command="{x:Bind ViewModel.ExportSettingsCommand}"/>
+                                <Button Content="Einstellungen importieren" Command="{x:Bind ViewModel.ImportSettingsCommand}"/>
+                            </StackPanel>
+                        </controls:SettingsCard>
+                    </controls:SettingsExpander.Items>
+                </controls:SettingsExpander>
+
                 <TextBlock Margin="8,8,0,8" Text="Datenbank Optionen" Style="{ThemeResource SubtitleTextBlockStyle }" />
                 <controls:SettingsExpander HorizontalContentAlignment="Stretch"
                     IsExpanded="False"
