@@ -285,23 +285,6 @@
                     </controls:SettingsExpander.Items>
                 </controls:SettingsExpander>
 
-                <controls:SettingsExpander
-                    IsExpanded="False"
-                    Description="Einstellungen sichern oder auf einen anderen Rechner übertragen"
-                    Header="Einstellungen exportieren / importieren">
-                    <controls:SettingsExpander.HeaderIcon>
-                        <FontIcon Glyph="&#xE1A5;"/>
-                    </controls:SettingsExpander.HeaderIcon>
-                    <controls:SettingsExpander.Items>
-                        <controls:SettingsCard>
-                            <StackPanel Orientation="Horizontal" Spacing="10">
-                                <Button Content="Einstellungen exportieren" Command="{x:Bind ViewModel.ExportSettingsCommand}"/>
-                                <Button Content="Einstellungen importieren" Command="{x:Bind ViewModel.ImportSettingsCommand}"/>
-                            </StackPanel>
-                        </controls:SettingsCard>
-                    </controls:SettingsExpander.Items>
-                </controls:SettingsExpander>
-
                 <TextBlock Margin="8,8,0,8" Text="Datenbank Optionen" Style="{ThemeResource SubtitleTextBlockStyle }" />
                 <controls:SettingsExpander HorizontalContentAlignment="Stretch"
                     IsExpanded="False"
@@ -313,9 +296,10 @@
                     <controls:SettingsExpander.Items>
                         <controls:SettingsCard
                             HorizontalContentAlignment="Stretch"
-                            ContentAlignment="Left">
-                            <StackPanel Orientation="Vertical" HorizontalAlignment="Stretch">
+                            ContentAlignment="Vertical">
+                            <controls:DockPanel HorizontalAlignment="Stretch">
                                 <controls:SettingsExpander 
+                                    controls:DockPanel.Dock="Top"
                                     HorizontalContentAlignment="Stretch" 
                                     Header="MS-SQL verwenden?" 
                                     IsExpanded="{Binding IsOn, ElementName=useSQL}">
@@ -337,8 +321,9 @@
                                         </controls:SettingsCard>
                                     </controls:SettingsExpander.Items>
                                 </controls:SettingsExpander>
-                                
+
                                 <controls:SettingsExpander
+                                    controls:DockPanel.Dock="Top"
                                     HorizontalContentAlignment="Stretch" 
                                     Header="Verwende Benutzername/Passwort statt Windows-Login"
                                     IsExpanded="{Binding IsOn, ElementName=useWinLoginToggleSwitch}">
@@ -355,24 +340,33 @@
                                         <controls:SettingsCard Header="DB Name:">
                                             <TextBox Visibility="{Binding IsOn, ElementName=useWinLoginToggleSwitch}" Text="{x:Bind ViewModel.SelectedDBName, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" PlaceholderText="database"/>
                                         </controls:SettingsCard>
+                                        <Button Margin="8,8" Content="Verbindung Testen" Command="{x:Bind ViewModel.DBConnectionTest}"/>
                                     </controls:SettingsExpander.Items>
                                 </controls:SettingsExpander>
-                                
-                                <Button Margin="8,8" Content="Verbindung Testen" Command="{x:Bind ViewModel.DBConnectionTest}"/>
-                                
-                                <StackPanel.Resources>
-                                    <Style TargetType="Grid">
-                                        <Setter Property="RowSpacing" Value="20" />
-                                        <Setter Property="ColumnSpacing" Value="10" />
-                                        <Setter Property="Padding" Value="10" />
-                                    </Style>
-                                </StackPanel.Resources>
-                            </StackPanel>
+                            </controls:DockPanel>
                         </controls:SettingsCard>
                         
                     </controls:SettingsExpander.Items>
                 </controls:SettingsExpander>
 
+                <TextBlock Margin="8,8,0,8" Text="Wartung" Style="{ThemeResource SubtitleTextBlockStyle }" />
+                <controls:SettingsExpander
+                    IsExpanded="False"
+                    Description="Einstellungen sichern oder auf einen anderen Rechner übertragen"
+                    Header="Einstellungen exportieren / importieren">
+                    <controls:SettingsExpander.HeaderIcon>
+                        <FontIcon Glyph="&#xE1A5;"/>
+                    </controls:SettingsExpander.HeaderIcon>
+                    <controls:SettingsExpander.Items>
+                        <controls:SettingsCard>
+                            <StackPanel Orientation="Horizontal" Spacing="10">
+                                <Button Content="Einstellungen exportieren" Command="{x:Bind ViewModel.ExportSettingsCommand}"/>
+                                <Button Content="Einstellungen importieren" Command="{x:Bind ViewModel.ImportSettingsCommand}"/>
+                            </StackPanel>
+                        </controls:SettingsCard>
+                    </controls:SettingsExpander.Items>
+                </controls:SettingsExpander>
+                
                 <TextBlock Margin="8,8,0,8" x:Uid="Settings_Personalization" Style="{ThemeResource SubtitleTextBlockStyle}" />
                 <controls:SettingsExpander 
                     IsExpanded="False"
