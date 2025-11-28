@@ -5,7 +5,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:viewmodels="using:CardCheckAssistant.ViewModels"
-    xmlns:ctWinUIConv="using:CommunityToolkit.WinUI.UI.Converters"
+    xmlns:ctWinUIConv="using:CommunityToolkit.WinUI.Converters"
     Loaded="Page_Loaded"
     mc:Ignorable="d">
     

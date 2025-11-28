@@ -7,7 +7,7 @@
     xmlns:svc="using:CardCheckAssistant.Services"
     xmlns:viewmodels="using:CardCheckAssistant.ViewModels"
     xmlns:ctWinUI="using:CommunityToolkit.WinUI.UI.Controls"
-    xmlns:ctWinUIConv="using:CommunityToolkit.WinUI.UI.Converters"
+    xmlns:ctWinUIConv="using:CommunityToolkit.WinUI.Converters"
     mc:Ignorable="d"
     Loaded="Page_Loaded">
 
