@@ -20,35 +20,44 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <Button 
+        <StackPanel
         Grid.Row="0"
         Grid.Column="0"
-        Height="36"
+        Orientation="Horizontal"
         Margin="8,-60,20,8"
-        Padding="30,8"
         VerticalAlignment="Top"
         HorizontalAlignment="Right"
-        Opacity="1"
-        Command="{x:Bind ViewModel.NavigateBackCommand}"
-        Content="Zurück und Speichern">
-            <Button.Resources>
-                <ResourceDictionary x:Key="SettingsPageRessources">
-                    <SolidColorBrush x:Key="ButtonBorderBrushDisabled" Opacity="0.6" Color="#BFBFBF" />
-                    <SolidColorBrush x:Key="ButtonBackground" Color="IndianRed" />
-                    <SolidColorBrush x:Key="ButtonBackgroundDisabled" Color="#73726e" />
-                    <SolidColorBrush x:Key="ButtonBackgroundPressed" Color="#f5fa75" />
-                    <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="#c4c736" />
-                    <SolidColorBrush x:Key="ButtonForegroundDisabled" Color="DarkGray" />
-                    <SolidColorBrush x:Key="ButtonForeground" Color="Black" />
-                    <SolidColorBrush x:Key="ButtonForegroundPointerOver" Color="White" />
-                    <SolidColorBrush x:Key="ButtonBackgroundFocused" Color="LightGreen" />
-                </ResourceDictionary>
-                <!--<SolidColorBrush x:Key="ButtonBorderBrush" Color="White" />-->
-                <!--<SolidColorBrush x:Key="ButtonBorderBrushPointerOver" Color="White" />-->
-                <!--<SolidColorBrush x:Key="ButtonBorderBrushFocused" Color="#ECF542" />-->
-                <!--<SolidColorBrush x:Key="ButtonBorderBrushPressed" Color="#ECF542" />-->
-            </Button.Resources>
-        </Button>
+        Spacing="12">
+            <Button
+            Height="36"
+            Padding="30,8"
+            Command="{x:Bind ViewModel.CancelCommand}"
+            Content="Abbrechen" />
+            <Button
+            Height="36"
+            Padding="30,8"
+            Opacity="1"
+            Command="{x:Bind ViewModel.NavigateBackCommand}"
+            Content="Zurück und Speichern">
+                <Button.Resources>
+                    <ResourceDictionary x:Key="SettingsPageRessources">
+                        <SolidColorBrush x:Key="ButtonBorderBrushDisabled" Opacity="0.6" Color="#BFBFBF" />
+                        <SolidColorBrush x:Key="ButtonBackground" Color="IndianRed" />
+                        <SolidColorBrush x:Key="ButtonBackgroundDisabled" Color="#73726e" />
+                        <SolidColorBrush x:Key="ButtonBackgroundPressed" Color="#f5fa75" />
+                        <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="#c4c736" />
+                        <SolidColorBrush x:Key="ButtonForegroundDisabled" Color="DarkGray" />
+                        <SolidColorBrush x:Key="ButtonForeground" Color="Black" />
+                        <SolidColorBrush x:Key="ButtonForegroundPointerOver" Color="White" />
+                        <SolidColorBrush x:Key="ButtonBackgroundFocused" Color="LightGreen" />
+                    </ResourceDictionary>
+                    <!--<SolidColorBrush x:Key="ButtonBorderBrush" Color="White" />-->
+                    <!--<SolidColorBrush x:Key="ButtonBorderBrushPointerOver" Color="White" />-->
+                    <!--<SolidColorBrush x:Key="ButtonBorderBrushFocused" Color="#ECF542" />-->
+                    <!--<SolidColorBrush x:Key="ButtonBorderBrushPressed" Color="#ECF542" />-->
+                </Button.Resources>
+            </Button>
+        </StackPanel>
 
         <ScrollViewer
         Margin="0,0,0,20">
@@ -271,6 +280,23 @@
                                         <Button Grid.Row="0" Grid.Column="1" Content="Aktuellen Eintrag löschen" Command="{x:Bind ViewModel.DeleteTextTemplate}"/>
                                     </Grid>
                                 </Grid>
+                            </StackPanel>
+                        </controls:SettingsCard>
+                    </controls:SettingsExpander.Items>
+                </controls:SettingsExpander>
+
+                <controls:SettingsExpander
+                    IsExpanded="False"
+                    Description="Einstellungen sichern oder auf einen anderen Rechner übertragen"
+                    Header="Einstellungen exportieren / importieren">
+                    <controls:SettingsExpander.HeaderIcon>
+                        <FontIcon Glyph="&#xE1A5;"/>
+                    </controls:SettingsExpander.HeaderIcon>
+                    <controls:SettingsExpander.Items>
+                        <controls:SettingsCard>
+                            <StackPanel Orientation="Horizontal" Spacing="10">
+                                <Button Content="Einstellungen exportieren" Command="{x:Bind ViewModel.ExportSettingsCommand}"/>
+                                <Button Content="Einstellungen importieren" Command="{x:Bind ViewModel.ImportSettingsCommand}"/>
                             </StackPanel>
                         </controls:SettingsCard>
                     </controls:SettingsExpander.Items>

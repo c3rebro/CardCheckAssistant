@@ -34,6 +34,8 @@ public partial class HomePageViewModel : ObservableRecipient, INavigationAware
     private readonly bool isCreateEventLogSourceErr;
 
     private ObservableCollection<CardCheckProcess> cardCheckProcessesFromCache;
+    private bool noJobsDialogShown;
+    private bool dbConnectionDialogShown;
 #if DEBUG
     private const string DBNAME = "OT_CardCheck_Test";
 #else
@@ -534,7 +536,11 @@ public partial class HomePageViewModel : ObservableRecipient, INavigationAware
             try
             {
                 // Connect to DB Async
-                cardCheckProcessesFromCache = SortData(await ReadCardChecks() ?? new ObservableCollection<CardCheckProcess>(), SelectedSort, SetSortAscending);
+                var cardCheckProcessesFromDB = await ReadCardChecks();
+
+                cardCheckProcessesFromCache = cardCheckProcessesFromDB != null
+                    ? SortData(cardCheckProcessesFromDB, SelectedSort, SetSortAscending)
+                    : null;
 
                 if (cardCheckProcessesFromCache != null)
                 {
@@ -542,7 +548,7 @@ public partial class HomePageViewModel : ObservableRecipient, INavigationAware
                 }
                 else
                 {
-                    return;
+                    DataGridItemCollection = null;
                 }
 
                 ModalView.Dialogs.Where(x => x.Name == "connectWaitMsgDlg").Single().Hide();
@@ -559,6 +565,10 @@ public partial class HomePageViewModel : ObservableRecipient, INavigationAware
                 await DBConnectFailed_Executed();
                 WelcomeScreenText = "Verbindungsfehler";
                 NumberOfChecksText = "Einstellungen überprüfen";
+
+                HomePageIsBusy = false;
+
+                return;
             }
             else if (DataGridItemCollection.Count == 0)
             {
@@ -568,6 +578,9 @@ public partial class HomePageViewModel : ObservableRecipient, INavigationAware
             }
             else
             {
+                noJobsDialogShown = false;
+                dbConnectionDialogShown = false;
+
                 WelcomeScreenText = "Aufträge gefunden";
                 NumberOfChecksText = string.Format("Zahl der neuen Aufträge: {0}", DataGridItemCollection.Where(x => x.Status == "InProgress").Count());
             }
@@ -586,15 +599,30 @@ public partial class HomePageViewModel : ObservableRecipient, INavigationAware
     /// 
     /// </summary>
     /// <returns></returns>
-    private static async Task NoJobFoundInDB_Executed()
+    private async Task NoJobFoundInDB_Executed()
     {
-        await App.MainRoot.MessageDialogAsync(
-        "Keine Aufträge",
-        "Die Verbindung mit der Datenbank war erfolgreich. Es befinden sich jedoch keine Aufträge darin. Wenn ein neuer Umschlag mit Karten eingetroffen ist, öffne bitte zuerst den Omnitracker und folge dort den Anweisungen.\n" +
-        "\n" +
-        "Kehre dann hierher zurück. Der CardCheckAssistant kann geöffnet bleiben und wird automatisch aktualisiert. Falls nicht: Sebastian Hotze hauen.\n" +
-        "\n" +
-        "Happy CardChecking ;-)");
+        if (noJobsDialogShown)
+        {
+            return;
+        }
+
+        noJobsDialogShown = true;
+
+        var retryRequested = await App.MainRoot.ConfirmationDialogAsync(
+            "Keine Aufträge",
+            "Die Verbindung mit der Datenbank war erfolgreich. Es befinden sich jedoch keine Aufträge darin. Wenn ein neuer Umschlag mit Karten eingetroffen ist, öffne bitte zuerst den Omnitracker und folge dort den Anweisungen.\n" +
+            "\n" +
+            "Kehre dann hierher zurück. Der CardCheckAssistant kann geöffnet bleiben und wird automatisch aktualisiert. Falls nicht: Sebastian Hotze hauen.\n" +
+            "\n" +
+            "Happy CardChecking ;-)",
+            "Aktualisieren",
+            "Schließen",
+            string.Empty);
+
+        if (retryRequested ?? false)
+        {
+            await PostPageLoadedCommand_Executed();
+        }
     }
 
     /// <summary>
@@ -614,12 +642,33 @@ public partial class HomePageViewModel : ObservableRecipient, INavigationAware
     /// <returns></returns>
     private async Task DBConnectFailed_Executed()
     {
-        await App.MainRoot.MessageDialogAsync(
-        "Fehler in der Verbindung",
-        "Es konnte keine Verbindung mit der Datenabnk hergestellt werden.\n" +
-        "Bitte die Einstellungen überprüfen.");
+        if (dbConnectionDialogShown)
+        {
+            return;
+        }
+
+        dbConnectionDialogShown = true;
 
         scanDBTimer.Stop();
+
+        var retryRequested = await App.MainRoot.ConfirmationDialogAsync(
+            "Fehler in der Verbindung",
+            "Es konnte keine Verbindung mit der Datenabnk hergestellt werden.\n" +
+            "Bitte die Einstellungen überprüfen.",
+            "Erneut versuchen",
+            "Einstellungen öffnen",
+            "Schließen");
+
+        dbConnectionDialogShown = false;
+
+        if (retryRequested == true)
+        {
+            await PostPageLoadedCommand_Executed();
+        }
+        else if (retryRequested == false)
+        {
+            (App.MainRoot.XamlRoot.Content as ShellPage)?.ViewModel.NavigationService.NavigateTo(typeof(SettingsPageViewModel).FullName ?? string.Empty);
+        }
     }
     #endregion
 
@@ -683,7 +732,16 @@ public partial class HomePageViewModel : ObservableRecipient, INavigationAware
     {
         try
         {
-            var cardCheckProcessesFromDB = await ReadCardChecks() ?? new ObservableCollection<CardCheckProcess>();
+            var cardCheckProcessesFromDB = await ReadCardChecks();
+
+            if (cardCheckProcessesFromDB == null)
+            {
+                await DBConnectFailed_Executed();
+                WelcomeScreenText = "Verbindungsfehler";
+                NumberOfChecksText = "Einstellungen überprüfen";
+
+                return;
+            }
 
             var selectedID = SelectedCardCheckProcess?.ID;
 
@@ -724,22 +782,23 @@ public partial class HomePageViewModel : ObservableRecipient, INavigationAware
                 SelectedCardCheckProcess = null;
             }
 
+            cardCheckProcessesFromCache ??= new ObservableCollection<CardCheckProcess>(cardCheckProcessesFromDB);
+
             if (cardCheckProcessesFromCache != null)
             {
-                if (cardCheckProcessesFromDB == null)
-                {
-                    await DBConnectFailed_Executed();
-                    WelcomeScreenText = "Verbindungsfehler";
-                    NumberOfChecksText = "Einstellungen überprüfen";
-                }
-                else if (cardCheckProcessesFromDB.Count == 0)
+                if (cardCheckProcessesFromDB.Count == 0)
                 {
                     await NoJobFoundInDB_Executed();
                     WelcomeScreenText = "keine Aufträge";
                     NumberOfChecksText = "";
+
+                    return;
                 }
                 else
                 {
+                    noJobsDialogShown = false;
+                    dbConnectionDialogShown = false;
+
                     WelcomeScreenText = "Aufträge gefunden";
                     NumberOfChecksText = string.Format("Zahl der neuen Aufträge: {0}", cardCheckProcessesFromDB.Where(x => x.Status == "InProgress").Count());
                 }
