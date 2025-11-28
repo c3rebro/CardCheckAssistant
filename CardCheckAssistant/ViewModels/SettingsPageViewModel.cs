@@ -1,12 +1,15 @@
-﻿using System.Collections.ObjectModel;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Security.Cryptography;
 using System.Reflection;
 using System.Windows.Input;
+using System.Linq;
 
 using CardCheckAssistant.Contracts.Services;
 using CardCheckAssistant.Services;
 using CardCheckAssistant.Helpers;
 using CardCheckAssistant.Models;
+using CardCheckAssistant.DataAccessLayer;
 
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -29,6 +32,8 @@ namespace CardCheckAssistant.ViewModels;
 public partial class SettingsPageViewModel : ObservableRecipient, INavigationAware
 {
     private readonly IThemeSelectorService _themeSelectorService;
+    private ElementTheme _originalElementTheme;
+    private DefaultSettings? _originalSettings;
     private readonly EventLog eventLog = new("Application", ".", Assembly.GetEntryAssembly().GetName().Name);
 
     [ObservableProperty]
@@ -46,16 +51,11 @@ public partial class SettingsPageViewModel : ObservableRecipient, INavigationAwa
     {
         try
         {
-            
-
-            using var settings = new SettingsReaderWriter();
-            using var enc = new RijndaelEnc();
-
             _themeSelectorService = themeSelectorService;
+            _originalElementTheme = _themeSelectorService.Theme;
             _elementTheme = _themeSelectorService.Theme;
             _versionDescription = GetVersionDescription();
 
-            
             SwitchThemeCommand = new RelayCommand<ElementTheme>(
                 async (param) =>
                 {
@@ -65,41 +65,8 @@ public partial class SettingsPageViewModel : ObservableRecipient, INavigationAwa
                         await _themeSelectorService.SetThemeAsync(param);
                     }
                 });
-            
-            IsTextBoxCardCheckTextTemplateEnabled = false;
-            SelectedProjectFolder = settings.DefaultSettings.DefaultProjectOutputPath ?? string.Empty;
-            SelectedCustomProjectFolder = settings.DefaultSettings.LastUsedCustomProjectPath ?? string.Empty;
-            SelectedDefaultProject = settings.DefaultSettings.LastUsedDefaultProject ?? string.Empty; 
-            SelectedRFIDGearPath = settings.DefaultSettings.DefaultRFIDGearExePath ?? string.Empty;
-            RFiDGearIsAutoRunEnabled = settings.DefaultSettings.AutoRunProjectOnStart == true ? true : false;
-            SelectedDBName = settings.DefaultSettings.SelectedDBName ?? string.Empty;
-            SelectedDBTableName = settings.DefaultSettings.SelectedDBTableName ?? string.Empty;
-            SelectedDBServerName = settings.DefaultSettings.SelectedDBServerName ?? string.Empty;
-            SelectedDBServerPort = settings.DefaultSettings.SelectedDBServerPort ?? string.Empty;
-            SelectedDBUsername = settings.DefaultSettings.SelectedDBUsername ?? string.Empty;
-            CardCheckUseSQLLite = settings.DefaultSettings.CardCheckUseMSSQL == true ? true : false;
-            CreateSubdirectoryIsEnabled = settings.DefaultSettings.CreateSubdirectoryIsEnabled == true ? true : false;
-            RemoveTemporaryReportsIsEnabled = settings.DefaultSettings.RemoveTemporaryReportsIsEnabled == true ? true : false;
-            ReaderVolume = settings.DefaultSettings.ReaderVolume ?? 0;
 
-            SelectedDBUserPwd = enc.Decrypt(settings?.DefaultSettings?.SelectedDBUserPwd ?? "NoPWD");
-
-            if (settings?.DefaultSettings.CardCheckTextTemplates != null && settings.DefaultSettings.CardCheckTextTemplates.Any())
-            {
-                TextTemplates = new ObservableCollection<CardCheckTextTemplate>(settings.DefaultSettings.CardCheckTextTemplates);
-                SelectedTextTemplate = TextTemplates?.FirstOrDefault();
-
-                IsTextBoxCardCheckTextTemplateEnabled = true;
-            }
-            else
-            {
-                TextTemplates = new ObservableCollection<CardCheckTextTemplate>
-                {
-                    new ("N/A")
-                };
-
-                SelectedTextTemplate = TextTemplates?.FirstOrDefault();
-            }
+            LoadFromStoredSettings();
         }
         catch (Exception ex)
         {
@@ -117,9 +84,6 @@ public partial class SettingsPageViewModel : ObservableRecipient, INavigationAwa
         get => _cardCheckUseSQLLite ?? false;
         set
         {
-            using var settings = new SettingsReaderWriter();
-            settings.DefaultSettings.CardCheckUseMSSQL = value;
-            settings.SaveSettings();
             SetProperty(ref _cardCheckUseSQLLite, value);
         }
     }
@@ -133,9 +97,6 @@ public partial class SettingsPageViewModel : ObservableRecipient, INavigationAwa
         get => _selectedDBServerName ?? string.Empty;
         set
         {
-            using var settings = new SettingsReaderWriter();
-            settings.DefaultSettings.SelectedDBServerName = value;
-            settings.SaveSettings();
             SetProperty(ref _selectedDBServerName, value);
         }
     }
@@ -149,9 +110,6 @@ public partial class SettingsPageViewModel : ObservableRecipient, INavigationAwa
         get => _selectedDBServerPort ?? string.Empty;
         set
         {
-            using var settings = new SettingsReaderWriter();
-            settings.DefaultSettings.SelectedDBServerPort = value;
-            settings.SaveSettings();
             SetProperty(ref _selectedDBServerPort, value);
         }
     }
@@ -165,9 +123,6 @@ public partial class SettingsPageViewModel : ObservableRecipient, INavigationAwa
         get => _selectedDBTableName ?? string.Empty;
         set
         {
-            using var settings = new SettingsReaderWriter();
-            settings.DefaultSettings.SelectedDBTableName = value;
-            settings.SaveSettings();
             SetProperty(ref _selectedDBTableName, value);
         }
     }
@@ -181,9 +136,6 @@ public partial class SettingsPageViewModel : ObservableRecipient, INavigationAwa
         get => _selectedDBName ?? string.Empty;
         set
         {
-            using var settings = new SettingsReaderWriter();
-            settings.DefaultSettings.SelectedDBName = value;
-            settings.SaveSettings();
             SetProperty(ref _selectedDBName, value);
         }
     }
@@ -197,9 +149,6 @@ public partial class SettingsPageViewModel : ObservableRecipient, INavigationAwa
         get => _selectedDBUsername ?? string.Empty;
         set
         {
-            using var settings = new SettingsReaderWriter();
-            settings.DefaultSettings.SelectedDBUsername = value;
-            settings.SaveSettings();
             SetProperty(ref _selectedDBUsername, value);
         }
     }
@@ -213,10 +162,6 @@ public partial class SettingsPageViewModel : ObservableRecipient, INavigationAwa
         get => _selectedDBUserPwd ?? string.Empty;
         set
         {
-            using var settings = new SettingsReaderWriter();
-            using var enc = new RijndaelEnc();
-            settings.DefaultSettings.SelectedDBUserPwd = enc.Encrypt(value);
-            settings.SaveSettings();
             SetProperty(ref _selectedDBUserPwd, value);
         }
     }
@@ -230,9 +175,6 @@ public partial class SettingsPageViewModel : ObservableRecipient, INavigationAwa
         get => _selectedCustomProjectFolder ?? string.Empty;
         set
         {
-            using var settings = new SettingsReaderWriter();
-            settings.DefaultSettings.LastUsedCustomProjectPath = value?.ToString();
-            settings.SaveSettings();
             SetProperty(ref _selectedCustomProjectFolder, value);
         }
     }
@@ -246,9 +188,6 @@ public partial class SettingsPageViewModel : ObservableRecipient, INavigationAwa
         get => _selectedDefaultProject ?? string.Empty;
         set
         {
-            using var settings = new SettingsReaderWriter();
-            settings.DefaultSettings.LastUsedDefaultProject = value?.ToString();
-            settings.SaveSettings();
             SetProperty(ref _selectedDefaultProject, value);
         }
     }
@@ -262,9 +201,6 @@ public partial class SettingsPageViewModel : ObservableRecipient, INavigationAwa
         get => _selectedProjectFolder ?? string.Empty;
         set
         {
-            using var settings = new SettingsReaderWriter();
-            settings.DefaultSettings.DefaultProjectOutputPath = value.ToString();
-            settings.SaveSettings();
             SetProperty(ref _selectedProjectFolder, value);
         }
     }
@@ -278,9 +214,6 @@ public partial class SettingsPageViewModel : ObservableRecipient, INavigationAwa
         get => _selectedRFIDGearPath ?? string.Empty;
         set
         {
-            using var settings = new SettingsReaderWriter();
-            settings.DefaultSettings.DefaultRFIDGearExePath = value ?? "";
-            settings.SaveSettings();
             SetProperty(ref _selectedRFIDGearPath, value);
         }
     }
@@ -295,10 +228,6 @@ public partial class SettingsPageViewModel : ObservableRecipient, INavigationAwa
         set
         {
             SetProperty(ref _removeTemporaryReportsIsEnabled, value);
-            using var settings = new SettingsReaderWriter();
-
-            settings.DefaultSettings.RemoveTemporaryReportsIsEnabled = value;
-            settings.SaveSettings();
         }
     }
     private bool? _removeTemporaryReportsIsEnabled;
@@ -312,10 +241,6 @@ public partial class SettingsPageViewModel : ObservableRecipient, INavigationAwa
         set
         {
             SetProperty(ref _createSubdirectoryIsEnabled, value);
-            using var settings = new SettingsReaderWriter();
-
-            settings.DefaultSettings.CreateSubdirectoryIsEnabled = value;
-            settings.SaveSettings();
         }
     }
     private bool _createSubdirectoryIsEnabled;
@@ -335,10 +260,6 @@ public partial class SettingsPageViewModel : ObservableRecipient, INavigationAwa
         set
         {
             SetProperty(ref _rFiDGearIsAutoRunEnabled, value);
-            using var settings = new SettingsReaderWriter();
-
-            settings.DefaultSettings.AutoRunProjectOnStart = value;
-            settings.SaveSettings();
         }
     }
     private bool? _rFiDGearIsAutoRunEnabled;
@@ -376,10 +297,6 @@ public partial class SettingsPageViewModel : ObservableRecipient, INavigationAwa
         set
         {
             SetProperty(ref _readerVolume, value);
-            using var settings = new SettingsReaderWriter();
-
-            settings.DefaultSettings.ReaderVolume = value;
-            settings.SaveSettings();
         }
     }
     private int _readerVolume;
@@ -395,6 +312,8 @@ public partial class SettingsPageViewModel : ObservableRecipient, INavigationAwa
 
     public IAsyncRelayCommand NavigateBackCommand => new AsyncRelayCommand(NavigateBackCommand_Executed);
 
+    public IAsyncRelayCommand CancelCommand => new AsyncRelayCommand(CancelCommand_Executed);
+
     public ICommand SelectRFIDGearExeCommand => new AsyncRelayCommand(SelectRFIDGearExe_Executed);
 
     public ICommand SelectProjectFolderCommand => new AsyncRelayCommand(SelectProjectFolder_Executed);
@@ -405,6 +324,105 @@ public partial class SettingsPageViewModel : ObservableRecipient, INavigationAwa
 
     public ICommand ReaderConnectionTestCommand => new AsyncRelayCommand(ReaderConnectionTestCommand_Executed);
     #endregion
+
+    private void LoadFromStoredSettings()
+    {
+        using var settings = new SettingsReaderWriter();
+        using var enc = new RijndaelEnc();
+
+        _originalSettings = CloneSettings(settings.DefaultSettings);
+
+        ApplySettingsToView(settings.DefaultSettings, enc);
+    }
+
+    private void ApplySettingsToView(DefaultSettings settings, RijndaelEnc enc)
+    {
+        IsTextBoxCardCheckTextTemplateEnabled = false;
+        SelectedProjectFolder = settings.DefaultProjectOutputPath ?? string.Empty;
+        SelectedCustomProjectFolder = settings.LastUsedCustomProjectPath ?? string.Empty;
+        SelectedDefaultProject = settings.LastUsedDefaultProject ?? string.Empty;
+        SelectedRFIDGearPath = settings.DefaultRFIDGearExePath ?? string.Empty;
+        RFiDGearIsAutoRunEnabled = settings.AutoRunProjectOnStart == true;
+        SelectedDBName = settings.SelectedDBName ?? string.Empty;
+        SelectedDBTableName = settings.SelectedDBTableName ?? string.Empty;
+        SelectedDBServerName = settings.SelectedDBServerName ?? string.Empty;
+        SelectedDBServerPort = settings.SelectedDBServerPort ?? string.Empty;
+        SelectedDBUsername = settings.SelectedDBUsername ?? string.Empty;
+        CardCheckUseSQLLite = settings.CardCheckUseMSSQL == true;
+        CreateSubdirectoryIsEnabled = settings.CreateSubdirectoryIsEnabled == true;
+        RemoveTemporaryReportsIsEnabled = settings.RemoveTemporaryReportsIsEnabled == true;
+        ReaderVolume = settings.ReaderVolume ?? 0;
+
+        SelectedDBUserPwd = string.IsNullOrWhiteSpace(settings?.SelectedDBUserPwd)
+            ? string.Empty
+            : enc.Decrypt(settings!.SelectedDBUserPwd!);
+
+        TextTemplates = CloneTemplates(settings.CardCheckTextTemplates);
+        SelectedTextTemplate = TextTemplates.FirstOrDefault();
+        IsTextBoxCardCheckTextTemplateEnabled = TextTemplates.Any() && !(TextTemplates.Count == 1 && TextTemplates.First().TemplateTextName == "N/A");
+    }
+
+    private void ApplyCurrentStateToSettings(DefaultSettings settings, RijndaelEnc enc)
+    {
+        settings.CardCheckUseMSSQL = CardCheckUseSQLLite;
+        settings.SelectedDBServerName = SelectedDBServerName;
+        settings.SelectedDBName = SelectedDBName;
+        settings.SelectedDBTableName = SelectedDBTableName;
+        settings.SelectedDBUsername = SelectedDBUsername;
+        settings.SelectedDBUserPwd = enc.Encrypt(SelectedDBUserPwd ?? string.Empty);
+        settings.SelectedDBServerPort = SelectedDBServerPort;
+
+        settings.LastUsedCustomProjectPath = SelectedCustomProjectFolder;
+        settings.LastUsedDefaultProject = SelectedDefaultProject;
+        settings.DefaultRFIDGearExePath = SelectedRFIDGearPath;
+        settings.DefaultProjectOutputPath = SelectedProjectFolder;
+        settings.CreateSubdirectoryIsEnabled = CreateSubdirectoryIsEnabled;
+        settings.RemoveTemporaryReportsIsEnabled = RemoveTemporaryReportsIsEnabled;
+        settings.AutoRunProjectOnStart = RFiDGearIsAutoRunEnabled;
+        settings.ReaderVolume = ReaderVolume;
+
+        settings.CardCheckTextTemplates = CloneTemplates(TextTemplates);
+    }
+
+    private DefaultSettings CloneSettings(DefaultSettings settings)
+    {
+        return new DefaultSettings
+        {
+            CardCheckUseMSSQL = settings.CardCheckUseMSSQL,
+            SelectedDBServerName = settings.SelectedDBServerName,
+            SelectedDBName = settings.SelectedDBName,
+            SelectedDBTableName = settings.SelectedDBTableName,
+            SelectedDBUsername = settings.SelectedDBUsername,
+            SelectedDBUserPwd = settings.SelectedDBUserPwd,
+            SelectedDBServerPort = settings.SelectedDBServerPort,
+            LastUsedCustomProjectPath = settings.LastUsedCustomProjectPath,
+            LastUsedDefaultProject = settings.LastUsedDefaultProject,
+            DefaultRFIDGearExePath = settings.DefaultRFIDGearExePath,
+            DefaultProjectOutputPath = settings.DefaultProjectOutputPath,
+            CreateSubdirectoryIsEnabled = settings.CreateSubdirectoryIsEnabled,
+            RemoveTemporaryReportsIsEnabled = settings.RemoveTemporaryReportsIsEnabled,
+            AutoRunProjectOnStart = settings.AutoRunProjectOnStart,
+            ReaderVolume = settings.ReaderVolume,
+            CardCheckTextTemplates = CloneTemplates(settings.CardCheckTextTemplates)
+        };
+    }
+
+    private ObservableCollection<CardCheckTextTemplate> CloneTemplates(IEnumerable<CardCheckTextTemplate>? templates)
+    {
+        var items = (templates ?? Enumerable.Empty<CardCheckTextTemplate>())
+            .Select(t => new CardCheckTextTemplate(t.TemplateTextName)
+            {
+                TemplateTextContent = t.TemplateTextContent
+            })
+            .ToList();
+
+        if (!items.Any())
+        {
+            items.Add(new CardCheckTextTemplate("N/A"));
+        }
+
+        return new ObservableCollection<CardCheckTextTemplate>(items);
+    }
 
     private async Task CreateNewTextTemplate_Executed()
     {
@@ -465,17 +483,15 @@ public partial class SettingsPageViewModel : ObservableRecipient, INavigationAwa
 
     private async Task DBConnectionTest_Executed()
     {
-        using var settings = new SettingsReaderWriter();
-
-        // Connect to DB Async
-        if (settings.DefaultSettings.CardCheckUseMSSQL ?? false)
+        // Connect to DB Async with pending values
+        if (CardCheckUseSQLLite)
         {
             using var dbService = new SQLDBService(
-                settings.DefaultSettings.SelectedDBServerName,
-                settings.DefaultSettings.SelectedDBName,
-                settings.DefaultSettings.SelectedDBTableName,
-                settings.DefaultSettings.SelectedDBUsername,
-                settings.DefaultSettings.SelectedDBUserPwd);
+                SelectedDBServerName,
+                SelectedDBName,
+                SelectedDBTableName,
+                SelectedDBUsername,
+                SelectedDBUserPwd);
             await dbService.GetCardChecksFromMSSQLAsync();
         }
         else
@@ -603,19 +619,54 @@ public partial class SettingsPageViewModel : ObservableRecipient, INavigationAwa
         try
         {
             using var settings = new SettingsReaderWriter();
+            using var enc = new RijndaelEnc();
+
             if (TWN4ReaderDevice.Instance?.Count > 0 && TWN4ReaderDevice.Instance[0] != null)
             {
                 await TWN4ReaderDevice.Instance[0].DisconnectAsync();
             }
 
-            settings.DefaultSettings.CardCheckTextTemplates = TextTemplates;
+            ApplyCurrentStateToSettings(settings.DefaultSettings, enc);
 
             settings.SaveSettings();
+
+            _originalSettings = CloneSettings(settings.DefaultSettings);
+            _originalElementTheme = ElementTheme;
         }
-        catch
+        catch (Exception ex)
         {
+            eventLog.WriteEntry(ex.Message, EventLogEntryType.Error);
         }
 
+        NavigateHome();
+    }
+
+    private async Task CancelCommand_Executed()
+    {
+        try
+        {
+            if (_originalSettings != null)
+            {
+                using var enc = new RijndaelEnc();
+                ApplySettingsToView(_originalSettings, enc);
+            }
+
+            if (_originalElementTheme != ElementTheme)
+            {
+                await _themeSelectorService.SetThemeAsync(_originalElementTheme);
+                ElementTheme = _originalElementTheme;
+            }
+        }
+        catch (Exception ex)
+        {
+            eventLog.WriteEntry(ex.Message, EventLogEntryType.Error);
+        }
+
+        NavigateHome();
+    }
+
+    private void NavigateHome()
+    {
         (App.MainRoot.XamlRoot.Content as ShellPage)?.ViewModel.NavigationService.NavigateTo(typeof(HomePageViewModel).FullName ?? "");
     }
 
